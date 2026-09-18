@@ -344,13 +344,23 @@ body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --bo
    #f87171 chứ không phải --red #ef4444 — đo được 3,34:1 là quá mờ. */
 .set-name {
   display: inline-block;
-  /* Đỏ sáng hơn 1 tí ("cho nền màu đỏ sáng hơn 1 tí", 19/9/2026): 0,08 → 0,10.
-     Vẫn nhạt nhưng rõ hơn — nhìn vào thấy ngay nhãn hồng nhạt. */
-  background: rgba(239,68,68,0.10);
+  /* Nền XANH DƯƠNG NHẸ + VIỀN (yêu cầu 19/9/2026) — trước đó là nền đỏ nhạt không viền.
+     Dùng đúng sắc xanh của app (--accent #1d4ed8) ở alpha thấp, nên nhãn cùng họ màu với
+     nút “Thư viện”/“Từng câu” mà không thành một khối xanh đặc.
+     Lề trong hạ 1px mỗi phía (3px 9px → 2px 8px) để BÙ cho đường viền 1px: nhãn vẫn đúng
+     182×30px như trước, không làm thẻ bộ đề cao thêm. */
+  background: rgba(29,78,216,0.16);
+  border: 1px solid rgba(96,165,250,0.55);
   color: #ffffff;
-  padding: 3px 9px; border-radius: 8px;
+  padding: 2px 8px; border-radius: 8px;
 }
-body.light-mode .set-name { background: rgba(220,38,38,0.09); color: #000000; }
+/* Chế độ sáng: viền phải ĐẬM hơn chế độ tối mới thấy rõ, vì nền nhạt và mắt nhạy với
+   xanh dương kém hơn. Đo trên nền đã pha: 0,45 → ~2,0:1 (mờ), 0,60 → ~2,6:1 (rõ mà vẫn mảnh). */
+body.light-mode .set-name {
+  background: rgba(29,78,216,0.10);
+  border-color: rgba(29,78,216,0.6);
+  color: #000000;
+}
 /* Tên bộ đề trong bảng 🎲 Trộn đề: nền XANH LÁ NHẸ + chữ cùng tông (yêu cầu 18/9/2026).
    Cùng dáng với nhãn .set-name ở danh sách bộ đề nhưng KHÁC TÔNG màu (đỏ vs xanh lá)
    nên nhìn là biết đang ở bảng nào — đừng dùng chung một lớp cho cả hai chỗ.
@@ -569,13 +579,35 @@ function showClock() {
 }
 
 // ── THEME ──────────────────────────
-function toggleTheme() {
-  document.body.classList.toggle('light-mode');
-  try { localStorage.setItem('qlno_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); } catch (e) {}
-}
+// Chủ đề ghi nhớ RIÊNG cho hai kiểu màn hình: màn RỘNG mặc định TỐI, màn HẸP
+// (điện thoại, ≤480px — cùng ngưỡng với các tính năng mobile trước đây) mặc định SÁNG.
+// Bấm nút chỉ đổi cho kiểu màn hình đang xem, nên lựa chọn tối trên máy tính không
+// kéo theo điện thoại và ngược lại.
+const THEME_MOBILE_W = 480;
+function isPhoneView() { return window.innerWidth <= THEME_MOBILE_W; }
+function themeBucket() { return isPhoneView() ? 'narrow' : 'wide'; }
+let _theme = { wide: 'dark', narrow: 'light' };
 (function restoreTheme() {
-  try { if (localStorage.getItem('qlno_theme') === 'light') document.body.classList.add('light-mode'); } catch (e) {}
+  let raw = null;
+  try { raw = localStorage.getItem('qlno_theme'); } catch (e) {}
+  if (raw === 'light' || raw === 'dark') {
+    _theme.wide = raw;                    // dạng cũ (một chuỗi) = lựa chọn trên màn RỘNG
+  } else if (raw) {
+    try {
+      const saved = JSON.parse(raw);
+      if (saved && typeof saved === 'object') {
+        if (saved.wide === 'light' || saved.wide === 'dark') _theme.wide = saved.wide;
+        if (saved.narrow === 'light' || saved.narrow === 'dark') _theme.narrow = saved.narrow;
+      }
+    } catch (e) {}
+  }
+  if (_theme[themeBucket()] === 'light') document.body.classList.add('light-mode');
 })();
+function toggleTheme() {
+  const bucket = themeBucket();
+  _theme[bucket] = document.body.classList.toggle('light-mode') ? 'light' : 'dark';
+  try { localStorage.setItem('qlno_theme', JSON.stringify(_theme)); } catch (e) {}
+}
 
 // ── MODAL ──────────────────────────
 function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalDirect(); }
@@ -598,19 +630,34 @@ let _quizMode = 'home';       // home | browse | form | play | playAll | result
 let _quizState = null;
 let _exam = null;             // { questions, title, mode } của bài đang làm
 let _quizOpts = { shuffleQ: true, shuffleA: true };
-// Ô làm bài vừa chọn trong hàng 2×2 của mỗi bộ đề. Ô đó mang màu xanh, ba ô kia chỉ
-// còn viền — đúng yêu cầu "chọn ô nào thì hiện màu ô đó", và lựa chọn được ghi nhớ
-// qua các lần mở app (giống một thanh tab). Mặc định 'single' nên khi chưa chọn gì
-// thì giao diện vẫn như cũ: "▶️ Từng câu" xanh.
+// Ô làm bài đang được chọn trong hàng 2×2 của thẻ bộ đề. Nhớ CẢ BỘ LẪN Ô: bấm "📖 Học"
+// ở bộ A thì chỉ ô Học CỦA BỘ A mang màu xanh; ba ô kia của bộ A và MỌI ô của 10 bộ còn
+// lại trở về kiểu viền — cả app chỉ có ĐÚNG MỘT ô xanh tại một thời điểm. Bấm ở bộ khác
+// thì ô xanh chuyển sang đó, ô cũ tự về mặc định. KHÔNG có màu mặc định: chưa bấm gì thì
+// cả 44 ô đều chỉ còn viền.
 const SET_ACT_KEY = 'qlno_set_act';
 const SET_ACTS = { single: 1, all: 1, study: 1, browse: 1 };
-let _setAct = 'single';
+let _setActSel = { setId: null, key: null };
 (function restoreSetAct() {
+  // Chỉ nhận dạng { setId, key } do CHÍNH bản này ghi. Hai dạng cũ KHÔNG được đọc lên:
+  //  - một chuỗi trần ('single') của bản 18/9 — đọc lên là tự dưng có ô xanh dù chưa bấm;
+  //  - bản đồ setId → ô của bản 19/9 (mỗi bộ nhớ riêng) — khác hẳn ý nghĩa.
+  // Nhờ vậy lần mở đầu sau khi đổi vẫn sạch màu, đúng yêu cầu "tất cả ô khác về mặc định".
   try {
-    const saved = localStorage.getItem(SET_ACT_KEY);
-    if (SET_ACTS[saved]) _setAct = saved;
+    const saved = JSON.parse(localStorage.getItem(SET_ACT_KEY) || 'null');
+    if (saved && !Array.isArray(saved) && SET_ACTS[saved.key] && typeof saved.setId === 'string') {
+      _setActSel = { setId: saved.setId, key: saved.key };
+    }
   } catch (e) {}
 })();
+function saveSetAct() {
+  try { localStorage.setItem(SET_ACT_KEY, JSON.stringify(_setActSel)); } catch (e) {}
+}
+// Ô này có đang là ô xanh không? Phải khớp CẢ bộ — đó là điều làm cho chỉ một ô xanh
+// duy nhất tồn tại trên toàn app.
+function isSetActOn(setId, key) {
+  return _setActSel.setId === setId && _setActSel.key === key;
+}
 // Mặc định của đề trộn: bài 100 câu, trong đó nhóm "kỹ năng mềm" chỉ chiếm 20 câu.
 const MIX_DEFAULT_TOTAL = 100;
 const SOFT_SET_SHARE = 20;   // % tổng bài dành cho CẢ nhóm bên dưới (không phải mỗi bộ)
@@ -712,10 +759,10 @@ function quizToggleHtml(key, label) {
 }
 function toggleQuizOpt(k) { _quizOpts[k] = !_quizOpts[k]; renderQuiz(); }
 
-// Một ô trong hàng 2×2: ô đang được chọn dùng kiểu xanh (.primary), ô còn lại kiểu
+// Một ô trong hàng 2×2: ô ĐANG được chọn dùng kiểu xanh (.primary), các ô còn lại kiểu
 // viền. Hai kiểu cùng cỡ nên đổi màu KHÔNG làm nút nhảy kích thước.
 function setActBtn(setId, key, label, title, off) {
-  const on = _setAct === key;
+  const on = isSetActOn(setId, key);
   return '<button class="quiz-btn' + (on ? ' primary' : '') + '" data-set-act="' + key + '"'
     + (off || '')
     + ' onclick="useSetAct(\'' + setId + '\',\'' + key + '\')"'
@@ -723,12 +770,12 @@ function setActBtn(setId, key, label, title, off) {
     + (on ? ' aria-current="true"' : '') + '>' + label + '</button>';
 }
 
-// Ghi nhớ ô vừa chọn RỒI mới chạy hành động của ô đó: hành động mở màn khác nên
-// không kịp vẽ lại hàng nút, màu sẽ đúng ngay khi quay về trang chủ.
+// Ghi nhớ ô vừa bấm RỒI mới chạy hành động của ô đó: hành động mở màn khác nên không
+// kịp vẽ lại hàng nút, màu sẽ đúng ngay khi quay về trang chủ.
 function useSetAct(setId, key) {
   if (!SET_ACTS[key]) return;
-  _setAct = key;
-  try { localStorage.setItem(SET_ACT_KEY, key); } catch (e) {}
+  _setActSel = { setId: setId, key: key };
+  saveSetAct();
   if (key === 'browse') openBrowse(setId);
   else startSetExam(setId, key);
 }

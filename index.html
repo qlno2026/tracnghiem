@@ -14,7 +14,13 @@
 :root {
   --navy: #111318;
   --navy-mid: #1a1d24;
-  --accent: #3b82f6;
+  /* Màu xanh chính (nút, huy hiệu A/B/C/D, thanh tiến độ). Đã ĐẬM hơn theo yêu cầu
+     18/9/2026: #3b82f6 → #1d4ed8 — cùng sắc xanh với đầu dải gradient của .header.
+     Đổi luôn cho DỄ ĐỌC hơn: chữ trắng trên #3b82f6 chỉ đạt 3,68:1 (dưới ngưỡng 4.5),
+     trên #1d4ed8 đạt 6,63:1 — huy hiệu đáp án vốn là chỗ yếu nhất của app ở chế độ tối. */
+  --accent: #1d4ed8;
+  /* Xanh NHẠT chỉ dùng cho CHỮ/VIỀN ở chế độ tối (chip đang bật, đồng hồ kỹ thuật số),
+     nên KHÔNG hạ xuống theo --accent: chữ phải sáng để đọc được trên nền tối. */
   --accent-glow: #60a5fa;
   --gold: #f59e0b;
   --red: #ef4444;
@@ -139,13 +145,11 @@ body {
 }
 .quiz-toggle.chip { padding: 7px 8px; text-align: center; }
 
-/* Ba nút thư viện trên trang chủ: cùng MỘT hàng, mỗi nhãn một dòng.
-   Đo bằng canvas tại cửa sổ 311px (chỗ trống trong thẻ 265px), cỡ 17px:
-   "Chọn file" 72.8px, "Chọn thư mục" 114.2px, "Thư viện" 70.9px. Cả ba nhãn đầy
-   đủ cần 294px — không vừa. Đã thử `flex: 1 1 0` (chia đều 83px mỗi nút): nhãn
-   "Chọn thư mục" bị bẻ thành 3 dòng. Nên: rút nhãn còn "Chọn file"/"Thư mục"/
-   "Thư viện" (248px với padding 5px + gap 6px, dư ~17px) — giữ cỡ 17px, không
-   phải thu nhỏ chữ.
+/* Hàng nút thư viện trên trang chủ. Trước 18/9/2026 hàng này có BA nút (Chọn file /
+   Thư mục / Thư viện) và phải đo bằng canvas ở cửa sổ 311px mới vừa: cả ba nhãn đầy
+   đủ cần 294px trong khi thẻ chỉ có 265px, nên nhãn phải rút ngắn và thử cả
+   `flex: 1 1 0` (làm "Chọn thư mục" bị bẻ 3 dòng). Hai nút đầu đã bỏ theo yêu cầu —
+   còn đúng một nút mở bảng 📦, `.lib-act` bên dưới giờ chỉ giữ cỡ nút ổn định.
    `flex: 1 1 auto` (không phải `1 1 0`) để bề ngang thả theo nội dung; `flex-wrap:
    wrap` là lưới an toàn cho cửa sổ hẹp hơn nữa — nút cuối xuống hàng dưới chứ
    KHÔNG bị cắt chữ (đừng dùng `white-space: nowrap`: nó tràn chữ ra ngoài nút
@@ -163,7 +167,7 @@ body {
 /* ── QUIZ ───────────────────────── */
 .quiz-card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 14px; margin: 10px 0;
+  border-radius: 12px; padding: 11px; margin: 8px 0;
 }
 .quiz-input {
   width: 100%; padding: 10px; border-radius: 10px;
@@ -172,8 +176,8 @@ body {
 }
 .quiz-input:focus { outline: none; border-color: var(--accent); }
 .quiz-opt {
-  display: flex; align-items: flex-start; gap: 10px; width: 100%;
-  text-align: left; padding: 12px; margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 8px; width: 100%;
+  text-align: left; padding: 9px; margin-bottom: 6px;
   border-radius: 10px; border: 1.5px solid var(--border);
   background: var(--navy-mid); color: var(--answer);
   font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.5;
@@ -211,7 +215,7 @@ body {
   flex-shrink: 0; margin-top: 2px;
 }
 .quiz-fb {
-  display: none; margin-top: 6px; padding: 10px 11px;
+  display: none; margin-top: 5px; padding: 8px 10px;
   border-radius: 10px; font-size: 16px; line-height: 1.5;
 }
 .quiz-fb.show { display: block; }
@@ -220,6 +224,21 @@ body {
 .quiz-all-head {
   position: sticky; z-index: 5;
   top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  /* Nền ĐỤC là bắt buộc vì đây là thanh DÍNH: câu hỏi và đáp án cuộn qua bên dưới.
+     `.quiz-card` cho nền `--card` = rgba(255,255,255,0.04) — đúng cho thẻ thường,
+     nhưng ở thanh dính thì 96% trong suốt nên chữ cuộn qua hiện xuyên lên, đè cả
+     tiêu đề bộ đề lẫn dòng “Đã trả lời… · Đúng… · Sai…”. Chỉ chế độ tối bị, vì
+     `body.light-mode .quiz-card` (độ ưu tiên cao hơn) đã đặt #ffffff đục sẵn.
+     --navy-mid (#1a1d24) chính là --navy (#111318) hoà 4% trắng — đúng cái mà
+     rgba(255,255,255,0.04) đang cho ra trên nền trang, nhưng ĐỤC. */
+  background: var(--navy-mid);
+  /* GỌN: đây là thanh DÍNH, mỗi px chiều cao là một px nội dung bị che, nên padding
+     riêng cho nó nhỏ hơn thẻ thường (7px 10px thay vì 11px). Đo ở khung 468px:
+     78px → 63px (−19%). Kèm theo: khe tiêu đề ↔ dòng điểm 6px → 3px và nút 🏠
+     padding 6px 9px → 4px 8px (khi đó nút còn 41×26).
+     SAU ĐÓ (cùng ngày) nút 🏠 được làm TO LÊN theo yêu cầu — xem khối `.home-btn`
+     ở trên: nút 62×45 nên thanh này cao lại 63px → 82px khi tiêu đề một dòng. */
+  padding: 7px 10px;
 }
 
 /* ── ĐẦU MÀN LÀM BÀI ─────────────────
@@ -235,7 +254,22 @@ body {
    Nút chỉ dùng emoji 🏠 (23px chữ): nhãn “Trang chủ” cần 103px + padding, đủ để
    ngốn thêm 80px bề ngang của tiêu đề. */
 .head-row { display: flex; align-items: center; gap: 8px; }
-.home-btn { padding: 6px 9px; line-height: 1; font-size: 17px; flex-shrink: 0; }
+/* Nút về trang chủ đã được làm TO hơn (yêu cầu 18/9/2026: “cho nút quay lại màn
+   hình chính to hơn”). Trước đó nó bị thu nhỏ xuống 4px 8px chính vì lý do ngược lại
+   — xem khối .quiz-all-head bên dưới: đây là thứ QUYẾT ĐỊNH chiều cao hàng đầu bài.
+   Đo ở khung 468px, tiêu đề ngắn “Chuẩn mực đạo đức · 10 câu” (một dòng, 21px):
+
+   | font/padding        | nút     | thanh dính |
+   |---------------------|---------|------------|
+   | 17px 4px 8px (cũ)   | 41×26   | 63px       |
+   | 22px 6px 11px       | 54×35   | 72px       |
+   | **24px 10px 14px**  | **62×45** | **82px** |
+   | 28px 8px 14px       | 68×45   | 82px       |
+
+   Chọn dòng in đậm ban đầu, rồi GIẢM xuống ("cho icon quay lại nhỏ hơn 1 tí", 19/9/2026):
+   font 24px → 20px, padding 10/14 → 7/11 → nút **48×34**. Vẫn lớn hơn bản gốc 41×26,
+   vẫn trên ngưỡng chạm WCAG 24×24, và thanh dính hạ xuống **74px** (từ 82).*/
+.home-btn { padding: 7px 11px; line-height: 1; font-size: 20px; flex-shrink: 0; }
 /* (Icon ❓ emoji ở lượt trước đã bị thay bằng .q-num — xem khai báo .q-num ở trên.) */
 /* Ghi chú cũ của icon ❓, giữ lại để biết vì sao không quay lại emoji ở cỡ chữ lớn:
    emoji ở 16px rộng 22px, cộng khe 8px là lấy mất 30px bề ngang câu hỏi — đo trên
@@ -302,10 +336,94 @@ body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --bo
    đọc ra là một tấm riêng), xám NHẠT #f1f3f5 ở chế độ sáng (thẻ trắng nên hộp lùi
    xuống). Một biến duy nhất, không phải hai luật chồng nhau. */
 .set-box { background: var(--set-box-bg); }
+/* Nhãn tên bộ đề: nền NHẸ (tint trong suốt) + chữ cùng tông, dáng giống hai chip
+   “Đảo câu hỏi / Đảo đáp án”. Lịch sử màu theo yêu cầu người dùng: xanh ĐẶC + chữ
+   trắng → xanh nhẹ → **đỏ nhẹ** (đang dùng). Đừng viết style thẳng trong thẻ: cần
+   luật riêng cho chế độ sáng, mà style thẳng thì CSS thường không ghi đè được.
+   Đỏ phải SÁNG hơn xanh khi làm chữ (mắt nhạy với đỏ kém hơn): ở chế độ tối dùng
+   #f87171 chứ không phải --red #ef4444 — đo được 3,34:1 là quá mờ. */
+.set-name {
+  display: inline-block;
+  /* Đỏ sáng hơn 1 tí ("cho nền màu đỏ sáng hơn 1 tí", 19/9/2026): 0,08 → 0,10.
+     Vẫn nhạt nhưng rõ hơn — nhìn vào thấy ngay nhãn hồng nhạt. */
+  background: rgba(239,68,68,0.10);
+  color: #ffffff;
+  padding: 3px 9px; border-radius: 8px;
+}
+body.light-mode .set-name { background: rgba(220,38,38,0.09); color: #000000; }
+/* Tên bộ đề trong bảng 🎲 Trộn đề: nền XANH LÁ NHẸ + chữ cùng tông (yêu cầu 18/9/2026).
+   Cùng dáng với nhãn .set-name ở danh sách bộ đề nhưng KHÁC TÔNG màu (đỏ vs xanh lá)
+   nên nhìn là biết đang ở bảng nào — đừng dùng chung một lớp cho cả hai chỗ.
+   Chữ xanh lá ở chế độ tối phải SÁNG (#34d399), không dùng --green #10b981: mắt nhạy
+   với xanh lá kém hơn xanh dương, #10b981 trên tint này chỉ 5,32:1 còn #34d399 đạt
+   7,09:1. Chế độ sáng ngược lại cần ĐẬM: #15803d chỉ 4,44:1 (dưới ngưỡng 4,5:1) nên
+   dùng #166534 — 6,40:1. Đừng viết style thẳng trong thẻ: style thẳng không ghi đè
+   được luật chế độ sáng. */
+.mix-name {
+  display: inline-block;
+  /* Nền xanh lá THẬT NHẠT + chữ trắng/đen theo chế độ (yêu cầu 19/9/2026).
+     Lịch sử: xanh lá 0,14 + chữ #34d399 → giờ alpha xuống 0,07 và chữ sang #ffffff.
+     Nhạt hơn nhưng chữ ĐẬM hơn (trắng đặc) nên tương phản TĂNG: 7,07:1 → ~15:1.
+     Đừng hạ alpha thêm: dưới 0,05 thì nhãn mất hẳn trên nền tối. */
+  background: rgba(16,185,129,0.07);
+  color: #ffffff;
+  padding: 3px 8px; border-radius: 8px;
+}
+body.light-mode .mix-name { background: rgba(16,185,129,0.06); color: #000000; }
+
+/* ── SEARCH ───────────────────────── */
+/* Thanh tìm kiếm đứng RIÊNG, ngay dưới thanh xanh trên cùng và TRÊN thẻ “📚 Thư viện
+   bộ đề” (19/9/2026 — trước đó nó nằm trong thẻ). Vì ở ngoài thẻ nên KHÔNG có nền hay
+   viền của .quiz-card: chỉ ô nhập (--navy-mid + viền --border) nổi trên nền trang.
+   Lề trên 8px trùng nhịp với .main 0 8px hai bên, để nó thẳng hàng với các thẻ bên dưới. */
+.search-wrap { position: relative; margin: 8px 0 10px; }
+.search-input {
+  width: 100%; padding: 9px 12px 9px 34px;
+  border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--navy-mid); color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+.search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; pointer-events: none; opacity: 0.6;
+}
+.search-results {
+  max-height: 360px; overflow-y: auto; margin-top: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.search-results:empty { display: none; }
+.search-hit {
+  padding: 9px; margin-bottom: 6px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--navy-mid);
+}
+.search-hit-set {
+  font-size: 13px; font-weight: 500; color: var(--accent-glow);
+  margin-bottom: 4px;
+}
+.search-hit-q {
+  font-size: 16px; font-weight: 500; color: var(--text);
+  line-height: 1.5; margin-bottom: 4px;
+}
+.search-hit-a {
+  font-size: 15px; font-weight: 400; color: var(--green);
+  line-height: 1.4;
+}
+.search-hit-q em, .search-hit-a em {
+  font-style: normal; background: rgba(251,191,36,0.25);
+  border-radius: 3px; padding: 0 2px;
+}
+.search-empty {
+  font-size: 15px; color: var(--text-dim); padding: 8px 0;
+}
+body.light-mode .search-input { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+body.light-mode .search-hit { background: #ffffff; border-color: #c9d1da; }
+body.light-mode .search-hit-q { color: #1e293b; }
+body.light-mode .search-hit-a { color: #166534; }
 body.light-mode .header {
   background:
     linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 42%),
-    linear-gradient(135deg, #2563eb, #1e40af);
+    linear-gradient(135deg, #1e40af, #1e3a8a);
   box-shadow: 0 3px 10px rgba(30,64,175,0.35);
 }
 body.light-mode .header-sub { color: #dbeafe; }
@@ -314,7 +432,7 @@ body.light-mode .modal-handle { background: rgba(0,0,0,0.15); }
 body.light-mode .quiz-card { background: #ffffff; border-color: #c9d1da; }
 body.light-mode .quiz-input { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
 body.light-mode .quiz-btn { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
-body.light-mode .quiz-btn.primary { background: #2563eb; color: #ffffff; border-color: #2563eb; }
+body.light-mode .quiz-btn.primary { background: #1d4ed8; color: #ffffff; border-color: #1d4ed8; }
 body.light-mode .quiz-btn.danger { background: #dc2626; color: #ffffff; border-color: #dc2626; }
 body.light-mode .quiz-opt { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
 /* Đáp án đã chọn ở CHẾ ĐỘ SÁNG phải hiện xanh/đỏ y như chế độ tối.
@@ -326,8 +444,9 @@ body.light-mode .quiz-opt.correct { border-color: var(--green); background: rgba
 body.light-mode .quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.15); }
 /* Chip bật/tắt ở chế độ sáng: chữ xanh nhạt --accent-glow (#60a5fa) trên nền chip
    xanh nhạt chỉ đạt 2.06:1 — không đọc được. Đổi sang xanh đậm, vì giờ trạng thái
-   BẬT chỉ hiện bằng màu (nhãn không còn kèm “: Bật”). #1d4ed8 cho 5.43:1. */
-body.light-mode .quiz-toggle.on { background: rgba(59,130,246,0.14); border-color: #2563eb; color: #1d4ed8; }
+   BẬT chỉ hiện bằng màu (nhãn không còn kèm “: Bật”). Đậm thêm lần nữa theo yêu cầu
+   (18/9/2026): #1d4ed8 → #1e40af, đo được 7.45:1 trên nền chip ở chế độ sáng. */
+body.light-mode .quiz-toggle.on { background: rgba(59,130,246,0.14); border-color: #1d4ed8; color: #1e40af; }
 /* Số câu (viền đỏ) ở chế độ sáng: --red #ef4444 trên thẻ trắng chỉ đạt 3.76:1 —
    hơi mờ cho một con số nhỏ. Dùng #dc2626 (đúng màu đỏ mà chế độ sáng đã dùng ở
    .quiz-btn.danger) → 4.53:1, vượt ngưỡng dễ đọc. */
@@ -472,7 +591,6 @@ const OLD_SET_NAME = 'Văn hóa doanh nghiệp EVN';
 let quizLib = [];             // [{ id, name, addedAt, questions: [{ id, q, options[], correct, explain }] }]
 let _libSetId = null;         // bộ đề đang xem / sửa câu hỏi
 let _renamingSetId = null;
-let _renamePreview = null;    // [{ id, oldName, next }] khi xem trước rút gọn tên
 let _restorePreview = null;   // { fileName, exportedAt, sets, add, update } khi xem trước phục hồi
 let _restoreConfirm = false;  // đã bấm "Thay thế toàn bộ" lần đầu hay chưa
 let _libPending = null;       // { kind: 'set' | 'all', setId }
@@ -480,19 +598,17 @@ let _quizMode = 'home';       // home | browse | form | play | playAll | result
 let _quizState = null;
 let _exam = null;             // { questions, title, mode } của bài đang làm
 let _quizOpts = { shuffleQ: true, shuffleA: true };
-// Nút nào trong ba nút thư viện đang được chọn (mang màu xanh). Đây là "thanh tab"
-// giả: cả ba nút đều là hành động một lần (mở hộp thoại chọn file / mở bảng thư
-// viện), nên "đang chọn" chỉ có nghĩa là nút vừa bấm — và được ghi nhớ qua các lần
-// mở app, đúng như một tab thật.
-const LIB_ACT_KEY = 'qlno_lib_act';
-const LIB_ACTS = { file: 1, dir: 1, lib: 1 };
-let _libAct = 'file';
-(function restoreLibAct() {
-  // Phải chạy SAU khi LIB_ACT_KEY/LIB_ACTS đã được khai báo (khối restoreTheme ở
-  // trên không đọc được các hằng này vì chúng nằm sau theo thứ tự mã).
+// Ô làm bài vừa chọn trong hàng 2×2 của mỗi bộ đề. Ô đó mang màu xanh, ba ô kia chỉ
+// còn viền — đúng yêu cầu "chọn ô nào thì hiện màu ô đó", và lựa chọn được ghi nhớ
+// qua các lần mở app (giống một thanh tab). Mặc định 'single' nên khi chưa chọn gì
+// thì giao diện vẫn như cũ: "▶️ Từng câu" xanh.
+const SET_ACT_KEY = 'qlno_set_act';
+const SET_ACTS = { single: 1, all: 1, study: 1, browse: 1 };
+let _setAct = 'single';
+(function restoreSetAct() {
   try {
-    const saved = localStorage.getItem(LIB_ACT_KEY);
-    if (LIB_ACTS[saved]) _libAct = saved;
+    const saved = localStorage.getItem(SET_ACT_KEY);
+    if (SET_ACTS[saved]) _setAct = saved;
   } catch (e) {}
 })();
 // Mặc định của đề trộn: bài 100 câu, trong đó nhóm "kỹ năng mềm" chỉ chiếm 20 câu.
@@ -596,20 +712,49 @@ function quizToggleHtml(key, label) {
 }
 function toggleQuizOpt(k) { _quizOpts[k] = !_quizOpts[k]; renderQuiz(); }
 
+// Một ô trong hàng 2×2: ô đang được chọn dùng kiểu xanh (.primary), ô còn lại kiểu
+// viền. Hai kiểu cùng cỡ nên đổi màu KHÔNG làm nút nhảy kích thước.
+function setActBtn(setId, key, label, title, off) {
+  const on = _setAct === key;
+  return '<button class="quiz-btn' + (on ? ' primary' : '') + '" data-set-act="' + key + '"'
+    + (off || '')
+    + ' onclick="useSetAct(\'' + setId + '\',\'' + key + '\')"'
+    + (title ? ' title="' + title + '"' : '')
+    + (on ? ' aria-current="true"' : '') + '>' + label + '</button>';
+}
+
+// Ghi nhớ ô vừa chọn RỒI mới chạy hành động của ô đó: hành động mở màn khác nên
+// không kịp vẽ lại hàng nút, màu sẽ đúng ngay khi quay về trang chủ.
+function useSetAct(setId, key) {
+  if (!SET_ACTS[key]) return;
+  _setAct = key;
+  try { localStorage.setItem(SET_ACT_KEY, key); } catch (e) {}
+  if (key === 'browse') openBrowse(setId);
+  else startSetExam(setId, key);
+}
+
 function quizHomeHtml() {
   const nQ = totalQuestions();
   let h = '';
 
+  // ── Thanh tìm kiếm ── (NGOÀI thẻ, ngay dưới thanh xanh trên cùng)
+  if (quizLib.length) {
+    h += '<div class="search-wrap">';
+    h += '<span class="search-icon">🔍</span>';
+    h += '<input id="searchInput" class="search-input" type="text" placeholder="Tìm kiếm câu hỏi..." oninput="onSearch()">';
+    h += '<div id="searchResults" class="search-results"></div>';
+    h += '</div>';
+  }
+
   // ── Thư viện ──
   h += '<div class="quiz-card">';
   h += '<div style="font-size:17px;font-weight:500;margin-bottom:4px">📚 Thư viện bộ đề</div>';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:14px">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
-  // Ba nút xếp cùng một hàng: nhãn phải ngắn mới vừa, nên phần giải thích dài
-  // được đẩy vào title (tooltip) thay vì nằm trong nhãn.
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:12px">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
+  // Trang chủ chỉ còn MỘT nút, mở bảng 📦. Nạp file, nạp cả thư mục, sao lưu và
+  // phục hồi đều nằm trong bảng đó, nên hai nút “Chọn file”/“Thư mục” đã bị bỏ.
   h += '<div class="lib-act-row">';
-  h += libActBtn('file', 'Chọn file', 'Nạp file bộ đề — chọn được nhiều file Excel/CSV cùng lúc, hoặc 1 file .zip chứa cả thư mục');
-  h += libActBtn('dir', 'Thư mục', 'Nạp cả thư mục — mọi file Excel bên trong');
-  h += libActBtn('lib', 'Thư viện', 'Quản lý thư viện: đổi tên, xoá, sao lưu, phục hồi');
+  h += '<button class="big-upload-btn lib-act" onclick="openLibPanel()"'
+    + ' title="Nạp file, nạp cả thư mục, đổi tên, xoá, sao lưu, phục hồi">📦 Thư viện</button>';
   h += '</div>';
   if (!quizLib.length) {
     h += '<div style="display:flex;gap:8px;margin-top:8px">';
@@ -624,7 +769,7 @@ function quizHomeHtml() {
 
   if (!nQ) {
     h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">'
-      + 'Chưa có bộ đề nào.<br>Bấm “Chọn file” rồi chọn các file Excel/CSV — hoặc 1 file .zip chứa cả thư mục.<br>Mỗi file sẽ thành một bộ đề riêng.</div>';
+      + 'Chưa có bộ đề nào.<br>Bấm “📦 Thư viện” rồi chọn “📥 Nạp hoặc nạp lại file bộ đề” — chọn được nhiều file Excel/CSV, hoặc 1 file .zip chứa cả thư mục.<br>Mỗi file sẽ thành một bộ đề riêng.</div>';
     return h;
   }
 
@@ -635,13 +780,14 @@ function quizHomeHtml() {
   quizLib.forEach(s => {
     const off = s.questions.length ? '' : ' disabled';
     h += '<div class="set-box" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
-    h += `<div style="font-size:17px;font-weight:500;line-height:1.4" title="${esc(s.name)}">${esc(dispName(s.name))}</div>`;
+    h += `<div style="font-size:17px;font-weight:500;line-height:1.4" title="${esc(s.name)}">`
+      + `<span class="set-name">${esc(s.name)}</span></div>`;
     h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
     h += '<div class="set-acts">';
-    h += `<button class="quiz-btn primary"${off} onclick="startSetExam('${s.id}','single')">▶️ Từng câu</button>`;
-    h += `<button class="quiz-btn"${off} onclick="startSetExam('${s.id}','all')">📋 Cả bộ</button>`;
-    h += `<button class="quiz-btn"${off} onclick="startSetExam('${s.id}','study')">📖 Học</button>`;
-    h += `<button class="quiz-btn" onclick="openBrowse('${s.id}')">👁 Câu hỏi</button>`;
+    h += setActBtn(s.id, 'single', '▶️ Từng câu', 'Làm từng câu một', off);
+    h += setActBtn(s.id, 'all', '📋 Cả bộ', 'Làm cả bộ trong một trang', off);
+    h += setActBtn(s.id, 'study', '📖 Học', 'Học: chọn sai thì chọn lại', off);
+    h += setActBtn(s.id, 'browse', '👁 Câu hỏi', 'Xem danh sách câu hỏi của bộ này', '');
     h += '</div></div>';
   });
   h += '</div>';
@@ -657,7 +803,8 @@ function quizBrowseHtml() {
   if (!s) { _quizMode = 'home'; return quizHomeHtml(); }
   const n = s.questions.length;
   let h = '<div class="quiz-card">';
-  h += `<div style="font-size:17px;font-weight:500;line-height:1.35" title="${esc(s.name)}">${esc(dispName(s.name))}</div>`;
+  h += `<div style="font-size:17px;font-weight:500;line-height:1.35" title="${esc(s.name)}">`
+    + `<span class="set-name">${esc(s.name)}</span></div>`;
   h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:4px 0 12px">${n} câu hỏi</div>`;
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
   h += `<button class="quiz-btn primary"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','single')">▶️ Thi từng câu</button>`;
@@ -716,6 +863,45 @@ function mixRows() {
   }));
 }
 
+// ── SEARCH ────────────────────────────────────────────────
+// Tìm kiếm câu hỏi theo nội dung. Hiển thị câu hỏi + đáp án đúng.
+function onSearch() {
+  const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+  const el = document.getElementById('searchResults');
+  if (!el) return;
+  if (!q || q.length < 2) { el.innerHTML = ''; return; }
+  const hits = [];
+  for (const s of quizLib) {
+    for (const qu of s.questions) {
+      const txt = qu.q.toLowerCase();
+      const opts = (qu.options || []).join(' ').toLowerCase();
+      if (txt.includes(q) || opts.includes(q)) {
+        hits.push({ set: s.name, q: qu.q, options: qu.options, correct: qu.correct, explain: qu.explain || '' });
+        if (hits.length >= 50) break;   // giới hạn 50 kết quả cho nhanh
+      }
+    }
+    if (hits.length >= 50) break;
+  }
+  if (!hits.length) {
+    el.innerHTML = '<div class="search-empty">Không tìm thấy kết quả.</div>';
+    return;
+  }
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  el.innerHTML = hits.map(h => {
+    const qHtml = h.q.replace(re, '<em>$1</em>');
+    // tìm đáp án đúng
+    const correctText = Array.isArray(h.correct)
+      ? h.correct.map(i => h.options[i]).join(', ')
+      : (h.options[h.correct] || '');
+    const aHtml = correctText.replace(re, '<em>$1</em>');
+    return '<div class="search-hit">'
+      + '<div class="search-hit-set">' + esc(h.set) + '</div>'
+      + '<div class="search-hit-q">' + qHtml + '</div>'
+      + '<div class="search-hit-a">✅ ' + aHtml + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 function quizMixHtml() {
   const rows = mixRows();
   const pctSum = rows.reduce((a, r) => a + r.pct, 0);
@@ -729,7 +915,7 @@ function quizMixHtml() {
   h += '</div>';
   rows.forEach(r => {
     h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}">${esc(dispName(r.set.name))}</div>`;
+    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span class="mix-name">${esc(r.set.name)}</span></div>`;
     h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center" value="${r.pct}" oninput="onMixInput()">`;
     h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim)">%</div>';
     h += `<div id="mixCnt-${r.set.id}" style="width:62px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${r.got} câu</div>`;
@@ -905,7 +1091,7 @@ function startSetExam(setId, mode) {
   const s = libSet(setId);
   if (!s || !s.questions.length) { alert('Bộ đề này chưa có câu hỏi.'); return; }
   _libSetId = s.id;
-  startExam(s.questions, dispName(s.name), mode);   // điện thoại: dùng tên gọn ở đầu bài thi
+  startExam(s.questions, s.name, mode);   // tên đầy đủ — không còn rút gọn ở màn hẹp
 }
 
 function replayExam() { if (_exam) startExam(_exam.questions, _exam.title, _exam.mode); }
@@ -981,8 +1167,8 @@ function quizPlayHtml() {
   h += `<div style="font-size:15px;font-weight:400">Câu ${st.idx + 1}/${total}</div>`;
   h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim)">Đúng: <b style="color:var(--green)">${st.score}</b></div>`;
   h += '</div>';
-  h += `<div style="height:6px;background:var(--border);border-radius:3px;margin:10px 0 14px;overflow:hidden"><div style="height:100%;width:${Math.round(st.idx / total * 100)}%;background:var(--accent)"></div></div>`;
-  h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:14px', st.idx + 1);
+  h += `<div style="height:6px;background:var(--border);border-radius:3px;margin:8px 0 10px;overflow:hidden"><div style="height:100%;width:${Math.round(st.idx / total * 100)}%;background:var(--accent)"></div></div>`;
+  h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:10px', st.idx + 1);
   it.opts.forEach((o, i) => {
     let cls = 'quiz-opt';
     if (answered) {
@@ -1028,14 +1214,14 @@ function quizAllHtml() {
   h += `<div style="flex:1;min-width:0;font-size:17px;font-weight:500">${st.title ? esc(st.title) : '📋 Cả bộ đề'} · ${st.items.length} câu</div>`;
   h += homeBtnHtml();
   h += '</div>';
-  h += '<div id="allSummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px"></div>';
+  h += '<div id="allSummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:3px"></div>';
   h += '</div>';
 
   st.items.forEach((it, qi) => {
     const done = it.chosen !== null;
     const isRight = done && !!it.opts[it.chosen].ok;
     h += `<div class="quiz-card" id="qb-${qi}">`;
-    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:12px', qi + 1);
+    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
       let cls = 'quiz-opt';
       let mark = '';
@@ -1253,29 +1439,6 @@ function parseQuizSheet(ws) {
 function pickSetFiles() { document.getElementById('quizFileInput').click(); }
 function pickSetDir() { document.getElementById('quizDirInput').click(); }
 
-// Một nút trong "thanh tab" thư viện: nút đang chọn dùng nền xanh (.big-upload-btn),
-// hai nút còn lại dùng kiểu viền (.quiz-btn). Kích thước do .lib-act quyết định nên
-// đổi qua lại giữa hai kiểu không làm nút nhảy cỡ.
-function libActBtn(key, label, title) {
-  const on = _libAct === key;
-  return '<button class="' + (on ? 'big-upload-btn' : 'quiz-btn') + ' lib-act"'
-    + ' onclick="useLibAct(\'' + key + '\')"'
-    + ' title="' + title + '"'
-    + (on ? ' aria-current="true"' : '') + '>' + label + '</button>';
-}
-
-// Đổi màu nút vừa bấm rồi mới chạy hành động của nút đó. Gọi hành động TRƯỚC và
-// vẽ lại `.main` SAU: hộp thoại chọn file là thẻ <input> nằm ngoài `.main` nên
-// không bị vẽ lại mất, còn renderQuiz() chỉ dựng lại #quizPane.
-function useLibAct(key) {
-  if (!LIB_ACTS[key]) return;
-  _libAct = key;
-  try { localStorage.setItem(LIB_ACT_KEY, key); } catch (e) {}
-  if (key === 'file') pickSetFiles();
-  else if (key === 'dir') pickSetDir();
-  else openLibPanel();
-  renderQuiz();
-}
 const EXCEL_EXT = /\.(xlsx|xls|csv)$/i;
 const ZIP_EXT = /\.zip$/i;
 
@@ -1335,91 +1498,6 @@ function setNameFromFile(fileName) {
   const base = String(fileName || '').replace(/\.[^.]+$/, '').trim();
   return base || 'Bộ đề';
 }
-
-// ── TÊN GỌN KHI XEM TRÊN ĐIỆN THOẠI ──────────────────────────────────
-// Trên màn hình hẹp, tên bộ đề dài làm danh sách cao và khó quét mắt — nhất là các
-// nhóm cùng tiền tố ("Kinh doanh điện năng-Thị trường điện&DPPA", "KT điện cho
-// CNKD-Bậc7_7"). Hàm dưới cắt PHẦN HIỂN THỊ: tiền tố chung của một nhóm (từ 2 bộ
-// trở lên) được bỏ đi vì phần còn lại mới là chỗ phân biệt, và tên quá dài được
-// cắt ở ranh giới từ rồi thêm “…”.
-// QUAN TRỌNG: chỉ là tên hiển thị — tên thật trong dữ liệu, trong bản sao lưu và
-// trong bảng 📦 vẫn nguyên, nên không mất thông tin và không cần sửa lại tên.
-// Tên đầy đủ vẫn tra được ở tooltip (title) tại những chỗ có thể trỏ chuột.
-const MOBILE_W = 480;        // ngưỡng coi là màn hình điện thoại
-// 34 ký tự là mức vừa ĐÚNG MỘT DÒNG thẻ ở khung nhìn hẹp nhất (327px, chữ 17px).
-// Để 30 thì "Hệ thống thu thập dữ liệu từ xa" (31 ký tự) bị cắt oan thành
-// "Hệ thống thu thập dữ liệu từ…", còn "Các tình huống vi phạm sử dụng điện và cách
-// xử lý" bị cắt giữa cụm ("…vi phạm sử…").
-const DISP_MAX = 34;
-let _dispMap = {};
-let _dispKey = '';
-
-function isNarrowScreen() { return window.innerWidth <= MOBILE_W; }
-
-// Cắt ở ranh giới từ để không chặt đôi một từ.
-function cutAtWord(s, max) {
-  if (s.length <= max) return s;
-  let t = s.slice(0, max);
-  const sp = t.lastIndexOf(' ');
-  if (sp >= Math.floor(max / 2)) t = t.slice(0, sp);
-  return t.replace(/[-–—:,&;.]+$/, '').trim() + '…';
-}
-
-function dispMap() {
-  const key = isNarrowScreen() ? 'm|' + quizLib.map(s => s.name).join('¦') : 'wide';
-  if (key === _dispKey) return _dispMap;
-  _dispKey = key;
-  _dispMap = {};
-  if (!isNarrowScreen() || quizLib.length < 2) return _dispMap;
-  const names = quizLib.map(s => s.name);
-  // 1. Gom tiền tố chung của từng cặp, cắt về ranh giới từ gần nhất.
-  const cands = [];
-  for (let i = 0; i < names.length; i++) {
-    for (let j = i + 1; j < names.length; j++) {
-      const a = names[i].toLowerCase(), b = names[j].toLowerCase();
-      let k = 0;
-      while (k < a.length && k < b.length && a.charAt(k) === b.charAt(k)) k++;
-      for (let t = k; t >= 8; t--) {
-        const ch = names[i].charAt(t - 1);
-        if (ch === '-' || ch === '–' || ch === '—' || ch === ':' || ch === ' ' || ch === '&') {
-          if (t >= 8) cands.push(names[i].slice(0, t));
-          break;
-        }
-      }
-    }
-  }
-  // 2. Áp dụng tiền tố DÀI nhất trước; mỗi tên chỉ bị cắt một lần.
-  cands.sort(function (x, y) { return y.length - x.length; });
-  cands.forEach(function (p) {
-    const lp = p.toLowerCase();
-    const hit = names.filter(function (n) { return n.toLowerCase().indexOf(lp) === 0 && !(n in _dispMap); });
-    if (hit.length < 2) return;
-    hit.forEach(function (n) {
-      const rest = n.slice(p.length).replace(/^[-–—:,&;\s]+/, '').trim();
-      if (rest.length >= 3) _dispMap[n] = rest;
-    });
-  });
-  // 3. Tên còn quá dài thì cắt ở ranh giới từ.
-  names.forEach(function (n) {
-    const d = _dispMap[n] || n;
-    if (d.length > DISP_MAX) _dispMap[n] = cutAtWord(d, DISP_MAX);
-    else if (_dispMap[n]) _dispMap[n] = d;
-  });
-  // 4. Chốt an toàn: nếu hai bộ ra CÙNG một tên gọn, hoặc tên gọn trùng tên đầy đủ
-  // của bộ khác, thì bỏ rút gọn cho những bộ đó — thà dài mà phân biệt được.
-  const seen = {};
-  names.forEach(function (n) { const d = _dispMap[n]; if (d) seen[d] = (seen[d] || 0) + 1; });
-  names.forEach(function (n) {
-    const d = _dispMap[n];
-    if (!d) return;
-    const clash = seen[d] > 1 || (names.indexOf(d) >= 0 && d !== n);
-    if (clash) delete _dispMap[n];
-  });
-  return _dispMap;
-}
-
-// Tên hiển thị của một bộ đề (điện thoại: tên gọn; máy tính: tên đầy đủ).
-function dispName(name) { const m = dispMap(); return m[name] || name; }
 
 // Mỗi file thành một bộ đề. File trùng tên thì CẬP NHẬT lại nội dung bộ đề đó.
 async function handleQuizImport(inp) {
@@ -1502,247 +1580,6 @@ async function handleQuizImport(inp) {
   const allFailed = failed.concat(expanded.failed);
   if (allFailed.length) msg += '\n\nKhông đọc được ' + allFailed.length + ' file:\n• ' + allFailed.join('\n• ');
   alert(msg);
-}
-
-// ── RÚT GỌN TÊN BỘ ĐỀ ────────────────────────────────────────────────
-// Tên file hay bị mất dấu cách ("Cáctìnhhuốngviphạm…"), nên cần tách lại thành
-// âm tiết tiếng Việt. Âm tiết = [âm đầu] + [vần] + [âm cuối].
-const VN_BASE = {
-  'a':'a','á':'a','à':'a','ả':'a','ã':'a','ạ':'a','ă':'a','ắ':'a','ằ':'a','ẳ':'a','ẵ':'a','ặ':'a',
-  'â':'a','ấ':'a','ầ':'a','ẩ':'a','ẫ':'a','ậ':'a',
-  'e':'e','é':'e','è':'e','ẻ':'e','ẽ':'e','ẹ':'e','ê':'e','ế':'e','ề':'e','ể':'e','ễ':'e','ệ':'e',
-  'i':'i','í':'i','ì':'i','ỉ':'i','ĩ':'i','ị':'i',
-  'o':'o','ó':'o','ò':'o','ỏ':'o','õ':'o','ọ':'o','ô':'o','ố':'o','ồ':'o','ổ':'o','ỗ':'o','ộ':'o',
-  'ơ':'o','ớ':'o','ờ':'o','ở':'o','ỡ':'o','ợ':'o',
-  'u':'u','ú':'u','ù':'u','ủ':'u','ũ':'u','ụ':'u','ư':'u','ứ':'u','ừ':'u','ử':'u','ữ':'u','ự':'u',
-  'y':'y','ý':'y','ỳ':'y','ỷ':'y','ỹ':'y','ỵ':'y','d':'d','đ':'d'
-};
-const VN_ONSETS = ['ngh', 'ng', 'nh', 'ch', 'gh', 'gi', 'kh', 'ph', 'th', 'tr', 'qu',
-  'b', 'c', 'd', 'g', 'h', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', ''];
-const VN_NUCLEI = ['ieu', 'yeu', 'oai', 'oao', 'oay', 'oeo', 'uay', 'uoi', 'uou', 'uya', 'uye', 'uyu',
-  'ai', 'ao', 'au', 'ay', 'eo', 'eu', 'ia', 'ie', 'iu', 'oa', 'oe', 'oi', 'oo', 'ua', 'ue', 'ui', 'uo', 'uu', 'uy', 'ya', 'ye',
-  'a', 'e', 'i', 'o', 'u', 'y'];
-const VN_CODAS = ['ch', 'ng', 'nh', 'c', 'm', 'n', 'p', 't', ''];
-
-function baseOf(ch) {
-  const low = ch.toLowerCase();
-  return VN_BASE[low] || low;
-}
-function matchAt(run, i, piece) {
-  if (!piece) return true;
-  if (i + piece.length > run.length) return false;
-  for (let k = 0; k < piece.length; k++) {
-    if (baseOf(run[i + k]) !== piece[k]) return false;
-  }
-  return true;
-}
-// Độ dài âm đầu dài nhất khớp tại vị trí i (0 = âm tiết sau bắt đầu bằng nguyên âm)
-function onsetLenAt(run, i) {
-  let len = 0;
-  for (let k = 0; k < VN_ONSETS.length; k++) {
-    const on = VN_ONSETS[k];
-    if (on.length > len && matchAt(run, i, on)) len = on.length;
-  }
-  return len;
-}
-function cmpScore(a, b) {
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
-}
-
-// Âm cuối "ch"/"nh" không đứng sau ă/â; "ng"/"c" không đứng sau i/y/ê
-function codaOk(nucText, coda) {
-  if (!coda) return true;
-  const low = nucText.toLowerCase();
-  if (coda === 'ch' || coda === 'nh') {
-    if (low.indexOf('ă') >= 0 || low.indexOf('â') >= 0) return false;
-    return true;
-  }
-  if (coda === 'ng' || coda === 'c') {
-    if (low === 'i' || low === 'y' || low === 'ê') return false;
-  }
-  return true;
-}
-
-// Từ điển âm tiết lấy từ chính câu hỏi trong thư viện, để chọn cách tách đúng:
-// "văn hóa" (cả hai đều có thật) phải thắng "vă nhóa".
-const VN_SEED = ('văn hóa hệ thống thu thập thị trường vi phạm điện năng kinh doanh nội quy ' +
-  'lao động chăm sóc khách hàng đo đếm ngân dữ liệu từ xa tình huống cách xử lý các và sử ' +
-  'dụng đúng sai câu hỏi đáp án chuẩn mực đạo đức an toàn bậc phụ lục nghiệp vụ quản lý ' +
-  'cung cấp chất lượng dịch ngày càng trách nhiệm môi trường cộng đồng giá trị cốt lõi sứ ' +
-  'mệnh tầm nhìn khẩu hiệu triết lý người nhân viên công ty tập đoàn').split(' ');
-let _vnVocab = null;
-function vnVocab() {
-  if (_vnVocab) return _vnVocab;
-  const set = new Set(VN_SEED);
-  quizLib.forEach(function (s) {
-    s.questions.forEach(function (q) {
-      String(q.q || '').concat(' ', (q.options || []).join(' '), ' ', q.explain || '')
-        .toLowerCase().match(/\p{L}+/gu) 
-        ?.forEach(function (w) { if (w.length > 1) set.add(w); });
-    });
-  });
-  _vnVocab = set;
-  return set;
-}
-
-// Tách một mạch chữ thành các âm tiết; trả về null nếu không tách trọn được
-function parseRun(run) {
-  const n = run.length;
-  const vocab = vnVocab();
-  const cache = new Map();
-  function best(i) {
-    if (i === n) return { syls: [], known: 0 };
-    if (cache.has(i)) return cache.get(i);
-    let pick = null, pickScore = null;
-    for (let oi = 0; oi < VN_ONSETS.length; oi++) {
-      const on = VN_ONSETS[oi];
-      if (!matchAt(run, i, on)) continue;
-      const oEnd = i + on.length;
-      for (let ni = 0; ni < VN_NUCLEI.length; ni++) {
-        const nu = VN_NUCLEI[ni];
-        if (!matchAt(run, oEnd, nu)) continue;
-        const nEnd = oEnd + nu.length;
-        for (let ci = 0; ci < VN_CODAS.length; ci++) {
-          const co = VN_CODAS[ci];
-          if (!matchAt(run, nEnd, co)) continue;
-          if (!codaOk(run.slice(oEnd, nEnd), co)) continue;
-          const end = nEnd + co.length;
-          if (end > n) continue;
-          const rest = best(end);
-          if (rest === null) continue;
-          const syl = run.slice(i, end);
-          const cand = { syls: [syl].concat(rest.syls), known: rest.known + (vocab.has(syl.toLowerCase()) ? 1 : 0) };
-          // Ưu tiên: ít âm tiết nhất → nhiều âm tiết có thật trong từ điển nhất →
-          // âm tiết sau có âm đầu → âm đầu đó dài nhất.
-          const nextLen = rest.syls.length ? onsetLenAt(run, end) : 0;
-          const sc = [cand.syls.length, -cand.known,
-            rest.syls.length ? (nextLen > 0 ? 0 : 1) : 2, -nextLen, -nu.length, -co.length];
-          if (pick === null || cmpScore(sc, pickScore) < 0) { pick = cand; pickScore = sc; }
-        }
-      }
-    }
-    cache.set(i, pick);
-    return pick;
-  }
-  const res = best(0);
-  return res ? res.syls : null;
-}
-
-function isUpperLetter(ch) {
-  const up = ch.toUpperCase();
-  return ch === up && ch !== ch.toLowerCase();
-}
-// Cụm 2+ chữ HOA liền nhau (KT, CNKD, NHCH, EVN...) là từ viết tắt, giữ nguyên
-function tidyRun(run) {
-  if (run.length <= 4) return run;
-  const n = run.length;
-  const isAc = new Array(n).fill(false);
-  let i = 0;
-  while (i < n) {
-    if (isUpperLetter(run[i])) {
-      let j = i;
-      while (j < n && isUpperLetter(run[j])) j++;
-      if (j - i >= 2) for (let k = i; k < j; k++) isAc[k] = true;
-      i = j;
-    } else i++;
-  }
-  const groups = [];
-  let s = 0;
-  for (let k = 1; k <= n; k++) {
-    if (k === n || isAc[k] !== isAc[k - 1]) { groups.push({ text: run.slice(s, k), ac: isAc[s] }); s = k; }
-  }
-  return groups.map(function (g) {
-    if (g.ac) return g.text;
-    const syls = parseRun(g.text);
-    return (syls && syls.length > 1) ? syls.join(' ') : g.text;
-  }).join(' ');
-}
-
-function tidyToken(tok) {
-  return tok.replace(/\p{L}+/gu, function (run) { return tidyRun(run); });
-}
-
-function tidySetName(raw) {
-  let s = String(raw == null ? '' : raw).trim();
-  if (!s) return String(raw == null ? '' : raw);
-  const original = s;
-  s = s.replace(/\.(xlsx|xls|csv|txt)$/i, '');
-  s = s.replace(/(?<=\p{L})_(?=\p{L})/gu, ' ');          // gạch dưới giữa hai chữ -> dấu cách
-  s = s.replace(/^\s*\d{1,3}\s*[.)\-–:]\s*/, ' ');        // số thứ tự đầu tên: "2.", "11. ", "3 -"
-  s = s.replace(/\b\d{1,4}[.\/\-]\d{1,2}[.\/\-]\d{2,4}\b/g, ' ');   // ngày đầy đủ
-  s = s.replace(/\b(19|20)\d{2}\b/g, ' ');                // năm lẻ
-  s = s.replace(/^\s*\([^)]*\)\s*/, ' ');               // ngoặc đơn mở đầu tên
-  s = s.replace(/\s*\([^)]*\)/g, function (m) {          // ngoặc chỉ có số/ngày thì bỏ
-    const letters = m.replace(/[0-9.\-\/_ ]/g, '').replace(/[()]/g, '');
-    return letters.trim() ? m : ' ';
-  });
-  s = s.replace(/\s+(final|last|new)$/i, ' ');
-  s = s.replace(/(\p{L})[.\-_]([A-Za-z0-9]{1,4})$/u, function (m, p1, p2) {  // đuôi mã: ".2K", ".v2"
-    return /[0-9]/.test(p2) ? p1 : m;
-  });
-  s = s.split(/\s+/).filter(Boolean).map(tidyToken).join(' ');
-  s = s.replace(/\s{2,}/g, ' ').replace(/^[\s\-–_.,;:&]+|[\s\-–_.,;:&]+$/g, '').trim();
-  if (!s) return original;
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-// ── XEM TRƯỚC KHI ĐỔI TÊN ──
-function openRenamePreview() {
-  _vnVocab = null;                                  // từ điển dựng lại theo thư viện hiện tại
-  _renamePreview = quizLib.map(function (s) {
-    return { id: s.id, oldName: s.name, next: tidySetName(s.name) };
-  });
-  renderLibPanel();
-}
-function cancelRenamePreview() { _renamePreview = null; renderLibPanel(); }
-
-function renderRenamePreview(body) {
-  const changed = _renamePreview.filter(function (r) { return r.next !== r.oldName; }).length;
-  let h = '';
-  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
-  h += '<div style="font-size:17px;font-weight:500">✨ Rút gọn tên bộ đề</div>';
-  h += '<button class="quiz-btn" style="padding:6px 10px" onclick="cancelRenamePreview()" aria-label="Đóng">✕</button>';
-  h += '</div>';
-  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:4px">Bỏ số thứ tự, ngày tháng và tách chữ dính. Xem qua rồi mới áp dụng.</div>';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px">${changed}/${_renamePreview.length} bộ sẽ đổi tên. Bỏ dấu ✓ ở dòng muốn giữ nguyên, hoặc sửa lại tên trong ô.</div>`;
-
-  _renamePreview.forEach(function (r) {
-    const diff = r.next !== r.oldName;
-    h += '<div class="arc-item" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--card)">';
-    h += '<div style="display:flex;align-items:center;gap:8px">';
-    h += `<input type="checkbox" id="rpOn-${r.id}"${diff ? ' checked' : ''} style="width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)">`;
-    h += `<input id="rpName-${r.id}" class="quiz-input" style="flex:1;min-width:0" value="${esc(r.next)}">`;
-    h += '</div>';
-    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px;line-height:1.4">cũ: ${esc(r.oldName)}</div>`;
-    if (!diff) h += '<div style="font-size:15px;font-weight:400;color:var(--gold);margin-top:3px">Không có gì để rút gọn</div>';
-    h += '</div>';
-  });
-
-  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">';
-  h += `<button class="quiz-btn primary"${changed ? '' : ' disabled'} onclick="applyRenamePreview()">✅ Áp dụng ${changed} tên mới</button>`;
-  h += '<button class="quiz-btn" onclick="cancelRenamePreview()">Hủy, giữ nguyên</button>';
-  h += '</div>';
-  body.innerHTML = h;
-}
-
-function applyRenamePreview() {
-  if (!_renamePreview) return;
-  let n = 0;
-  _renamePreview.forEach(function (r) {
-    const cb = document.getElementById('rpOn-' + r.id);
-    const inp = document.getElementById('rpName-' + r.id);
-    if (cb && !cb.checked) return;
-    const v = ((inp && inp.value) || '').trim();
-    const s = libSet(r.id);
-    if (!s || !v || v === s.name) return;
-    s.name = v;
-    n++;
-  });
-  _renamePreview = null;
-  saveLib();
-  renderLibPanel(); renderQuiz();
-  alert('Đã đổi tên ' + n + ' bộ đề.');
 }
 
 // ── SAO LƯU / PHỤC HỒI THƯ VIỆN ──────────────────────────────────────
@@ -1864,7 +1701,7 @@ function applyRestore() {
   });
   const kept = quizLib.length - added - updated;
   _restorePreview = null; _restoreConfirm = false;
-  saveLib(); resetMixDefaults(); _vnVocab = null;
+  saveLib(); resetMixDefaults();
   _quizMode = 'home';
   renderLibPanel(); renderQuiz();
   alert('Đã phục hồi từ file:\n• ' + added + ' bộ đề mới\n• ' + updated + ' bộ đề được cập nhật'
@@ -1885,7 +1722,7 @@ function applyRestoreReplace() {
     });
   });
   _restorePreview = null; _restoreConfirm = false;
-  _libPending = null; _libSetId = null; _renamingSetId = null; _vnVocab = null;
+  _libPending = null; _libSetId = null; _renamingSetId = null;
   saveLib(); resetMixDefaults();
   _quizMode = 'home';
   renderLibPanel(); renderQuiz();
@@ -1955,7 +1792,6 @@ function openLibPanel() {
 function renderLibPanel() {
   const body = document.getElementById('modalBody');
   if (!body) return;
-  if (_renamePreview) { renderRenamePreview(body); return; }
   if (_restorePreview) { renderRestorePreview(body); return; }
   let h = '';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
@@ -1967,7 +1803,6 @@ function renderLibPanel() {
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:12px">';
   h += '<button class="quiz-btn primary" onclick="closeModalDirect(); pickSetFiles()">📥 Nạp hoặc nạp lại file bộ đề</button>';
   h += '<button class="quiz-btn" onclick="closeModalDirect(); pickSetDir()">📁 Nạp cả thư mục</button>';
-  h += `<button class="quiz-btn"${quizLib.length ? '' : ' disabled'} onclick="openRenamePreview()">✨ Rút gọn tên tự động</button>`;
   h += '</div>';
 
   // Sao lưu / phục hồi phải luôn bấm được, kể cả khi thư viện trống (máy mới).
@@ -1977,7 +1812,7 @@ function renderLibPanel() {
   h += '</div>';
 
   if (!quizLib.length) {
-    h += '<div style="padding:20px 0;text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">Thư viện đang trống.<br>Bấm “Chọn file” (hoặc “Thư mục”) và chọn các file Excel/CSV.</div>';
+    h += '<div style="padding:20px 0;text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">Thư viện đang trống.<br>Bấm “📥 Nạp hoặc nạp lại file bộ đề” (hoặc “📁 Nạp cả thư mục”).</div>';
     body.innerHTML = h;
     return;
   }
@@ -2068,12 +1903,12 @@ function quizStudyHtml() {
   h += `<div style="flex:1;min-width:0;font-size:17px;font-weight:500">📖 ${st.title ? esc(st.title) : 'Học bài'} · ${st.items.length} câu</div>`;
   h += homeBtnHtml();
   h += '</div>';
-  h += '<div id="studySummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px"></div>';
+  h += '<div id="studySummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:3px"></div>';
   h += '</div>';
 
   st.items.forEach((it, qi) => {
     h += `<div class="quiz-card" id="qb-${qi}">`;
-    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:12px', qi + 1);
+    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
       const tried = it.tried.indexOf(oi) >= 0;
       let cls = 'quiz-opt';
@@ -2171,18 +2006,6 @@ loadLib();
 resetMixDefaults();
 renderQuiz();
 
-// Khi bề ngang đổi qua lại ngưỡng điện thoại (xoay máy, kéo cửa sổ), tên bộ đề phải
-// đổi giữa dạng gọn và dạng đầy đủ. Chỉ vẽ lại ở MÀN TRANG CHỦ: vẽ lại giữa bài thi
-// sẽ làm mất vị trí cuộn của bài 30-60 câu.
-(function watchWidth() {
-  let wasNarrow = isNarrowScreen();
-  window.addEventListener('resize', function () {
-    const now = isNarrowScreen();
-    if (now === wasNarrow) return;
-    wasNarrow = now;
-    if (_quizMode === 'home') renderQuiz();
-  });
-})();
 </script>
 </body>
 </html>

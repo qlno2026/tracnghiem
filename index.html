@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1b2d">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Trắc Nghiệm</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&display=swap');
+
+:root {
+  --navy: #111318;
+  --navy-mid: #1a1d24;
+  --accent: #3b82f6;
+  --accent-glow: #60a5fa;
+  --gold: #f59e0b;
+  --red: #ef4444;
+  --green: #10b981;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --answer: #9aa8bb;   /* chữ đáp án ở chế độ tối: nhạt hơn hẳn chữ câu hỏi (#e2e8f0) cho đỡ chói */
+  --set-box-bg: #262a33;   /* nền hộp từng bộ đề — xám đậm ở chế độ tối, xám nhạt ở chế độ sáng */
+  --border: rgba(255,255,255,0.22);   /* viền ô ở chế độ tối: rõ hơn 0.08 cũ */
+  --card: rgba(255,255,255,0.04);
+  --radius: 12px;
+  --header-h: 56px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;   /* nền chung cho chữ không tự đặt cỡ, khớp mức +1px của cả app */
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* ── HEADER ───────────────────────── */
+.header {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0) 40%),
+    linear-gradient(135deg, #1d4ed8, #1e3a8a);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 10px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.header-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.title-wrap { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.header-title { font-size: 17px; font-weight: 500; letter-spacing: 0.3px; color: #ffffff; white-space: nowrap; }
+.header-sub { font-size: 15px; font-weight: 400; color: #cbd5e1; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.theme-toggle {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  padding: 0;
+  background: transparent;
+  flex-shrink: 0;
+}
+.theme-toggle img {
+  width: 100%; height: 100%;
+  border-radius: 50%; object-fit: contain; display: block;
+}
+.theme-toggle:active { transform: scale(0.9); }
+
+.upload-btn-header {
+  background: transparent; color: #ffffff; border: none;
+  padding: 6px 10px; border-radius: 8px;
+  cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; line-height: 1.1; gap: 0;
+  font-family: 'Inter', sans-serif; flex-shrink: 0;
+}
+.upload-btn-header:active { background: rgba(203,213,225,0.4); }
+
+/* ── MAIN ───────────────────────── */
+.main { padding: 0 8px 60px; }
+
+/* ── BUTTONS ───────────────────────── */
+.big-upload-btn {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.big-upload-btn:active { opacity: 0.9; }
+.big-upload-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.quiz-btn {
+  padding: 9px 12px; border-radius: 9px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--navy-mid); color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+}
+.quiz-btn.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+.quiz-btn.danger { background: var(--red); color: #ffffff; border-color: var(--red); }
+.quiz-btn:active { opacity: 0.85; }
+
+.quiz-toggle {
+  padding: 7px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: transparent; color: var(--text-dim);
+  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+}
+.quiz-toggle.on { background: rgba(59,130,246,0.18); border-color: var(--accent); color: var(--accent-glow); }
+
+/* Hai chip bật/tắt trên trang chủ nằm CHUNG MỘT HÀNG.
+   Đo bằng canvas ở cỡ 17px: “Đảo câu hỏi” 96.3px, “Đảo đáp án” 92.2px. Cộng
+   padding 8px mỗi bên và gap 8px thì cần 228.5px — vừa khung nhìn 311px (thẻ
+   rộng 266px). Bản cũ “Đảo câu hỏi: Bật” + “Đảo đáp án: Bật” cần 309px nên mỗi
+   cái phải xuống một hàng; thêm icon 🔀 còn tốn thêm ~56px nữa.
+   `auto-fit` + `minmax(120px, 1fr)` cho hai cột BẰNG NHAU khi đủ chỗ, và tự dồn
+   thành một cột khi cửa sổ hẹp hơn ~248px — không bao giờ tràn chữ. */
+.chip-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px; margin-top: 10px;
+}
+.quiz-toggle.chip { padding: 7px 8px; text-align: center; }
+
+/* Ba nút thư viện trên trang chủ: cùng MỘT hàng, mỗi nhãn một dòng.
+   Đo bằng canvas tại cửa sổ 311px (chỗ trống trong thẻ 265px), cỡ 17px:
+   "Chọn file" 72.8px, "Chọn thư mục" 114.2px, "Thư viện" 70.9px. Cả ba nhãn đầy
+   đủ cần 294px — không vừa. Đã thử `flex: 1 1 0` (chia đều 83px mỗi nút): nhãn
+   "Chọn thư mục" bị bẻ thành 3 dòng. Nên: rút nhãn còn "Chọn file"/"Thư mục"/
+   "Thư viện" (248px với padding 5px + gap 6px, dư ~17px) — giữ cỡ 17px, không
+   phải thu nhỏ chữ.
+   `flex: 1 1 auto` (không phải `1 1 0`) để bề ngang thả theo nội dung; `flex-wrap:
+   wrap` là lưới an toàn cho cửa sổ hẹp hơn nữa — nút cuối xuống hàng dưới chứ
+   KHÔNG bị cắt chữ (đừng dùng `white-space: nowrap`: nó tràn chữ ra ngoài nút
+   ngay khi flex phải co lại).
+   Không emoji trong ba nhãn: “📁 ” chiếm 28px, đủ đẩy tổng vượt 265px.
+   `width:auto` để thắng `width:100%` của .big-upload-btn, và lớp này đặt sau nên
+   đè được padding 12px 18px của nút đó. */
+.lib-act {
+  flex: 1 1 auto; min-width: 0; width: auto;
+  padding: 9px 5px;
+  text-align: center;
+}
+.lib-act-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+
+/* ── QUIZ ───────────────────────── */
+.quiz-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px; margin: 10px 0;
+}
+.quiz-input {
+  width: 100%; padding: 10px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--navy-mid);
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+}
+.quiz-input:focus { outline: none; border-color: var(--accent); }
+.quiz-opt {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%;
+  text-align: left; padding: 12px; margin-bottom: 8px;
+  border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--navy-mid); color: var(--answer);
+  font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.5;
+  font-weight: 500;   /* câu trả lời: 16px, nét 500 */
+  cursor: pointer;
+}
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.correct { border-color: var(--green); background: rgba(16,185,129,0.15); }
+.quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.15); }
+.quiz-badge {
+  min-width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #ffffff;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.quiz-opt .mark { font-size: 16px; line-height: 1.2; flex-shrink: 0; }
+/* Số câu đặt trước nội dung câu hỏi. Thay icon ❓ emoji ở lượt trước: emoji rộng
+   19px mà không mang thông tin gì, còn vòng tròn mang luôn SỐ CÂU nên bỏ được dòng
+   nhãn “Câu 1/30” trên mỗi thẻ — trang ngắn hơn hẳn.
+   Kiểu: KHÔNG có nền, chỉ một viền đỏ mảnh + số màu đỏ (yêu cầu người dùng — trước
+   đó là nền xanh đặc như huy hiệu A/B/C/D). Vì không còn nền nên viền phải là
+   `1px solid` chứ không phải nền mờ, nếu không số sẽ trôi trên nền thẻ.
+   Dài ra thành viên thuốc khi số có 2-3 chữ số: bài trộn mặc định 100 câu nên
+   “100” phải vừa.
+   Cỡ số 13px trên vòng 20px (người dùng thấy 12px hơi nhỏ). Vòng chỉ tăng 1px vì
+   bề ngang của vòng chính là bề ngang câu hỏi bị lấy đi — đo trên bộ 30 câu: tổng
+   số dòng phải xuống thêm không đổi so với vòng 19px. `margin-top: 2px` giữ số
+   nằm giữa dòng chữ đầu (hộp 20px trong dòng 24px). */
+.q-num {
+  min-width: 20px; height: 20px; border-radius: 10px; padding: 0 5px;
+  box-sizing: border-box; background: transparent;
+  border: 1px solid var(--red); color: var(--red);
+  font-size: 13px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.quiz-fb {
+  display: none; margin-top: 6px; padding: 10px 11px;
+  border-radius: 10px; font-size: 16px; line-height: 1.5;
+}
+.quiz-fb.show { display: block; }
+.quiz-fb.ok { background: rgba(16,185,129,0.14); border: 1px solid var(--green); }
+.quiz-fb.no { background: rgba(239,68,68,0.14); border: 1px solid var(--red); }
+.quiz-all-head {
+  position: sticky; z-index: 5;
+  top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+}
+
+/* ── ĐẦU MÀN LÀM BÀI ─────────────────
+   Hàng đầu của mọi màn làm bài: nút về trang chủ + tiêu đề bộ đề.
+   Nút nằm BÊN TRÁI HÀNG TIÊU ĐỀ — vị trí chuẩn của nút quay lại, và cũng là chỗ
+   rẻ nhất về chiều cao. Ba phương án đã đo ở khung nhìn 393px (thẻ 349px):
+   - Cạnh tiêu đề (đang dùng): ô tiêu đề còn 298px. Tiêu đề ngắn (“Văn hóa doanh
+     nghiệp · 30 câu” 253px) vẫn một dòng; vài tên dài thêm một dòng.
+   - Cạnh dòng tóm tắt: tiêu đề giữ nguyên, nhưng ở khung nhìn 311px dòng tóm tắt
+     “Đã trả lời … · Đúng … · Sai …” cần 218.5px + nút 51px = 269px mà chỉ có
+     249px → tóm tắt bị ngắt thành hai dòng, xấu hơn ngắt tiêu đề.
+   - Hàng riêng cho nút: đầu bài cao thêm ~30px ở mọi bề ngang.
+   Nút chỉ dùng emoji 🏠 (23px chữ): nhãn “Trang chủ” cần 103px + padding, đủ để
+   ngốn thêm 80px bề ngang của tiêu đề. */
+.head-row { display: flex; align-items: center; gap: 8px; }
+.home-btn { padding: 6px 9px; line-height: 1; font-size: 17px; flex-shrink: 0; }
+/* (Icon ❓ emoji ở lượt trước đã bị thay bằng .q-num — xem khai báo .q-num ở trên.) */
+/* Ghi chú cũ của icon ❓, giữ lại để biết vì sao không quay lại emoji ở cỡ chữ lớn:
+   emoji ở 16px rộng 22px, cộng khe 8px là lấy mất 30px bề ngang câu hỏi — đo trên
+   bộ Văn hóa doanh nghiệp thì 10/30 câu phải xuống thêm một dòng.
+
+/* Bốn nút làm bài của mỗi bộ đề: lưới 2×2 với hai cột BẰNG NHAU.
+   Trước đây là flex-wrap nên mỗi nút rộng theo nhãn — hàng trên [Từng câu][Cả bộ]
+   và hàng dưới [Học][Câu hỏi] lệch cỡ nhau, nhìn như lỗi. Lưới 2 cột cho cả bốn
+   nút cùng bề ngang và cùng chiều cao.
+   Padding ngang co từ 12px xuống 6px để nhãn dài nhất “▶️ Từng câu” (≈93px) vẫn
+   nằm một dòng: ở khung nhìn 311px mỗi cột chỉ còn ≈120px, trừ 12px padding là
+   ≈108px chỗ cho chữ. Bốn nút trên MỘT hàng là không thể ở cỡ 17px (mỗi nút chỉ
+   còn ≈78px, không đủ cho nhãn), nên 2×2 là cách duy nhất để cả bốn đều nhau. */
+.set-acts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 9px;
+  grid-auto-rows: 1fr;   /* cửa sổ rất hẹp: có nhãn phải xuống 2 dòng thì cả bốn nút vẫn cao bằng nhau */
+}
+.set-acts .quiz-btn { width: 100%; padding: 9px 6px; text-align: center; }
+
+/* ── MODAL ───────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 300;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #1a1d24;
+  border: 1px solid var(--border);
+  font-family: 'Inter', sans-serif;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 640px) {
+  .modal-overlay { align-items: center; padding: 24px; }
+  .modal { border-radius: 16px; max-height: 80vh; }
+}
+.modal-handle {
+  width: 36px; height: 3px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin: 5px auto 0;
+}
+.modal-body { padding: 4px 12px 20px; }
+
+/* ── LIGHT MODE ───────────────────────── */
+/* Nền chế độ sáng: trắng xám để các thẻ trắng nổi rõ. Thẻ và ô nhập vẫn trắng. */
+/* --text-dim đậm hơn #64748b một chút: hộp từng bộ đề giờ có nền xám #f1f3f5, mà
+   #64748b trên xám đó chỉ đạt 4.31:1 (dưới ngưỡng 4.5:1). #5b6675 cho 5.27:1 trên
+   nền xám và 5.83:1 trên thẻ trắng. */
+body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --border: rgba(0,0,0,0.22); --answer: #1e293b; --set-box-bg: #f1f3f5; }
+
+/* Hộp từng bộ đề trên trang chủ (📝 Thi từng bộ đề) có nền riêng để tách khỏi thẻ
+   chứa nó: xám ĐẬM #262a33 ở chế độ tối (thẻ tối chỉ ≈#1b1c21 nên hộp nhỉnh lên,
+   đọc ra là một tấm riêng), xám NHẠT #f1f3f5 ở chế độ sáng (thẻ trắng nên hộp lùi
+   xuống). Một biến duy nhất, không phải hai luật chồng nhau. */
+.set-box { background: var(--set-box-bg); }
+body.light-mode .header {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 42%),
+    linear-gradient(135deg, #2563eb, #1e40af);
+  box-shadow: 0 3px 10px rgba(30,64,175,0.35);
+}
+body.light-mode .header-sub { color: #dbeafe; }
+body.light-mode .modal { background: #f0f1f4; }
+body.light-mode .modal-handle { background: rgba(0,0,0,0.15); }
+body.light-mode .quiz-card { background: #ffffff; border-color: #c9d1da; }
+body.light-mode .quiz-input { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+body.light-mode .quiz-btn { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+body.light-mode .quiz-btn.primary { background: #2563eb; color: #ffffff; border-color: #2563eb; }
+body.light-mode .quiz-btn.danger { background: #dc2626; color: #ffffff; border-color: #dc2626; }
+body.light-mode .quiz-opt { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+/* Đáp án đã chọn ở CHẾ ĐỘ SÁNG phải hiện xanh/đỏ y như chế độ tối.
+   Luật `body.light-mode .quiz-opt` ở ngay trên có độ ưu tiên cao hơn
+   `.quiz-opt.correct/.wrong` (2 class + 1 thẻ so với 2 class), nên nó XOÁ luôn màu của
+   chế độ tối — chọn đúng hay sai đều ra nền trắng như nhau. Phải khai báo lại ở đúng
+   mức ưu tiên đó, và dùng đúng hai màu mà chế độ tối dùng. */
+body.light-mode .quiz-opt.correct { border-color: var(--green); background: rgba(16,185,129,0.15); }
+body.light-mode .quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.15); }
+/* Chip bật/tắt ở chế độ sáng: chữ xanh nhạt --accent-glow (#60a5fa) trên nền chip
+   xanh nhạt chỉ đạt 2.06:1 — không đọc được. Đổi sang xanh đậm, vì giờ trạng thái
+   BẬT chỉ hiện bằng màu (nhãn không còn kèm “: Bật”). #1d4ed8 cho 5.43:1. */
+body.light-mode .quiz-toggle.on { background: rgba(59,130,246,0.14); border-color: #2563eb; color: #1d4ed8; }
+/* Số câu (viền đỏ) ở chế độ sáng: --red #ef4444 trên thẻ trắng chỉ đạt 3.76:1 —
+   hơi mờ cho một con số nhỏ. Dùng #dc2626 (đúng màu đỏ mà chế độ sáng đã dùng ở
+   .quiz-btn.danger) → 4.53:1, vượt ngưỡng dễ đọc. */
+body.light-mode .q-num { border-color: #dc2626; color: #dc2626; }
+/* Hộp phản hồi ✅/❌: chế độ sáng dùng 0.12 còn chế độ tối 0.14 — chênh 2% độ trong
+   suốt, không nhìn ra được, nhưng để y hệt chế độ tối thì lấy 0.14 cho cả hai. */
+body.light-mode .quiz-fb.ok { background: rgba(16,185,129,0.14); }
+body.light-mode .quiz-fb.no { background: rgba(239,68,68,0.14); }
+body.light-mode .arc-item { background: #ffffff !important; border-color: #c9d1da !important; }
+
+#quizFileInput, #quizDirInput, #quizRestoreInput { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Đổi sáng/tối"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIQAAACECAYAAABRRIOnAAA8rUlEQVR42u29aZRlV3Xn+dvnnDu8KebIyElKZWpMISQQEiAGGzN4wI3tso17lW3cZZvRU8llV/da7fInl1d/qS7TbdzGpqqrV9Flg40NGIHBGCSQQBKaQBJoSCmVyjky5uFN995zdn+4NyIjU5mpTOUUsbperrcUmaF4cYd99/Df//3fwsZ9meqtgH/pt2XIGLsbMcM2Tu5QW6/j0jviJI7EJNbEgzcLakEAUATFY+jT63R98P3Hne/4kPXy4LP7Q1F0VIv7VcMc8BQwf4pjspQfGKr3hnvJBjxee4oL7kTMtSaqv97Wmm+JaoO7bDq6m1prS+7q2CjFRymqgTRt4qJBNOhLP1yEEDp0u/MogvM5vt/Bag/b60Do43vz9DvdI9KdearIO3tD8PcB3wH2AMUpDNZXRvvfDeICHqOpvvbHb57Z7uLWj7pm463a2vqGuDFyfZEOGlvfRJKOY+MmtTRB00HNGQ/OxaAq6mKMjQAxyJrTV60MwkPRQ1RDEQLGTxEVc9pZbhNCZnqdY5L3Zog6sxRFH9ebQtpF6C1NP5P35x9Uze9V+Cfg4Emeg8qI9b8bxPl5g2KtEdh08F1meMvPJANXvM3VhwaywW3U65upR5soGi1PPKqFxGJdYWLjxARFfcBXNxzV8n2m3yoGFEQUYy0YoR8CPhiMghTTahfmQ55P62JvUtziIUtngSxfwrTnKeaOLWbdY/eoFp8DvnqScbj17DVkAxiCdVH6djO07X1m/IaftvWxgXToStLWVSw1Rr1NRnRAUhNJkEyRIvSJCFgEVUWFMjuQ0smImrM4hFD5/FDeNRUMQhAlR0BiUmMJavAoIZtRszyl/eV9oTP/ooTerPWdKZKlI/Tmpxez/sLngU8qfH2Nl1uXhiHr1hDETES1ofc1xne9Lx/ZebMb2cHY8LWY5na/FDXAxCYLKhpyGkWoPkBKLyAGEVk9OQVU/DkbxPFopeiK86g+Maiufr4YR24tmRSk/R5meVKXl54L/dnnqHWnbH/2ML32MYqlqcdDCJ8EPglMrkfDENZPjuCrxG4ibk18xG+98cPN0Wsnhq+6jWTTqzVOR8NwGpt+yKWrSiSKhLJIyPsZilJkfYL3dPpd+kVO5hVrHALURFAU0bM5ZT3ry1OaiuIl0EeIsNRMTI4j680QFvdob/KZ0O/vN8nyESmOHaa/dHiSED4e4M/XGIZdDznG5TYIe9wQzIRpbf1IMvHqDw9OXDvRuv5tjG27oYjqoyYLhSEUqAqmevL1pOpAgQTFomSFJy9yFns9lno57V6HWu5LF2QMgqwEg/N+heoeCqYMU1B5DwXjQCy1sMTS4lEWpx4JbnZ/KJZmXDG/l3zx8GQRwsd5qWH4/78ZxFqvECXNkQ/bra/5g2TLzRNbr3kr6RW3FK2kaYs8iCenwGPFImc4XFXFCWXSZ6QMHxi8Qr/I6HXaLCwv0+/38CGQGIdUOYY5j8uw4iGqgHXyQaEouShia6R4WHiK2ckntT/3go/aR1x29Hl67ZlJ4I+BjwP55fQWcjm9go3Td6Sbbvpje9Udb9i6++1MbH9V4eNB64tMVH2ZD5zjIeop/lbmFYIPAfp9js7PkHf6RBjMaX7WCni9cBdZtcpDXEotdOkv7mPq6Pc1mnnC6/xBtzz9HD7rPajwB8DXLpe3sJchafQiZlM0etX/Zq57559tfd1Pbb/2dT/vhzZdJ17VFkUhIvKKjIE1iZ+sPrNVGhgUaw1pFDPaGqKR1ugXOd08Azn+jCMCGlj0QmQv4BOzck6hoCAgrTHqI9eJccPGO1WtD4Sk0Cvy3vyvAKPAI8DyJb5Hl+yXrUDMauPGj0W73viPrRt+/J2vesN7w5arf0izULOZ7wtiSgzgYlijCKKQq5KrIpGj3mwhkaOTtekHT4olB9QJV491OdY2JGLX1Bi65i2vKMAgChi0CBTqiIe2UxvdKlmIjYltkKShdOfeGHzxS4h8v0JA117DDW8QK2WVi0d3/O/2und9bNdrfrZ1ze0/X1C/wvpeJkE8GHNJIpisceGIMFRvMNJokuc5PsuY7dT4yO0HuGqr5RvPDDKY5ARclUDqmiOU8zsKsRjJibRHbgdx49dTi1qS5X2p1eqFLbqDeb/9yyIMVSHEV9cybGSDcEBhjLu2tu3Wzw1e/WO/cO1bfjkM73qT9opgvRZgzWXJZERKsKkIAYylOdBiGUu9mOcvfuVh/uz+G5lc6GKimJHiGF5yFk1CTQXFnKc5yupDHzBl8lkURM1tDI7sQLVvfJQEh9W8M3+HGH0HyL3A9MU2Cnuxq4g4HfyF+tU//LnhV/3U9de96b1FMrTTdvOeGKmSvXXw8ipEJifIKP/+nV/i1uum+Njdt3Gsl5MYw+3Ln+KouwFoVYXlhb1UgmBF8KFgOmkyNnwdnkQ8XhpxWmRLc1dpyH8J2Ac8saa3c1Fi+8XyyiFuTdxprn/Hp6+445dHdt/xP/p+OuD6+SLW6DrBSBU0YtAVLPVS3rBtmve+9hGOzN/G8kJgQBw39L/J5vAIC/EEheoJQePCHoliRGn6Hl0VGle8hZHdP0G+6QbX2PE6n6RjIwKfFrF3Vh7ilWXdl9ggVj4vRKM7/7J24zv/5NU//BG/7fof0W6uFi+oxOsGvFcMkemBD6Qu8K9v+2s0tiwVO0g3T9CyyuvnPsoMO1gWg7f5RYyx5VVJNCqTX98hHtrJplf9HG7idTa98ia1jU1e1f+JiPzlmrBhLnSMv5DGEABnRq/9v+q7f/gDu2//xby56ZZoud9GJFQVhIJePvcgaxocgUCkjmOZ4Tdvu4+bxh8HGWfffIO2NPnx8HEa+RQz9atoCiQUKOYV1xhnAwnpamNN6PU96rYxcM2PMeuCWEms3f9I3u9Of0BEUNXfqHo/5kLlFe5CGoOIDNe2v/oLo7ve/uadP/ThIqq3ona3DRHnkYhdHCQulKwaZovArtEev3LTp/F5F+uu53B7mC3TDzA6/TdkSYO+DJP4QIKhf9FqITmhsaaYVcKOpHU23/izzCZfJ8RE7vDTRXtm/wdE5EZVfQ8wd6GMwl2wMCEyku649cu1q3/k9qvf/P6CeNj1+hnGrS8u2Uq4cqqggW5IuPPWLxAnPfrdcWzSZHKqx+6D/56CcQSIx24h6+UE7zESXWQ4QE742onHhEAnJDR3/ChLFIhR1wqhWJo78GZjzFdCCD9OSek7b6MwF+joNZ248Yuju37o9mvf/MGil7RcN7QJTgnrjHGhFa6UuYKj2QC/dsMjvHXXN8h7DWy8hYKdNJ75C5rLz+A1RkRIR3YxMDRET7kEfm5taaoolkIjrHqCBpo73k194nbMlhucq20qQuB2Y8wXz6lFe5EMYrWacGO7/rJ+w7vfeP0dHyripOWKoouIXbdkMUGRPOHm5jS/cduX0aKLUYeLUyRbpPfsP+PiDPHztO0Yc67F5sEhBhstcg0Vcnnpj1o0EEKgduW7cVvvwF75ahfXR4oQwhs5nmieV/VhzhPDCLXxnX+Z7Lzj/a+646eL0Bh1eZETmfiMncnL/jJKv4h4/6330khm0GIAoxbSnUxPTdHr7MOaLiIZEu9EJaIvwsjoGLkLdOUydafFYFCsBEZ2vpl05Hoa21/joniwEPT9GLNiFPZSG4QDirgxdqe56o4P3PzmX8+j5nUu77UxZn3zdo0JLPcT3rHzRX70hv9KVihGPMFYqNVpz8/SabcxNsKELgvpCLPRIBJykjhh08Bw2TW9jFmxaJ9OaDF67c+go7upbb3BWVvPRcMHgDurysNdKoOwQBEljZ+vXfNDf3LVze/JB7bc7Dp5F+/MBSOeXLCLt7ZfJor3gU1Rn3/7+k9hwjBOG6h08PGVEG9i5uAMGqr6VB1zyY0k6ktSjSrDrQHqcUJQvWwnVQSH+IKQDDB89ZswY9fSnNjtUHIR8yfAz1dGYS+2QVTlpd0VXfGmv5y4/l165fVvc53ukhgr65rDrYCTQNEb4n233sOmkccIeQtDAXgkqoE45hYW8UUVs0WppymplI0tVLHGsHl4BNHLWUhbrAH8MnHzCppXvo1idIfURq92qkGlDB27qvBhLpZBrCQrprb1pr8a3P6G4W2vfkdY6HnxpmQ4r0crUAVRJTaeXq/Gq7fu4V++6gv49gjGeCDD6xYkGkXzLsf278FZQDOCqXMw2U0/lB5CRchEqDVaaBqzhF4mjC1UFYij3S+oD99Ia+JW6puvkvrA5qAhDCPyV9X9Pack05yj8fh4aNt/MFfc9oZrX/8zhbepDRSoGJD16R5ElSI41AsLLuK3X/9FnJtFaVYXtsC6QYxtgC9Ymj1WhZgC1ZT5eBzoIRVC6QE1lnpjgP5FwizPzt+VvAonhiXJaey4Axnejdt6s3Vps0D1DcB/qA7ZXGiDsIC3LnkX22+/c8dNP16EsatdkYd107E8Le8BwUnOdLfJh3d/kddu+QF5di3WtqvTjyhcExM3WZ5bYG5qHusceEWSzYxFMWZNoSmU012bWi1iA0UIl8Ek5ATCTq6eBWnQuuLt+HSUge2vdcaYQoQ7gXdVRmEvlEFUv1mG7ZWv++S2696gW3a9yeS9BdRUXAbR9WcM1TUzoiyFmKs2LfDhW76Cz5eItI2oqzjTlhCNgWngs4J+p4dxDgnQi8boyzDzHoycSOiNI2GkUaPKQC+bQShKUy31ooe0tjByxZvIamMMb9ttQFREPgkMny3Ny5xtIpkMbfkjM757YuL6nwxtxZgNMRaqiCpSCP/2tf9ErZFDGFyD7pZx2LkYYsuhg/tpt9sYYzEKi40dzLuUEQ34tecrQhGUgcYAYuSyz9hoRfhZzD1+4nWYwc3I8DUmbW0NqjqByB+dbYJpziZUGBu9tbX1db85cdUP+3prwkY+R1dChcpl7V6e3MmUKo3yCpEIWb/Oe655kh+5+p/wvQgr9vjDogHiAdQMlDe534YiL8tVoOO2osZi1B4nxkjJi8wQXK2Oc46gioqiEtBL6i3Nat6oCHU8TVswvOOHyWzK0PZbbBQ3vaj+JvDWswkd5uVDBa6+ZfdHs6GrGd92sxAyVGTd+wcjQifkjLaW+d07/oFQWMzJow4aMC7B2JLGduTIIVZUAoJAaFxJETI6FUJ48tVxxlKP08sEZZ8adMuKnKJ2PTJ2E0tRTLT9NeXkichHK7DqjKHDvFyoiNLWh8LE7lvT7W/yNBqmL3KCCMJ6a1xpqCoBC0W/yUdu+SIjze+Crx/nZEgEJiOwQHA3QohAAktHj6Ch5CKIwKIbpq5CLB415b+teEStZjtdLWaJjIBg1JzlqOBFKkbVEoJDwjIjV95BHo1gB8ZNY/Aqj+qtwIdeLnSYM3iHADJqtt3yR/XW1WHr6GbjrCEEXdcqAgrUpGCqG/GeLYf5yd1fJuumFQAlJxiPMWCiBBGDdtvMTB7BRZD7YbzbSh5fhQn9U1bUgqAK9bRG5BxG1kcvrxxyznFRwubNr8IWBXbrbqPWBeCPKGc+TpsJmzPNUcS1kd+uD24btltuCEs2kci6deMeTwwP5Xsl986DMGYsv/rG/wejLVzYXJ6SVnmDelQzfPRaxJSeQ7wwP9sjEojsFN418dEQgkdVyh/TU4wPWocRg78s5eepHoeAwZBlgWj8tfSTTRRpKgOj1wVgGDG/vQpinKVBrGgkjSZbrv2tdHSX2tY2G4xgxALrG56OJHCs3+LXX/sVrpp4gpAbjMlOeigUwWPiYVQdOMfs9DSd+QWIU0LI6CZX0HUDGPWn9YiKYsXgrF2X4TNEDQa33ILmXZLNN1pbayqqv3UmL2FO5x1cc+i3i+HtozJ2a+gFJ4lbmZ/QdXnyaJlUzXnlDROT/Mpr/h7v1xix6Bq8RFHqaDxOIAdj6bcXyNvTiLUEXye3Y3iTVjjD6QeMjYHI2gq6v9w+QlbfIkJRZKTjN2Fqm2g7JB27Ohh0FJHTeglzGu+wibHrfqsxdJ0mrS0mhIzYuvMYYbsUjhK8F+JshN95/aeIbYHPtoPkJ43hldWFmBTseAlRG8fBfc9T5IoRcGQUjSvPinIvCJFzJ011rQejAFVPEdcZmrgJsjYyssvYJF3xEptO5SXMKXAHjePa+9LmttHawDUeVTFAHCWoyvoNFcaz2E35Fzfdw+1XPETeG8TZQycxywSMK1OJeBQxQkAQF9Ne7uALUIkQ7znmrmQJiz2TR6wGeGMXVaOB66/0puhRG7oWiYfoukTM+NXewCjI+6qLY89kEB5w6fDOX41Ht6kO7TLBayXVs9LAWo9JpdLOI24Zn+c3bvsSRX8AR4HRseMPwAoxwriqhbEDwZZUv8IwuW8v1gLah9hhGluoh4Lwcr2a6vslLZ5119ExAbLaBNHwbkK+TDR6rXHJgAK/umbu9pQGYQEVY99qxza/KmvdoMbWjej61t8MCI5AVkT8+q1fZ7hxAC3SEnM4xcv7HCXCuKScgggFaKC9tFSKh2hOZlocc9tQ6a8bFPb8Or6BgaHdRBIozIBJx69SQV9VoZcneImXJBW2sekDWWMbo8O7AlqAGIJW1r8OEidZU2YqkJiCY90BfvLqR3nHrr/Dd0aITL9EptbeTPVli46CQJNgr4CQE0WWzsIMUwcPE0UC3lO4bWgyhtGMiyVPcOlwCUMIBXb4CmqtHRg/hx/cEayNAT5wuqRSKtexOR7e8Z60vl3jeMCi+boFoUqzVvqFY9PgPHe+8T8TfK2Cp82ZpYeipNSfRBFjyYqcTreNmFKYzFpL4qL11sQ9rzLMCNSa12F9l6I+aGVspwLvATZX917WGoQFsC798TA42owGt4VZa0RRRMAZ0FCsi/yhdFSCasCLYzFv8pFX383E4DI+VPAyASScoi1flNJC7voKfg4Qx0wf2EtnfhnjEpyHw7XbmJcmEf7lz3iFlcV67uvAPAV2ZDveDRAVmcRD24MVaYL98bU2YNbOj7nayHtdOk6tdQU5OaaCZ1WVXpGtGzJMAGLj6feVn9i2l/de/09kne1YXn6qyhjBxI3KIMp/63faaFhD9olqqFjQM1OGBQga6ObZuh47EARPjq2N02hshbyLTYcw9TGE8N61NmDWYA9b0ta2t8T1ESQdNwP+OIQTFMIK9VzXx6BNrpZWZPid2/4O6wxWMow2qw7XaQBYDSDjqGuCtKsyNGL/cy+U0HTlEUPzampBsSf1P05HZPN+RSBtHYJ2BDyBZgBr68jAdnoa6EeJcSObAX0LsGUFkzCrrsLYH5OB5kBobfcqVmxYleHCiNDL8/J0ZR3kDkaZ7ye896aHuWLLIxRZv1KH6r9Mu98jtomYpCwvK12TXq+zamgBoWvHOCZC0PSMAiFS5dnee9YvnF/+MUFQ9USNq8A6fMgkrm/xRpIB4MdWwsbqo2Ti+tvyRouodaWqhhNIs4mA5hnq/aW3hzWc4VKcNNDLLK/ZNMUHbv4CoRjFmugkoPWlH6AIQRzEo9VnuXKoqN/l4N7nsM5hxVMkdeYbO9mqy4j1GFGMhFO+nYHC9ylChjWKlZPephQBOb1vuTThYkXyOYSCRmuMKGnivMfUR9U2hwHexkmCYJFrDN0RuXGG3KBZoZ2vHHoqBlsU5HmGJLUz4vsXS89Bq3ZETwxtjfn92+4iiScJWbMElzhVZierZWPJ8LIQb0I0gDowQpFlLM/M0+8XQI08GmO+mCCTOqJnZn5YY1lazJjvOuokmHBqzexmUlSmKmsIu3pJpEJlbcUVAprUiJqbySZ/QK+WGFMfhaWjdwARUKw0KHbadGSnJE0NUdNAtuZAS8W0rMjoZxmNtEYIepxCd6nm9wnUgMNZxM9d9xyv3fokPqtjJZzdB6iibgisK5NFUcSmtKf3Mz6uTAxfhWqdorUD3XGIQl84s3IuJWNqYWCe+eEFEokwetJvlTomBL59YIgiQEogw+EI+Msw5iMoXZ9gk1GMDRAwUXO7Zsd+sDOo7gSedeVTaN+Q1Yej2uAW33Vi3Qnwg1J4COrIej2GW02ySyivqlpe3BjDbIDrB3J+7/Ufx4cehgGgcwbcYXVSpwSm7C6QOgSPWAtFwWAyy/t/561gkvKJ1gDhP57lk6sVkVNegpDgO9BQ/vaBd/Cl599GI87oqmUJy5AuVU+uXvpqQwrSwa0sHnI0NEfraTBJM9Le8hsULQ3CuvhH6rUY3FbVFeHuky6IiNDu90BLAfFCL113T4EQDHlu+Z3XfYbh9FGKbDsi9bMeLRGJkNihGspKQmOMThKyfVVDNF/t5irp+T2HCurGmDkwwyc+q9yU30eiAe8Vb2NeiG4+c9Psog4K53i3lSRK0aLA2FhdOkHRW/oR4JMOMCYeuNpF47h6UyLNS0rZKTpn3Syj0+uT1moX/dhtNQjhgxJJYMbH/NQVL/D2XV/F57fgxFe5jClBqJexKG+GMG4Yo2V5aEIHbR+CYgEx5oR4/sqlBxUlJRDhTMw/fup+XnvgH2mlUARPauCxxp3sje5AWLrkMkuKEAdPL7XUknH62SG8sxKaw8g8V1esQlomrl1rjMFFK7dBT+NwYHpp4ZLWniJQBKEVBX77zR8j0K1u6rmEHcW4CGPdKiinoUuRHcDYhQsk5KaAI4TDuEaf++87xHcffQHbrNMmQYEXkx/iq/VfxrMMl2lUWABnTTWOUBWYtRQD1wItI7Bb6oPjoTGgzbQpoqemeihKLJa80yMUvgKswklMpAuiiYEYCEEptCwzuz3Hv3n1Q2wbPUIoasiKYIeEl/cOK8cf78DbQQIedQb6z+H8LGiz3KlwAXQtVMGkhqnDPe76+0eoJw5T9ImCQ90mHmj+FrF4UgqEArkM6luKUncJ0cAQqgFVL8RNFVsfB3YbhXGDuMIM0PP1ip18Wp436gOL7WWMtReVcBsq4d/lzHLH1iP8i1v/kry3GWicQzKmq2P9xjVBI5AYus8i7WcQtUByAS92H+FK7vqbR8kXjuBsXj5I2uVbjd/iqNtFXTuXcR2GYCjIvSOT4TI0KpgoxaWpA8aNEXu71hrYZDgoESVCfRrgpBrQmV+cx3pPzUYrC60uYFWhhGCIscTktE2d33vjZ4hNgRQOK9NnEbJW1hxEqPTxbgJxgxjtg61D5/sQ9oEkVVv8ZTb1ncWr0BjT2MTD33iOJx9+nlrdkEkT4y1TtdezL30XUViqdv4IirvEOYRW8u2W4BXbmABjkOCJxAXiFsDtBqXRrwZ6jJQ/cDqDkKq/3s/6LC7OVZvvLnA+oYIhULcdFnsNfv3GR7hm82MU3XGc6SO66SyerArelBi0i0QjIPXyiVh+Gs0XwQ4dL57PCzgMZeWSwOzhnC989gHSpFSOMyFB3Ahfbv4blk2xmrKWaau5DH0AJagpPWblHZxoeSxJDaBhxLo3JQYwsZwSLz5FDIqsY3Z+kSzLLtiw69rfKBJY7DfYPX6QX3vd3xGKAmPaK9JW54BmZai2IBokmBjVPrL8KBIyYPBM8yrncIkbKA6ryuc//TWWFgLOVRm9Kk82f53ZaCep9lGxq0q1XFbZVgWJCcaQqyEYxEZ1gDcZk6QuTerEzXE0hLMSHZEAUigzs7NrUDm5IOP7K5+ybCz/9va7GHJ7Id+G0fQMnczTAFL0URlF7GYIATovgvYRaVSfc/6GnPsM0xjlO/dM8r3HXqDerFMEQ0yHydr1PJq+m1pYxmqMUb2kfYxTe02Dek+tPgxxjU4QeighGizHVTVY60Nc6SXoWc4QKkaE+fYSy53lkqJ/njG42jODGmWyN8jP7/out+z4DkV+Jcb0XjnjMkoQZzD9KWi/gJwAy58nEKyeKN3P1JEen/+H75HGzQpBVYK0uK9xJ3MIFr9mWRuXv/+5ZsHxijRYHDtExBoRd7ORKnRz9vRuKeUeOTZzDPKsJNO8ZCDmXFhQ5X+zEBgbnOE37vgrQp4fdzyip2FBnWFsVXsQjaIkaP8IapbKK2AuhEBa2VbGbuXzf/0AvfklYtvG+oiYGo80P8yM3ckYnarX6tesEREuL11mxaAtagOZipEAqu5mc14il8aQ5zkHpyZPcPfno4Sa9Ry/9+qvMVo7iM82YeT8QBzjalAsQf5YOUqgF0ar2nvFNJo8fPcMT3/3CVp1KNQSa4/9yTt4rPazJLqAv6ALBy5Os0g0YOMYcc6a83LxCi2J6be7TE1PkSBVeS3HF46d4Yk2IthqzF6M0unHvG37Qf7FDd/Gd64isnmFFbySeJmhZjMaXwOdRxHfRnxR5hJBz8smAoLURpk5DF/87H0kkSXXBCFi3u3im4MfwdvOml1drvpa1iXfMg2e3CZIlFyAQlghMo6ZxXlmlxaIbKmoci7n7qoxvEbi+V/e8t9ApkHmUOIKTeMc34J6j7phtNhDyI6AGboAK7YrJoPmoD3+4dP3s7TQwzmF4EjU8cTgzzNtx4jVs1Fea+tERzVx9EpJoiplLK2LY2Z6BothsNUiC+FlOROhEv9si7BcOP7X132RbePfI3RGMK5fVgImrkpNOYeW3jKECElTiux5TMhLkZDzekIV1RQfDG5wgce+uZ8nH3qGZrNGrgU15tmXvofnkp9iICyiGlcLpdebVzg+8GwkUARzghd3YjzG5GfdEzjdL7AqWITDM5OoBAZag2RV5SEvN7ntc24bWOIndz3C9MzNEBxq64i+iOkXGKmdQ/0uIIqSkfSeoZ44xNQhZMcFqF4xvaSHiZSlmYgv3fU4US3G47HB03ZX8O2BD7PoPYNi0Iuwru2C0WR0ZdsxFGrA+FU7cdrvkGUdaE+Ttq4+qT9xFtPPFVIZpJLYwXBsagZUaA20UFXyikdiTrpIpdqJEpMy2XP87Bf/Z1wI9CRiwLe57Yn3YzqPIMaeo6sXLJaf+slRduzKqG17PUlzgpB3y2msc75VCkQoR7D1ce76fw8xfWCRessSQkoqyzzU/BDTZpyBMIsSVd7BrENpXzDW0lueh6xLKu6Ey+E0z323UBsXvVPoP8g5rQZSINLyKTw6PUk367BlbAJvIC8KIuNOAUgJxnoWVSBziAYK12Tk8KfoZwuE9BbMObKaPUKjaRlsHWZu+hBzc1+mPvFqRrfdjBHPuU+kCRoybGMLTzwwz8PffISBZsD7QIqwJ3kPT6bvpBmWyihcrcHSdRcqdLUnpaGHCQXOurXH6Z0aHo8lvFZEQtByQF5fUakkq9V5mb0a5heX6GYF4+MTtJIaWZGVbKU1BN7KaMuWj4AaoaEL7B17L89v+ZeIKcPRWaMPEugWNV4z8D1S92ssS4zrdelNPYXZ+upXFDFUBaKY5bmYf/z0t0hcRkGZI7TNldw/+EEycmJWzs2s0xFIQaSSSFqVMwQRH0JwRkN43Gjw3vaWKbpziHqM0Ve0lEVUEJVKpC3gVGgQkXV77D10iJm5eWJVItU12bqWGo+qawQ4oRALkSuPIASCevQc3oUq2+whDAvYIkXFUR/biYnq4M/FO+hq8ivRFr709w8zeXSOKLL4MIAznm82P8Ri3MKQr9GMtOswXJSGavCIEYrOVKVpoUg5tFkSyyAUXhUbFkjd8dqZC8JpUJyxWIG9U4d58dhh+lmf2NhSzKKCJ09V4VSTFNX3zu0dsFybPo9ItcFQDEltDA35OfZcHCF4bNPw1ENP8cg3nqDeiAjBk/icI+nbONC4g7jok64GzfWtwhWwxK4g0tnKQwtZSJBiEfJuYYBvS7+NbS9op9dGxZxXflx6ClPK9gFWoeGVcRsROm0mjxxkcuoomvepGUNNBLsCA1OJxIVXvnBdVQnWMOxmK+9TipMmA4PA4jlQNxSvLYiU5QXP5z7zLZxxq2Wkjxt8o/H7iC+wwV5Wfcpzpcj0igy/NIeIxRJQCWpCQELxbaPQDnlOCIHMr0w7y0XJaZKonLA6tjDL80cOcmDqKAudZUIIWGNXh231Fcw3rQSdAssYy2xOn8dLB9FAFLdI4rJbKuckG/wCJmlw12eeYfJoB6mXrG2ngQdad3LMjIAWlfFvDIMo+0W+HD+UlwwMtZ3CQ5otEIoZU3S6SBqRaP+CC2UokHlBcDTEIV7oLLbpLLRJ0oRas85AvUnkIqwIxpjyCa+oZl4MvaLAiOEE4XWhykvAiuKlxpZkL8O6SOa3gxzGDe4sAa6ie9bntRIqvvdQj4e+sZdWDUJwRBgO1d/CM8kP0dQlnIDiq5ksWefeQcmMIfRyetlMVc5DzUYm6ywQ0IccMOWzftHu9exAcQTMztXIffGEPkpwJJJye2036zIzu0Q8P0McJdTihFoSU4tTkiq5DBaiKKrQzROPbmXmNM8z5vuBK8Mx6q5Lr1ptWGuMnlsIUkUctGe28aVP/R2x65eLVgL0zJV8rfFvgAxb7U2VdSnnehoYQmJssZ9e3qYmSZlVKGgoCmDKAU9p6E257uIWP39AW2MqXi5WY01OURkrFktTKqXZrGC5l7FMKXYWO1dhFY4kTqqJaz3R82R9UCXXPgfbDd6880Hq7jna/QQb1UhaW0rXLmfPj3TJEF/65N3MHp0jbQ1ShIJIY74z8BvMJoMM5L0KazCrMw/r3x4Uo47u4gGsKsYIRRAN6iW0Z6aApxyw5DXsIVvYQncpRHnXehddUjKH48QVC5Ecr3S0UAKBkHvybu+0+s6KYCUwaA2vGthPIYsQIuLaMDZuomHpLPyeEoLiGik/+M4RHrzvSWpNR/AQq2Vf4zYeT3+Yhk7haWIoNkzusGK0NZOx3JtFgwELqhK8iCVr7wGWTLUJ4HnfWSTz07pQLGGMW6MsoJcMQ9M1XmP1d0sFcYtgrK3e5oT3yvctFifKztYiPpTDcnFrazmg83KMLjUErSFxj/Z8j7s+/c/EUqJ4Tgv6doLHmx+hRhfnY+INYgzH76GWi2CLLnlnEjFx1dNAjc8o8t7zQDDVDbk79NtEnQXptw+Wo3xVQqeXZX7gTJO/+lILqoieHhiKlLHaPHkQjLHUBq6oqgt9GVpZuUtL4hp3ffZ7TB6bJ07KsQQrfR4d+AD7uJo49EEdYcNUFeU9VFWMdXQXZ8m6i2BLQFCMiOYdfN69e63G1IM+z3JZ6huz8AKia9cPbpT6GnpquCKeYzzZjw+KjSKiWr3kL5zxPBwa5nED8zz+UMGD33iepNmgj5JqYF/6Hp5I30lDpysGVIANxHaQiqYg4uh39hG8x4ipVPiM0W4nV/UPrtWYeiFo8UK/Ny15ZzZoNsuiE0z1ZyMYhQXmg2OkcZjR5BB58CT1Gi6JEDpnRChVA+IilmYH+PynHiUxOTb0cMGx7K7nocb7sdolFouhqKQPN8bLYLBYli340IXFQ9RQXAlTBosRlg69ALywVmMqB+4PvXny7rHQWz6IwV3Gdcav5DkISIjZHk2jOkLhhbQxirHRy9izoFogyQT/9LdPsnD0BaLE4oPDacSjzQ9x0E2QaLZhwsSp8ghw+N40y8uHy2tSitAGHwL9pYX7Kxs4gVN5T9GZxyzPSza3n9Eg63Yn56knOCGVgmtGDuJNirEp8eAwhALxp3+ifVBMfQtPPnSUB+77HvVGTO5TEunzdP3dPFV/Ky0Wq1AhFT/SbjTdUoaI8LMH0GIBEVstjouk6Pfx2fw9J2zrrb7+ig/Zom/P2H73oPqiDeJgA0AuBsjVUneBqxtH8H4O62LixgAEf5pwUTXWokB7rsMXP/1NrDUoFjFtlqPXct/Ar1L4jEaJ+LNRX1pBZ52l58t7qgoYFStW+ocW0fCVlefDrFmkcUThPr9wELd0IEzPvVDyEDVsiFP2KsRGmagdJuQ94sYQ1m0ph3lPOY85gNeASS1f+uwDzByeI0kcXgN1NTza+gCZGWSYDn01mA2rahww1qELR+ktvwAmXSnPQqEWnT54H3BkZXGOOUnz+m99fwmzNI9b/AGq2Trs659GVEQtm9MlhpJpCt+nNbQJMbXT4A+GoHPYhuWJh2a5/1t7SAZSCi8koc++9Of4fvo6nF+mR7yhvUMJsRiW5p4hL8KafMpThC799tzfrrUBs2ZPBsCXFZaLhcPGzx5QFvYjVgjrPp1SCnVsSfbTjI9RmAlcYxiYP3W4UIOJj7G4WOPzn3qaCIsXg5OCdnw19zbej/V9EhGMbNRUskIhBKLeDJ3Zp0gkLqkGqmptatLl6eXgsy+vtQFzonQaR0G+0F08Kt2lSd9beBoxdt0XWaYSM7mm1cUZg4kHiZujIPOnLJmDZkh0Df/4N48xe+QoadJHvMeYFvc1fo8F2yKpdnpv5G0ZQRWihP7Cc0hvisSYag46eCNIPvXsF8p7vqoBccp48AmvinSPmO7cHvLl2SruBNaN2PVJgFQBZDi21PbicyWtCzaKUR+fYgRPMI1BfvCdaR699zGaTSXzDSLt83T607yYvpFaWCJUJFndgF5h5ahFLDbPmJ/8Ac4JXqWUhxdniqJLtjz1iTMtYaumUfVehe+HmUmJ28eCTj1CJEJQOQVevD426ngCIgU7Wg+jYYa4NVTqN4X0pEEbkCihPdfgc397D8YKQRMMPbrxVXyj9qs4s1RKIFfd2aCygYxiTTdIFeci8pmn8MsHsFLqcGogGBtLb3b/90MI967ZlXLaJWyFwn/xWVuyxbnQmXkW1z6MWLcOvUMFuQTDpqTDzmZGRkStOV5u3jvheB2qfUwqfOUzdzN7ZJEoiVByjEm5f+Df0YnqNHwp9rPRd6eIgPg+s0cer8rpcn95W0woyIVjz/6Xyrm+7BI2AT4JOtObP2jbxYIuTz5C3RYEWVkuL+umvrbiyTWmFQeaZglSwbXq4MOapXGWwjcwTXjy4aM8cN8TNGo1iqDEvsdU7Sd4Or6FMb9MF4PfMB2cUzOrA4EoFsL0E0jnACJJqRiIaOzU+vb0TJF1PnmydziVQaxgEsdU5GN0pqS2PBlm516g250Hk5RbaNbTkGpF3r6hMUfDzRCnQ7goXoOfmHIELznA0lyLz/3No2hUo7DgQkEnuoZ7Gh/CaIcct+E9g65MufjAsaNPIEbXrCsNweCEg499DDi2gj283GbfUAH8f1qozvSPHjNpf0mX999HP9RAFCvFuniGVhTy59RxZeNZErOIHdx9UqlZTl2ZpMldf/cic4fmSKNSl96ZhAdadzIvAzTUY6XkZW7QIFH5No81DfyRR+h2DmIkLoG7ELSwqZH56Zmss/inp9klcUqDWPESMyLysX7nsJjlGd+d3UM0/xhpYo/rP6yTPKIIli3RUUy0hVpzEyEcd/oackx9hB/c3+eRb95Ho2kJvsBpl6frv8hT0Zuo6xJeI2RD+4dy2CaNDGSHOHroEcSUuUOp0OO8k760jz7yMdCZU3kHziDNUgYc1T+FYq49s9fkxujCga/T7fdZYO2mmctXdZSIvDLkcq4aPIqPBVdzSCgRuaDgbUTWS/nnux4jMorXCINh0e7iocYvUTPLVbNKCbpSTW28qkJQOmppa8LC/rvRfJFU4nJAQFXVYbL23JzvzJ/WO3DmvQKllwD+sFg+aqLFydDtdMkPPMhwVOlHX2aDMCiZRowlXTYnB4nqPayLV9eJBe3g6nXuuet7vLjvIFGS4AErKQ+0fodJGSVdQ4XbeLiDHqf3qtKIIuz09+kc20tqk1XVu6AaxBpT7H/kD6t7eloJPvOy6sLwF6CP+smnbNMkYe7IA/iZp8ldnUUp1ozaXfrLKQJ9tYzEPUbTaUxtc8kEkgwfClxjmH1PHuIbX3yMWi3Cq1Bjkb31X+C52luY0GlUIzYe/KTHZZsROuJZNilJ7xiLL3yV1Earj3+kPlibWDf9wqO+t/QX1T0NZ0R9X4ZmUCjc2W/P4meeVokTJl+8m1Yxg6zuujKXxyAAHwyb64ukURvb3IwED2RgMvqdFn//tw+TqyBikdAhM9fxSPPnMEUbT0R/Q/GmT20QKoYBm7Pw4j/Tz5cJ9jii7BGtaUb74HfvXCPFo6/EIFZwCQvcq8ifZdNP23ov99qfZeH5r7LZQ6FyCffrvDSh9FiucM8z3Ehw9QKC4jXGNof52hcf4sU9U8TNmKAQScS3W/+aKRkjlQxF2LiLnMs0INPAOAnF/gdYmn0G59LVDq+q+m5cs4sHH/6z4PN7q3vpX7YvdFbC9OgfZv3eZG/qSSPRYDg68wzzRx+gnto1+y0v/UKQSDw3tqah1cDaMdT3cek4z31/mbu//DQDdYcWfWqm4NnaL/BU8iaaoY3FYapR+I33KnmuRgvqiaO3sIdDh75F37SQ1XZ/CIgxtfb8ZGf24B++XKg4F4NYCR1ziLyvP7Vf7PSBENXqHDn0IL3ZZ9GohlcuOeBbJoiGodoythUgZKgV8v4iX/hvD6K+g5oIGzyz7ka+3fwgSVgkXJ4FRxe0wAwKhasRetMcfuEejPXIGhQ6BIKzVjrP3fM+VOdeLlSci0EcDx2qX/XkH+0cecK1er0iVs/sM99gtjNJYVKcFIiES+YxuyoYltkx/DDx4E30NcXUB7n7H/Zw6IVDpLWIEAwi43x94DcJJqEmOYGyvPQbrswszSGSHC8Ry6HL5DNfJ+rOkBITk6+0vQvvnOvte/ijRd796tmEinM1iJXQYYHf99ncg72D33VDJvZaLOC/fxf1MIlx0SVh3JU7t4U4wI76NNtaikpMLbY8+5Tj7q8+RVoTAoaYLnsav8CMu4V26NHWdIP7B0AcjahDePpL6OKLiEtWpQ5CCN4Z59KFgw/2Zvf+/pptLVxog9DVLRzwi935g3P9qe8bSRta9CeZeeEeeir0xZWDPhc5x46koB9qjEQFw6Mp6pZZ7i/xsc9vIhQ5WEPi+8wld/DN1s9R0zY1LJH4DU2XLRS6rsbcge+QL+zBuQQkW23wF9aa4Htzi/se+sU1a3v0YhjEWmxir6IfnDvyjKRzLxZR0tT25FPMP/s5YlGCyJrk5iKVm1JKo103NI0bGMamM/yfd/80e/bN0qrnBO/xGvG11kdYlph+cDjRDTlboVX4LzkOCZ3997Cw716sjQkUqJpyukS1qBuR3p5vfDAEv/dsE8nzMYiVfMIBn9GQ/+7igccjzZaKetykO/kss8/9A94IfeOwFBgpLvjOa0WwFeB8TXM/0fgBvv/0rfwf33w9I/GL+ACJJHy/9T/xonsVY76Nk42CQ+pJOIMnkpwcoYhqLB28l/b+b9Nwyer0eVDFewrjatHSc9/63by3+Jk1a7y52AZBBXA44KN5tviJ3ovfjbx2izSq0T/2FPN7PkfdFdjI4oO5SEvQLTMKu7YsIH43d37hnSgLjOkhKCLm49dwb/1fMRaWKCrKi2wog1jhRRpEDI3U0jl4N0v776FmHV4MHoeghEChzkXFoYc/kS8e+eg5rB66YAax4imMoh/0S4f/kz/6hHMuL2ouoph+loUf/DXLy/N0Xb3iUIQ1SnHnZxgGpectm6THq66Y42PfeCv3H9jEtvgI9WweY8e4t/kbYPzqngpd9zpQuqbCr3pPWtCzMUveM//MF2jvf5CmNaupgTUeDaEQlzimv/+fssk9Hzxp+OqSGoSu2ZLwwezYiw/4Q0+4YE0RuYh85hBzT38WuvupJeUxlpow5ry5meVUouWmgcM8Nz/Gf7z3eoYaGXmeU/ezPNz6BfbG1zIUeqtjdxvFIGRV61JJYyHSBRb2fJ7uoaeoOUMh8fFmnPdFMJEzS/se6Bz8wQcvRA/BXqhlTgp/n7dn3241XGFaE0WwiYmKLsXUHkx9gFpjCz4ohfgKgZdXLDdgBNresGu8zX37rmfPwhjGRezKv8VocZhvD/4uRj2L6khlo7Suqt6DlApfsU0oukeZe/Iu7NIkJnGrUkoiigaKwqTOLB96qL33gXcD/QtBi7cXcNa2A3zGt2feEmt+lRkYL0IwxthlZqaeJ8n7tAZ3MOMiTFDi83hiFYiNcmSpzpFOg4bL8ETckD3GQ+n/wJzdTkRGIrJhBvcFISjMW8uwcfgjj3LwuX8EP4+10Sp1seQ3ZEVhUmeXX/xWZ+8D716DRIYLIatwwbgqQBf4r3l7dotRf7sdGM+zkNpgYHnhRWznAMPNbdh4iCIUq/pQ59P/tlKqzlsK1NR5JrqOlC5mA8FPJRStWJswEHpkL36Zgwe/jRfBSoRdg/ZpIC9MGun0U5/ovPjoe6sH0VwoFRN7oQlM1YF9oWjPbIs1v90MbfIhxDIM0u3P0p5+ilYc4Vs7yMVSp1vNTtqXlFzn0vUDmLcjNLUoV9yfKMi5DiuIMq+KpSA3MUXUoLn8LNPPfJalub0kLiHCrmrqW1U1ntCJEmenn/xE79CTHzzpmrPeDGJt+DDAP2TtuYUoW/qJpDUkHVPzRowh5CxP76XoTTMw0EKTEfpF1TEV8wpvZHXRCOgJwqSyblXp0VJ1V12NVOdp77+PuefvwedtxK2o7oYqQQs+x5o8ig377v3d/rHn/+CkMUzWq0GcXMHcn3cXn9L23DvM8KaGmrQAjBVL1j7AwvQ+UiJazTGK2KEhQ9Qc3+r6CmYSTjQmWYcchlKAmdhQNxZm9nDouX8mn34cayKsdaj6VSZa0FB4cS4Is8Vzd/+rYnHyP19MRpJcdAnKEiC51rjafxnZ+Zo3Z0NbQ5EFIqzpk5GHnMbANQxvfT2NoW10qBOKrEyeRDb8nMTqRdZSz09sTE0KivZRpo9+l/b09xCBVNKTZl7K7XOFdSbuTH5r6fkHfzUU2Z7zAZ0ut4dY6X04YFpD8V97c4cGjPo7bHOziGgRMEYkouhN05l6iv7yFLgG9foQmU3INUNUq8RTTjOUcnlntNe28V56HGX/IRNPcCmpsRTtSRb238fci1+nv3wQY2IM8YlCZqoFota4RPIjT360/eIjv6TBT19sY7iUPnVt4vNj9dbE/y1X3rZV01ZweQ8RYxAhLzIKMdSHrqK++Xaag1vJSSg0IHocv1jBOn0FyJnLqPkUKtRQMKWG94qRqBKMwYgjkYxOe4bO0cdozzyF+B6xTcqcqfIKWo0UqQYwzmTBH/bPfePXis7cV05xDTe8QawN8h7YJCb5d/Urb/ntZGgHPcQHzU0sIhbwvkduLGl9K9HYLTSGr4V4CI8naEamnlhKiJRV9PNs1xPKBf1/V1Rig2gp46aGyESIxJhsmc7Si+RTj9FdfhFb9HAmJRhLCOGkNR8+FOJsZGP80Sf/tHv0B/9egz+2hs+gly7L4ZJLSvrql78jbY3/sdt+6xs0GSPzWZGYwiJWRAPeF/TEEMctGqPXUBu+HqlP0I4jrBrqvly/RLX1b3Wn9UsK17VE4LOlkZ5YpehJf1vZV76yX6zvLH0TqOce25mhu7iX9rGn6PbnSEOOta5SCD6hMFA0+CDG5RoR9eYe7B144A98d/FrJ1+rS5v2Xq4x5fJkIyPmw/Xxq/8gbLlxIjI18L2iEKwRkQwhUIDPsCYhikdojlxDfXAnRX0TzjXBQBHAh4BqRiTlCgXVcupQWMuDOHuDWE1pterASLlyUiXGGoszYFQoig62N0t/cR9Ls3vIulMUvg0mQkxEEk6mM6oqwaO4SBx58JP9Q4/8cT578OPVysBL6hXWg0FwiidgwkXJRxpjN3442rRzomsjQtEvrKhBnRExiBSEUBC8IjaiSAZp1rZRG5uAeDM+HcTGgxQqWMnLfRzBQ/B4PZ596BnJOyv6nCUjW4wFKVesFVrqwkpYRDuLOH+M7swky0uHoD+DFP1yi6BxIOVujxPBcw2oBg9OjcGFMBmO/ODjnZm9f66hmLxcXmE9GcTJ3gJgwiQDH2ltvvbD9YGrJnouIg+5SvBBjBgwgoBXpS8eCX2K4HDG4dIGUbqJuL4ZlzSo12pIMkyPUVxUSiwacUgJZZ5w8rr22Q05IkLhFRdmcX6e9vISPu/Tax+l6E/iO0tkvsCaDDUxsTqiam32SXiRioaAiAkqgjGkPkz2jj7x8fbsC3+u/gRDuOxK8+sJuZEVBZvjHiN6Xzq2630yfuPNwdVBCzTveSsCxphyyaCr4F2P16JcuIpBgisV9GyEcQ1sXCP4QFQbIUrr+LBWlbHahW0CoSjot49hRAg+w2dLSCigKMAEvHiUCGdctW3Ulio0L603Q/WF9RisS/Ddhcf9sR98Mp878EkNfnINVuPXC51rneK6JxiGNda83QxMvM+Mv/qnk/rogBiPBg8++BKowEg1dnMczKpWKaArnhqAXoBCtBKX0eNXQEtNKQEaVYYqCJhKMUfkONagugYDURQpf1oJ5R4BseVuawOqi/2Zg5/PZ/Z8UjuzX1/jCdeVIWyE3QcnGwbAdhs13mUHt/9MPHL120KzOWBEEa+o5hjFB632wRq7RsZfVolaHkGlXJnGCVNbQgiysq1zzViLnqba1FCJsoixZlXN05iYQrPFsDB1j5/Z97mifeyr6vODJ6G3fr0SPDcCBVlOIbCKINtNUvvRqLHlrQxveYM2N13vbGysKCEERMulIVJmkEFQVJDjqaWYcJr2VwUVhVXCn64IYxvDGjMSEVQcxhCy9uIzvn30QV2YvNe3p/7pJCOwaz5a1z3MvsHaAivJ19r03YnYa03ceL1tDr8lqg3vsq2J3S5pbPGmrP1XRZBCIGipNBebcnrLnzS9FZkyzPS1xCDFmNWQYQHy3hHtzT9VdBb3FktH7yu6i9/RorfnJG9m1iTLuqH6Lhv0ZdZ0/U5RpsmQsdFuccmwSwfuIKrXo/rwHXlSj7wYGycDNyfG2gyhe1IXoknwvjP/eIb3CrlZnrqffrfje/P3a9GfC3nvKVU/f5oyWk5hsBvm9f8BpOA1X6Al0/kAAAAASUVORK5CYII=" alt=""></button>
+    <div class="title-wrap">
+      <div class="header-title">Trắc Nghiệm</div>
+      <div class="header-sub" id="bankLabel">Chưa có câu hỏi</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="upload-btn-header" id="clockBtn" onclick="showClock()" title="Xem đồng hồ">
+      <span id="clockLive" style="color:#ffffff;font-size:21px;font-weight:700"></span>
+      <span id="clockDateLive" style="color:rgba(255,255,255,0.65);font-size:15px;font-weight:400;margin-top:2px"></span>
+    </button>
+  </div>
+</div>
+
+<div class="main" id="quizPane"></div>
+
+<input type="file" id="quizFileInput" accept=".xlsx,.xls,.csv" multiple onchange="handleQuizImport(this)">
+<input type="file" id="quizDirInput" webkitdirectory directory multiple onchange="handleQuizImport(this)">
+<input type="file" id="quizRestoreInput" accept=".json,application/json" onchange="handleRestoreFile(this)">
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ── HELPERS ────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+// Bỏ dấu tiếng Việt + hạ chữ thường (dùng cho tìm kiếm/so khớp)
+function normVn(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+// normVn() bỏ dấu được nhưng chữ "đ" không phân rã NFD được, nên phải đổi thủ công.
+function quizNormBase(s) { return normVn(String(s == null ? '' : s)).replace(/đ/g, 'd'); }
+function quizKey(s) { return quizNormBase(s).replace(/[_\s]/g, ''); }
+function quizText(s) { return quizNormBase(s).replace(/\s+/g, ' ').trim(); }
+
+// Đọc file thành workbook. File CSV/txt được tự giải mã UTF-8, vì SheetJS mặc định
+// đọc CSV theo codepage Latin-1 nên tiếng Việt sẽ bị sai dấu và không khớp tên cột.
+function readWorkbook(arrayBuffer, fileName) {
+  const bytes = new Uint8Array(arrayBuffer);
+  if (/\.(csv|txt|tsv)$/i.test(String(fileName || ''))) {
+    let text = new TextDecoder('utf-8').decode(bytes);
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // bỏ BOM nếu có
+    return XLSX.read(text, { type: 'string' });
+  }
+  return XLSX.read(bytes, { type: 'array' });
+}
+
+function shuffleArr(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// ── CLOCK ──────────────────────────
+function updateLiveClock() {
+  const el = document.getElementById('clockLive');
+  const dateEl = document.getElementById('clockDateLive');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  if (dateEl) {
+    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    dateEl.textContent = days[now.getDay()] + ', ' + now.getDate() + '/' + (now.getMonth() + 1) + '/' + String(now.getFullYear()).slice(-2);
+  }
+}
+updateLiveClock();
+setInterval(updateLiveClock, 1000);
+
+function showClock() {
+  let overlay = document.getElementById('clockOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'clockOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.style.display = 'none'; };
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#1a1d24;border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.5);min-width:240px';
+    box.innerHTML = '<div id="clockDigital" style="font-size:49px;font-weight:200;color:#60a5fa;letter-spacing:2px"></div>' +
+      '<div id="clockDate" style="font-size:15px;font-weight:400;color:#94a3b8;margin-top:8px"></div>';
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  (function tick() {
+    if (overlay.style.display === 'none') return;
+    const now = new Date();
+    document.getElementById('clockDigital').textContent =
+      String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+    const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+    document.getElementById('clockDate').textContent =
+      days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+    requestAnimationFrame(tick);
+  })();
+}
+
+// ── THEME ──────────────────────────
+function toggleTheme() {
+  document.body.classList.toggle('light-mode');
+  try { localStorage.setItem('qlno_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); } catch (e) {}
+}
+(function restoreTheme() {
+  try { if (localStorage.getItem('qlno_theme') === 'light') document.body.classList.add('light-mode'); } catch (e) {}
+})();
+
+// ── MODAL ──────────────────────────
+function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── BỘ CÂU HỎI ────────────────────────────────────────────────────────
+const LIB_KEY = 'qlno_quiz_library';
+const LEGACY_KEY = 'qlno_quiz_bank';   // bộ đề đơn của phiên bản trước, chỉ dùng để di trú
+const OLD_SET_NAME = 'Văn hóa doanh nghiệp EVN';
+let quizLib = [];             // [{ id, name, addedAt, questions: [{ id, q, options[], correct, explain }] }]
+let _libSetId = null;         // bộ đề đang xem / sửa câu hỏi
+let _renamingSetId = null;
+let _renamePreview = null;    // [{ id, oldName, next }] khi xem trước rút gọn tên
+let _restorePreview = null;   // { fileName, exportedAt, sets, add, update } khi xem trước phục hồi
+let _restoreConfirm = false;  // đã bấm "Thay thế toàn bộ" lần đầu hay chưa
+let _libPending = null;       // { kind: 'set' | 'all', setId }
+let _quizMode = 'home';       // home | browse | form | play | playAll | result
+let _quizState = null;
+let _exam = null;             // { questions, title, mode } của bài đang làm
+let _quizOpts = { shuffleQ: true, shuffleA: true };
+// Nút nào trong ba nút thư viện đang được chọn (mang màu xanh). Đây là "thanh tab"
+// giả: cả ba nút đều là hành động một lần (mở hộp thoại chọn file / mở bảng thư
+// viện), nên "đang chọn" chỉ có nghĩa là nút vừa bấm — và được ghi nhớ qua các lần
+// mở app, đúng như một tab thật.
+const LIB_ACT_KEY = 'qlno_lib_act';
+const LIB_ACTS = { file: 1, dir: 1, lib: 1 };
+let _libAct = 'file';
+(function restoreLibAct() {
+  // Phải chạy SAU khi LIB_ACT_KEY/LIB_ACTS đã được khai báo (khối restoreTheme ở
+  // trên không đọc được các hằng này vì chúng nằm sau theo thứ tự mã).
+  try {
+    const saved = localStorage.getItem(LIB_ACT_KEY);
+    if (LIB_ACTS[saved]) _libAct = saved;
+  } catch (e) {}
+})();
+// Mặc định của đề trộn: bài 100 câu, trong đó nhóm "kỹ năng mềm" chỉ chiếm 20 câu.
+const MIX_DEFAULT_TOTAL = 100;
+const SOFT_SET_SHARE = 20;   // % tổng bài dành cho CẢ nhóm bên dưới (không phải mỗi bộ)
+const SOFT_SET_KEYS = ['vanhoadoanhnghiep', 'chuanmucdaoduc', 'noiquylaodong'];
+const ZERO_SET_KEYS = ['bac67'];   // bộ mặc định 0% khi trộn (vẫn tự nâng lên được)
+// Bộ mặc định ĐÚNG một số phần trăm (không chia đều, không phải 0%). Mỗi dòng là
+// [từ khoá trong tên, phần trăm]. "Hệ thống thu thập dữ liệu từ xa" chỉ có 10 câu nên
+// tỷ lệ chia đều (12%) xin 12 câu — nhiều hơn số nó có, bài trộn bị hụt. 7% = 7 câu,
+// và 5% dôi ra được chia cho các bộ còn lại.
+const FIXED_SET_PCT = [['hethongthuthapdulieu', 7]];
+let _mix = { total: MIX_DEFAULT_TOTAL, pct: {} };   // pct[setId] = phần trăm của bộ đó trong đề trộn
+
+function quizNewId(prefix) { return (prefix || 'q') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function normalizeQ(q) {
+  const out = {
+    id: (q && q.id) ? String(q.id) : quizNewId(),
+    q: String((q && q.q) || ''),
+    options: (q && Array.isArray(q.options)) ? q.options.map(function (o) { return String(o); }) : [],
+    correct: (q && typeof q.correct === 'number') ? q.correct : 0,
+    explain: (q && typeof q.explain === 'string') ? q.explain : ''
+  };
+  if (!out.q || out.options.length < 2) return null;
+  if (out.correct < 0 || out.correct >= out.options.length) out.correct = 0;
+  return out;
+}
+
+function normalizeSet(s) {
+  return {
+    id: (s && s.id) ? String(s.id) : quizNewId('s'),
+    name: String((s && s.name) || 'Bộ đề'),
+    addedAt: (s && s.addedAt) || Date.now(),
+    questions: ((s && Array.isArray(s.questions)) ? s.questions : []).map(normalizeQ).filter(Boolean)
+  };
+}
+
+function loadLib() {
+  let raw = null;
+  try { raw = localStorage.getItem(LIB_KEY); } catch (e) { raw = null; }
+
+  if (raw === null) {                    // lần đầu chạy bản nhiều bộ đề
+    let old = [];
+    try { old = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]'); } catch (e) { old = []; }
+    quizLib = [];
+    const qs = (Array.isArray(old) ? old : []).map(normalizeQ).filter(Boolean);
+    if (qs.length) quizLib.push(normalizeSet({ name: OLD_SET_NAME, questions: qs }));
+    saveLib();
+    return;
+  }
+
+  let parsed = [];
+  try { parsed = JSON.parse(raw); } catch (e) { parsed = []; }
+  quizLib = (Array.isArray(parsed) ? parsed : [])
+    .map(normalizeSet)
+    .filter(function (s) { return s.questions.length; });
+}
+
+function saveLib() {
+  try { localStorage.setItem(LIB_KEY, JSON.stringify(quizLib)); }
+  catch (e) { alert('Không lưu được thư viện: ' + ((e && e.message) || e)); }
+}
+
+function libSet(id) {
+  for (let i = 0; i < quizLib.length; i++) if (quizLib[i].id === id) return quizLib[i];
+  return null;
+}
+function curSet() { return libSet(_libSetId) || quizLib[0] || null; }
+function totalQuestions() { return quizLib.reduce(function (n, s) { return n + s.questions.length; }, 0); }
+
+function updateBankLabel() {
+  const el = document.getElementById('bankLabel');
+  if (!el) return;
+  const n = totalQuestions();
+  el.textContent = quizLib.length ? (quizLib.length + ' bộ đề · ' + n + ' câu') : 'Chưa có bộ đề';
+}
+
+// ── RENDER ──────────────────────────
+function renderQuiz() {
+  const pane = document.getElementById('quizPane');
+  if (!pane) return;
+  updateBankLabel();
+  if (_quizMode === 'browse') { pane.innerHTML = quizBrowseHtml(); return; }
+  if (_quizMode === 'play') { pane.innerHTML = quizPlayHtml(); return; }
+  if (_quizMode === 'playAll') { pane.innerHTML = quizAllHtml(); updateAllSummary(); return; }
+  if (_quizMode === 'study') { pane.innerHTML = quizStudyHtml(); updateStudySummary(); return; }
+  if (_quizMode === 'result') { pane.innerHTML = quizResultHtml(); return; }
+  pane.innerHTML = quizHomeHtml();
+  paintMix();
+}
+
+// Chip bật/tắt. Nhãn KHÔNG kèm “: Bật/Tắt” nữa — hai chip này phải nằm chung một
+// hàng ở khung nhìn 311px (chỗ trống 266px), mà “Đảo câu hỏi: Bật” + “Đảo đáp
+// án: Bật” cần 309px. Trạng thái hiện bằng MÀU (chip đang bật có nền xanh, viền
+// và chữ xanh) và ghi rõ ở `title` để vẫn tra được khi trỏ chuột.
+function quizToggleHtml(key, label) {
+  const on = !!_quizOpts[key];
+  return `<button class="quiz-toggle chip${on ? ' on' : ''}" onclick="toggleQuizOpt('${key}')"`
+    + ` title="${label}: đang ${on ? 'BẬT' : 'TẮT'} — bấm để ${on ? 'tắt' : 'bật'}">${label}</button>`;
+}
+function toggleQuizOpt(k) { _quizOpts[k] = !_quizOpts[k]; renderQuiz(); }
+
+function quizHomeHtml() {
+  const nQ = totalQuestions();
+  let h = '';
+
+  // ── Thư viện ──
+  h += '<div class="quiz-card">';
+  h += '<div style="font-size:17px;font-weight:500;margin-bottom:4px">📚 Thư viện bộ đề</div>';
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:14px">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
+  // Ba nút xếp cùng một hàng: nhãn phải ngắn mới vừa, nên phần giải thích dài
+  // được đẩy vào title (tooltip) thay vì nằm trong nhãn.
+  h += '<div class="lib-act-row">';
+  h += libActBtn('file', 'Chọn file', 'Nạp file bộ đề — chọn được nhiều file cùng lúc');
+  h += libActBtn('dir', 'Thư mục', 'Nạp cả thư mục — mọi file Excel bên trong');
+  h += libActBtn('lib', 'Thư viện', 'Quản lý thư viện: đổi tên, xoá, sao lưu, phục hồi');
+  h += '</div>';
+  if (!quizLib.length) {
+    h += '<div style="display:flex;gap:8px;margin-top:8px">';
+    h += '<button class="quiz-btn" style="flex:1;min-width:0" onclick="pickRestoreFile()">📂 Phục hồi từ file sao lưu</button>';
+    h += '</div>';
+  }
+  h += '<div class="chip-row">';
+  h += quizToggleHtml('shuffleQ', 'Đảo câu hỏi');
+  h += quizToggleHtml('shuffleA', 'Đảo đáp án');
+  h += '</div>';
+  h += '</div>';
+
+  if (!nQ) {
+    h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">'
+      + 'Chưa có bộ đề nào.<br>Bấm “Chọn file” rồi chọn các file Excel/CSV.<br>Mỗi file sẽ thành một bộ đề riêng.</div>';
+    return h;
+  }
+
+  // ── Thi từng bộ đề ──
+  h += '<div class="quiz-card">';
+  h += '<div style="font-size:17px;font-weight:500;margin-bottom:2px">📝 Thi từng bộ đề</div>';
+  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:12px">Làm riêng từng bộ, hoặc mở để xem lại câu hỏi.</div>';
+  quizLib.forEach(s => {
+    const off = s.questions.length ? '' : ' disabled';
+    h += '<div class="set-box" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
+    h += `<div style="font-size:17px;font-weight:500;line-height:1.4">${esc(s.name)}</div>`;
+    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
+    h += '<div class="set-acts">';
+    h += `<button class="quiz-btn primary"${off} onclick="startSetExam('${s.id}','single')">▶️ Từng câu</button>`;
+    h += `<button class="quiz-btn"${off} onclick="startSetExam('${s.id}','all')">📋 Cả bộ</button>`;
+    h += `<button class="quiz-btn"${off} onclick="startSetExam('${s.id}','study')">📖 Học</button>`;
+    h += `<button class="quiz-btn" onclick="openBrowse('${s.id}')">👁 Câu hỏi</button>`;
+    h += '</div></div>';
+  });
+  h += '</div>';
+
+  // ── Trộn đề ──
+  h += quizMixHtml();
+  return h;
+}
+
+// Xem / sửa câu hỏi của một bộ đề
+function quizBrowseHtml() {
+  const s = curSet();
+  if (!s) { _quizMode = 'home'; return quizHomeHtml(); }
+  const n = s.questions.length;
+  let h = '<div class="quiz-card">';
+  h += `<div style="font-size:17px;font-weight:500;line-height:1.35">${esc(s.name)}</div>`;
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:4px 0 12px">${n} câu hỏi</div>`;
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  h += `<button class="quiz-btn primary"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','single')">▶️ Thi từng câu</button>`;
+  h += `<button class="quiz-btn"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','all')">📋 Thi cả bộ</button>`;
+  h += `<button class="quiz-btn"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','study')">📖 Học (chọn sai làm lại)</button>`;
+  h += '</div>';
+  h += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">';
+  h += '<button class="quiz-btn" onclick="backHome()">← Về trang chủ</button>';
+  h += '</div></div>';
+
+  if (!n) {
+    h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">Bộ đề này chưa có câu hỏi.<br>Mở 📦 để nạp lại file cho bộ này.</div>';
+    return h;
+  }
+
+  h += '<div class="quiz-card">';
+  h += '<div style="font-size:17px;font-weight:500;margin-bottom:10px">Danh sách câu hỏi</div>';
+  s.questions.forEach((q, i) => {
+    h += '<div style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
+    h += `<div style="font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(q.q)}</div>`;
+    h += `<div style="font-size:15px;color:var(--green);margin-top:6px;font-weight:400">✓ ${esc(q.options[q.correct] || '—')}</div>`;
+    h += '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+// ── TRỘN ĐỀ THEO TỶ LỆ ──
+function clampPct(v) {
+  if (typeof v !== 'number' || !isFinite(v)) return 0;
+  return Math.max(0, Math.min(100, Math.round(v)));
+}
+function pctOf(id) { return clampPct(_mix.pct[id]); }
+
+function mixTotalValue() {
+  const available = Math.max(1, totalQuestions());
+  let t = parseInt(_mix.total, 10);
+  if (!(t > 0)) t = Math.min(MIX_DEFAULT_TOTAL, available);
+  return Math.min(t, available);
+}
+
+// Chia số câu cho từng bộ theo tỷ lệ, dùng phương pháp "phần dư lớn nhất"
+function mixRows() {
+  const total = mixTotalValue();
+  const rows = quizLib.map(s => ({ s: s, pct: pctOf(s.id) }));
+  const sum = rows.reduce((a, r) => a + r.pct, 0);
+  const raw = rows.map(r => sum > 0 ? (r.pct / 100) * total : 0);
+  const counts = raw.map(v => Math.floor(v));
+  let left = sum === 100 ? total - counts.reduce((a, b) => a + b, 0) : 0;
+  const order = raw.map((v, i) => ({ i: i, frac: v - Math.floor(v) })).sort((a, b) => b.frac - a.frac);
+  let k = 0;
+  while (left > 0 && order.length) { counts[order[k % order.length].i]++; left--; k++; }
+  return rows.map((r, i) => ({
+    set: r.s, pct: r.pct, want: counts[i],
+    got: Math.min(counts[i], r.s.questions.length)
+  }));
+}
+
+function quizMixHtml() {
+  const rows = mixRows();
+  const pctSum = rows.reduce((a, r) => a + r.pct, 0);
+  const ok = pctSum === 100 && rows.some(r => r.got > 0);
+  let h = '<div class="quiz-card">';
+  h += '<div style="font-size:17px;font-weight:500">🎲 Trộn đề theo tỷ lệ</div>';
+  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:2px 0 12px">Đặt phần trăm cho từng bộ; tổng phải đúng 100%.</div>';
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
+  h += '<div style="flex:1;font-size:15px;font-weight:400">Tổng số câu của bài</div>';
+  h += `<input id="mixTotal" type="number" min="1" max="${Math.max(1, totalQuestions())}" class="quiz-input" style="width:88px;text-align:center" value="${mixTotalValue()}" oninput="onMixInput()">`;
+  h += '</div>';
+  rows.forEach(r => {
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}">${esc(r.set.name)}</div>`;
+    h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center" value="${r.pct}" oninput="onMixInput()">`;
+    h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim)">%</div>';
+    h += `<div id="mixCnt-${r.set.id}" style="width:62px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${r.got} câu</div>`;
+    h += '</div>';
+  });
+  h += '<div id="mixSum" style="font-size:15px;font-weight:400;margin-top:10px"></div>';
+  h += '<div id="mixWarn" style="font-size:15px;font-weight:400;color:var(--gold);margin-top:4px"></div>';
+  h += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">';
+  h += `<button id="mixBtnSingle" class="big-upload-btn" style="width:100%" onclick="mixExam('single')">🎲 Trộn &amp; thi từng câu</button>`;
+  h += `<button id="mixBtnAll" class="quiz-btn" onclick="mixExam('all')">📋 Trộn &amp; làm cả bộ</button>`;
+  h += `<button id="mixBtnStudy" class="quiz-btn" onclick="mixExam('study')">📖 Trộn &amp; học</button>`;
+  h += '</div></div>';
+  return h;
+}
+
+// Chỉ vẽ lại phần số câu + tổng + trạng thái nút, để ô nhập không mất con trỏ
+function paintMix() {
+  const rows = mixRows();
+  const pctSum = rows.reduce((a, r) => a + r.pct, 0);
+  const ok = pctSum === 100 && rows.some(r => r.got > 0);
+  const sumEl = document.getElementById('mixSum');
+  if (sumEl) {
+    sumEl.textContent = 'Tổng tỷ lệ: ' + pctSum + '%' + (pctSum === 100 ? ' ✓' : ' — cần đúng 100%');
+    sumEl.style.color = pctSum === 100 ? 'var(--green)' : 'var(--red)';
+  }
+  rows.forEach(r => {
+    const el = document.getElementById('mixCnt-' + r.set.id);
+    if (!el) return;
+    el.textContent = (r.want === r.got ? r.got : r.got + '/' + r.want) + ' câu';
+    el.style.color = (r.want === r.got) ? 'var(--text-dim)' : 'var(--gold)';
+  });
+  const short = rows.filter(r => r.want > r.got);
+  const warnEl = document.getElementById('mixWarn');
+  if (warnEl) {
+    warnEl.textContent = short.length
+      ? 'Không đủ câu: ' + short.map(r => r.set.name + ' chỉ có ' + r.set.questions.length + ' câu').join(', ')
+      : '';
+  }
+  ['mixBtnSingle', 'mixBtnAll', 'mixBtnStudy'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = !ok;
+  });
+}
+
+function onMixInput() {
+  const t = document.getElementById('mixTotal');
+  if (t) _mix.total = Math.max(1, Math.min(parseInt(t.value, 10) || 1, Math.max(1, totalQuestions())));
+  quizLib.forEach(s => {
+    const el = document.getElementById('mixPct-' + s.id);
+    if (el) _mix.pct[s.id] = clampPct(parseInt(el.value, 10));
+  });
+  paintMix();
+}
+
+// Nhóm "kỹ năng mềm": khớp theo TỪ KHOÁ trong tên bộ đề (bỏ dấu, bỏ gạch dưới),
+// nên đổi tên kiểu "Văn hóa doanh nghiệp EVN" vẫn nhận ra.
+function isSoftSet(name) {
+  const k = quizKey(name);
+  return SOFT_SET_KEYS.some(w => k.indexOf(w) >= 0);
+}
+
+// Nhóm "mặc định 0%": bộ KHÔNG được lấy câu khi trộn (người dùng vẫn tự nâng phần
+// trăm lên được nếu muốn). So khớp theo "chỉ chữ và số" nên "Bậc 6-7", "Bậc6_7",
+// "KT điện cho CNKD-Bậc6_7" đều khớp, còn "Bậc7_7" thì không (…bac77).
+function isZeroSet(name) {
+  const k = quizKey(name).replace(/[^a-z0-9]/g, '');
+  return ZERO_SET_KEYS.some(w => k.indexOf(w) >= 0);
+}
+
+// Trả về số phần trăm CỐ ĐỊNH của bộ, hoặc null nếu bộ không thuộc nhóm nào.
+// Dùng cùng cách so khớp "chỉ chữ và số" như isZeroSet.
+function fixedPctFor(name) {
+  const k = quizKey(name).replace(/[^a-z0-9]/g, '');
+  const hit = FIXED_SET_PCT.find(function (row) { return k.indexOf(row[0]) >= 0; });
+  return hit ? hit[1] : null;
+}
+
+// Chia đều `budget` phần trăm cho danh sách id, tổng đúng bằng budget.
+function splitPctEven(ids, budget) {
+  const out = {};
+  if (!ids.length) return out;
+  const base = Math.floor(budget / ids.length);
+  let left = budget - base * ids.length;
+  ids.forEach(id => { out[id] = base + (left-- > 0 ? 1 : 0); });
+  return out;
+}
+
+// Tỷ lệ mặc định chia làm BỐN nhóm, xét theo thứ tự:
+//   1. kỹ năng mềm (SOFT_SET_KEYS)  → cả nhóm 20% chia nhau (bài 100 câu -> 20 câu)
+//   2. cố định (FIXED_SET_PCT)      → mỗi bộ đúng số phần trăm của nó
+//   3. 0% (ZERO_SET_KEYS)           → không lấy câu nào
+//   4. còn lại                      → chia đều phần còn lại (100 - 20 - cố định)
+function resetMixDefaults() {
+  _mix.total = Math.min(MIX_DEFAULT_TOTAL, Math.max(1, totalQuestions()));
+  _mix.pct = {};
+  if (!quizLib.length) return;
+  const soft = [];
+  let fixed = [];        // [{ s, pct }]
+  const zero = [];
+  let rest = [];
+  quizLib.forEach(s => {
+    if (isSoftSet(s.name)) { soft.push(s); return; }
+    const f = fixedPctFor(s.name);
+    if (f !== null) { fixed.push({ s: s, pct: f }); return; }
+    if (isZeroSet(s.name)) { zero.push(s); return; }
+    rest.push(s);
+  });
+  // Nhóm kỹ năng mềm lấy 20%, TRỪ khi không có bộ nào khớp (đổi tên hết) thì các bộ
+  // còn lại phải nhận đủ 100%, nếu không tổng sẽ là 80% và nút trộn bị khoá.
+  let softBudget = soft.length ? SOFT_SET_SHARE : 0;
+  let fixedBudget = fixed.reduce((a, x) => a + x.pct, 0);
+  // Chốt an toàn: nếu người dùng đổi tên nhiều bộ trùng khoá cố định đến mức tổng
+  // vượt 100 thì cắt nhóm cố định lại, để phần chia đều không bị âm (số âm sẽ làm
+  // splitPctEven chia ra số vô lý và nút trộn bị khoá).
+  if (fixedBudget + softBudget > 100) fixedBudget = Math.max(0, 100 - softBudget);
+  // Nhóm cố định và nhóm 0% nhận phần của mình — nhưng nếu KHÔNG còn bộ nào nhận
+  // phần chia đều (thư viện chỉ có bộ kỹ năng mềm / cố định / 0%) thì phần đó phải
+  // trả về cho một trong các nhóm kia, nếu không tổng không đủ 100% và cả ba nút
+  // trộn bị khoá. Ưu tiên trả về cho nhóm 0%, rồi mới đến nhóm cố định; nếu thư
+  // viện chỉ toàn bộ kỹ năng mềm thì chính nhóm đó nhận đủ 100%.
+  if (!rest.length) {
+    if (zero.length) rest = zero;
+    else if (fixed.length) { rest = fixed.map(x => x.s); fixed = []; fixedBudget = 0; }
+    else softBudget = 100;
+  }
+  // Nhóm cố định: mỗi bộ nhận ĐÚNG số của nó — không dùng splitPctEven vì hai bộ
+  // cố định khác số nhau (7% và 5%) mà chia đều thì thành 6/6. Nếu chốt an toàn ở
+  // trên phải cắt thì cắt theo tỷ lệ và dồn phần lẻ vào bộ cuối để tổng vẫn đúng.
+  const wantFixed = fixed.reduce((a, x) => a + x.pct, 0);
+  const scale = wantFixed > fixedBudget ? fixedBudget / wantFixed : 1;
+  let fixedSum = 0;
+  fixed.forEach((x, i) => {
+    const v = (i === fixed.length - 1) ? Math.max(0, fixedBudget - fixedSum) : Math.round(x.pct * scale);
+    _mix.pct[x.s.id] = v;
+    fixedSum += v;
+  });
+  const restBudget = Math.max(0, 100 - softBudget - fixedSum);
+  Object.assign(_mix.pct, splitPctEven(soft.map(s => s.id), softBudget));
+  Object.assign(_mix.pct, splitPctEven(rest.map(s => s.id), restBudget));
+  // Bộ mặc định 0% (khi không phải nhóm dự phòng ở trên) ghi rõ 0% cho dễ đọc code.
+  zero.forEach(s => { if (!(s.id in _mix.pct)) _mix.pct[s.id] = 0; });
+}
+
+function backHome() {
+  _libPending = null;
+  _quizMode = 'home'; renderQuiz(); window.scrollTo(0, 0);
+}
+function openBrowse(setId) {
+  _libSetId = setId; _libPending = null;
+  _quizMode = 'browse'; renderQuiz(); window.scrollTo(0, 0);
+}
+
+// ── LÀM BÀI ──
+// mode: 'single' = từng câu một | 'all' = mọi câu trên một màn
+function startExam(questions, title, mode) {
+  const list = (questions || []).filter(Boolean);
+  if (!list.length) { alert('Chưa có câu hỏi nào.'); return; }
+  const m = (mode === 'all' || mode === 'study') ? mode : 'single';
+  const items = list.map(q => {
+    const opts = q.options.map((t, i) => ({ t: t, ok: i === q.correct }));
+    if (_quizOpts.shuffleA) shuffleArr(opts);
+    return { q: q.q, explain: q.explain || '', opts: opts, chosen: null, done: false, tried: [], wrongFirst: false };
+  });
+  if (_quizOpts.shuffleQ) shuffleArr(items);
+  _exam = { questions: list, title: title || '', mode: m };
+  _quizState = { items: items, idx: 0, chosen: null, score: 0, wrong: [], title: _exam.title };
+  _quizMode = m === 'all' ? 'playAll' : (m === 'study' ? 'study' : 'play');
+  renderQuiz();
+  window.scrollTo(0, 0);
+}
+
+function startSetExam(setId, mode) {
+  const s = libSet(setId);
+  if (!s || !s.questions.length) { alert('Bộ đề này chưa có câu hỏi.'); return; }
+  _libSetId = s.id;
+  startExam(s.questions, s.name, mode);
+}
+
+function replayExam() { if (_exam) startExam(_exam.questions, _exam.title, _exam.mode); }
+
+// Trộn đề: lấy ngẫu nhiên đúng số câu mỗi bộ phải đóng góp rồi xáo lại toàn bộ
+function mixExam(mode) {
+  const rows = mixRows();
+  const picked = [];
+  rows.forEach(r => {
+    if (r.got <= 0) return;
+    const pool = r.set.questions.slice();
+    shuffleArr(pool);
+    pool.slice(0, r.got).forEach(q => picked.push(q));
+  });
+  if (!picked.length) { alert('Tỷ lệ hiện tại không lấy được câu nào. Hãy tăng phần trăm cho ít nhất một bộ.'); return; }
+  shuffleArr(picked);
+  startExam(picked, '🎲 Trộn đề · ' + picked.length + ' câu', mode);
+}
+
+function answerQuiz(i) {
+  const st = _quizState;
+  if (!st || st.chosen !== null) return;
+  const it = st.items[st.idx];
+  if (!it || !it.opts[i]) return;
+  st.chosen = i;
+  const right = it.opts.find(o => o.ok);
+  if (it.opts[i].ok) st.score++;
+  else st.wrong.push({ q: it.q, chosen: it.opts[i].t, correct: right ? right.t : '—', explain: it.explain });
+  renderQuiz();
+}
+
+function nextQuiz() {
+  const st = _quizState;
+  if (!st) return;
+  st.idx++; st.chosen = null;
+  renderQuiz(); window.scrollTo(0, 0);
+}
+function finishQuiz() { _quizMode = 'result'; renderQuiz(); window.scrollTo(0, 0); }
+function quitQuiz() { _quizState = null; _quizMode = 'home'; renderQuiz(); window.scrollTo(0, 0); }
+
+// Nút về trang chủ ở đầu mọi màn làm bài — để không phải cuộn xuống đáy mới thoát
+// được (đề 30-60 câu thì nút “Thoát” ở đáy rất xa).
+// Chữ câu hỏi kèm SỐ CÂU trong vòng tròn xanh ở đầu — dùng cho BA màn làm bài
+// (từng câu, cả bộ, học). Dùng flex chứ không nối chuỗi số vào câu: nối chuỗi thì
+// câu dài xuống dòng sẽ có dòng thứ hai thụt vào thẳng lề, lệch hẳn với dòng đầu;
+// flex cho vòng tròn một cột riêng nên cả khối chữ thẳng hàng.
+// KHÔNG dùng ở hai màn danh sách (👁 Câu hỏi và “Cần ôn lại”): ở đó mỗi câu đã có
+// số “1.” đứng trước, thêm vòng tròn nữa thành rối.
+function qTextHtml(text, extraStyle, num) {
+  return '<div style="display:flex;gap:6px;align-items:flex-start;' + (extraStyle || '') + '">'
+    + '<span class="q-num">' + num + '</span>'
+    + '<div style="flex:1;min-width:0">' + text + '</div></div>';
+}
+
+function homeBtnHtml() {
+  return '<button class="quiz-btn home-btn" onclick="quitQuiz()" title="Về trang chủ"'
+    + ' aria-label="Về trang chủ">🏠</button>';
+}
+
+function quizPlayHtml() {
+  const st = _quizState;
+  if (!st || !st.items.length) return '<div class="quiz-card">Không có câu hỏi.</div>';
+  const it = st.items[st.idx];
+  const total = st.items.length;
+  const answered = st.chosen !== null;
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  let h = '<div class="quiz-card">';
+  h += '<div class="head-row" style="margin-bottom:8px">';
+  h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;color:var(--text-dim);line-height:1.35">${st.title ? esc(st.title) : ''}</div>`;
+  h += homeBtnHtml();
+  h += '</div>';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">';
+  h += `<div style="font-size:15px;font-weight:400">Câu ${st.idx + 1}/${total}</div>`;
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim)">Đúng: <b style="color:var(--green)">${st.score}</b></div>`;
+  h += '</div>';
+  h += `<div style="height:6px;background:var(--border);border-radius:3px;margin:10px 0 14px;overflow:hidden"><div style="height:100%;width:${Math.round(st.idx / total * 100)}%;background:var(--accent)"></div></div>`;
+  h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:14px', st.idx + 1);
+  it.opts.forEach((o, i) => {
+    let cls = 'quiz-opt';
+    if (answered) {
+      if (o.ok) cls += ' correct';
+      else if (i === st.chosen) cls += ' wrong';
+    }
+    h += `<button class="${cls}"${answered ? ' disabled' : ''} onclick="answerQuiz(${i})">`;
+    h += `<span class="quiz-badge">${letters[i]}</span><span style="flex:1">${esc(o.t)}</span>`;
+    if (answered && o.ok) h += '<span>✅</span>';
+    else if (answered && i === st.chosen) h += '<span>❌</span>';
+    h += '</button>';
+  });
+  if (answered) {
+    const isRight = !!it.opts[st.chosen].ok;
+    const rightOpt = it.opts.find(o => o.ok);
+    h += '<div style="margin-top:6px;padding:11px;border-radius:10px;font-size:14px;line-height:1.55;' +
+      (isRight ? 'background:rgba(16,185,129,0.14);border:1px solid var(--green)' : 'background:rgba(239,68,68,0.14);border:1px solid var(--red)') + '">';
+    h += isRight ? '✅ <b>Chính xác!</b>' : '❌ <b>Chưa đúng.</b> Đáp án đúng: <b>' + esc(rightOpt ? rightOpt.t : '—') + '</b>';
+    if (it.explain) h += '<div style="margin-top:6px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
+    h += '</div>';
+    const last = st.idx === total - 1;
+    h += `<button class="big-upload-btn" style="width:100%;margin-top:12px" onclick="${last ? 'finishQuiz()' : 'nextQuiz()'}">${last ? '🏁 Xem kết quả' : 'Câu tiếp →'}</button>`;
+  }
+  h += '</div>';
+  h += '<div><button class="quiz-btn" onclick="quitQuiz()">Thoát bài làm</button></div>';
+  return h;
+}
+
+function quizFeedbackHtml(it) {
+  const isRight = !!it.opts[it.chosen].ok;
+  const right = it.opts.find(o => o.ok);
+  let s = isRight ? '✅ <b>Chính xác!</b>' : '❌ <b>Chưa đúng.</b> Đáp án đúng: <b>' + esc(right ? right.t : '—') + '</b>';
+  if (it.explain) s += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
+  return s;
+}
+
+function quizAllHtml() {
+  const st = _quizState;
+  if (!st || !st.items.length) return '<div class="quiz-card">Không có câu hỏi.</div>';
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  let h = '<div class="quiz-card quiz-all-head">';
+  h += '<div class="head-row">';
+  h += `<div style="flex:1;min-width:0;font-size:17px;font-weight:500">${st.title ? esc(st.title) : '📋 Cả bộ đề'} · ${st.items.length} câu</div>`;
+  h += homeBtnHtml();
+  h += '</div>';
+  h += '<div id="allSummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px"></div>';
+  h += '</div>';
+
+  st.items.forEach((it, qi) => {
+    const done = it.chosen !== null;
+    const isRight = done && !!it.opts[it.chosen].ok;
+    h += `<div class="quiz-card" id="qb-${qi}">`;
+    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:12px', qi + 1);
+    it.opts.forEach((o, oi) => {
+      let cls = 'quiz-opt';
+      let mark = '';
+      if (done) {
+        if (o.ok) { cls += ' correct'; mark = '<span class="mark">✅</span>'; }
+        else if (oi === it.chosen) { cls += ' wrong'; mark = '<span class="mark">❌</span>'; }
+      }
+      h += `<button class="${cls}" id="qo-${qi}-${oi}"${done ? ' disabled' : ''} onclick="answerAll(${qi},${oi})">`;
+      h += `<span class="quiz-badge">${letters[oi]}</span><span style="flex:1">${esc(o.t)}</span>${mark}`;
+      h += '</button>';
+    });
+    h += `<div class="quiz-fb${done ? ' show ' + (isRight ? 'ok' : 'no') : ''}" id="qfb-${qi}">${done ? quizFeedbackHtml(it) : ''}</div>`;
+    h += '</div>';
+  });
+
+  h += '<div class="quiz-card" style="text-align:center">';
+  h += '<button class="big-upload-btn" style="width:100%" onclick="finishQuiz()">🏁 Xem kết quả</button>';
+  h += '<div style="margin-top:8px"><button class="quiz-btn" onclick="quitQuiz()">Thoát bài làm</button></div>';
+  h += '</div>';
+  return h;
+}
+
+function updateAllSummary() {
+  const st = _quizState;
+  const el = document.getElementById('allSummary');
+  if (!st || !el) return;
+  const done = st.items.filter(x => x.chosen !== null).length;
+  el.innerHTML = `Đã trả lời <b>${done}</b>/${st.items.length} · ` +
+    `Đúng <b style="color:var(--green)">${st.score}</b> · ` +
+    `Sai <b style="color:var(--red)">${st.wrong.length}</b>`;
+}
+
+function answerAll(qi, oi) {
+  const st = _quizState;
+  if (!st) return;
+  const it = st.items[qi];
+  if (!it || it.chosen !== null || !it.opts[oi]) return;
+  it.chosen = oi;
+  const right = it.opts.find(o => o.ok);
+  const isRight = !!it.opts[oi].ok;
+  if (isRight) st.score++;
+  else st.wrong.push({ q: it.q, chosen: it.opts[oi].t, correct: right ? right.t : '—', explain: it.explain });
+
+  // Cập nhật tại chỗ thay vì render lại cả danh sách, để không mất vị trí cuộn
+  it.opts.forEach((o, i) => {
+    const btn = document.getElementById('qo-' + qi + '-' + i);
+    if (!btn) return;
+    btn.disabled = true;
+    if (o.ok) { btn.classList.add('correct'); btn.insertAdjacentHTML('beforeend', '<span class="mark">✅</span>'); }
+    else if (i === oi) { btn.classList.add('wrong'); btn.insertAdjacentHTML('beforeend', '<span class="mark">❌</span>'); }
+  });
+  const fb = document.getElementById('qfb-' + qi);
+  if (fb) { fb.className = 'quiz-fb show ' + (isRight ? 'ok' : 'no'); fb.innerHTML = quizFeedbackHtml(it); }
+  updateAllSummary();
+}
+
+function quizResultHtml() {
+  const st = _quizState;
+  if (!st) { _quizMode = 'home'; return quizHomeHtml(); }
+  const total = st.items.length;
+  const pct = total ? Math.round(st.score / total * 100) : 0;
+  const col = pct >= 80 ? 'var(--green)' : (pct >= 50 ? 'var(--gold)' : 'var(--red)');
+  let h = '<div class="quiz-card" style="text-align:center">';
+  h += `<div style="font-size:45px;font-weight:800;line-height:1;color:${col}">${pct}%</div>`;
+  h += `<div style="font-size:15px;color:var(--text-dim);margin-top:8px">Đúng ${st.score}/${total} câu</div>`;
+  if (_exam && _exam.mode === 'study') h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px;line-height:1.5">Chế độ học: con số trên là số câu đúng ngay lần đầu. Các câu còn lại bạn đã làm đúng sau khi chọn lại.</div>';
+  h += '<div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap">';
+  h += '<button class="quiz-btn primary" onclick="replayExam()">🔄 Làm lại</button>';
+  h += '<button class="quiz-btn" onclick="quitQuiz()">🏠 Về trang chủ</button>';
+  h += '</div></div>';
+  if (st.wrong.length) {
+    h += '<div class="quiz-card">';
+    h += `<div style="font-size:17px;font-weight:500;margin-bottom:10px">📌 Cần ôn lại (${st.wrong.length})</div>`;
+    st.wrong.forEach((w, i) => {
+      h += '<div style="border-left:3px solid var(--red);padding:8px 10px;margin-bottom:10px;border-radius:0 8px 8px 0">';
+      h += `<div style="font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(w.q)}</div>`;
+      h += `<div style="font-size:15px;color:var(--red);margin-top:6px">Bạn chọn: ${esc(w.chosen)}</div>`;
+      h += `<div style="font-size:15px;color:var(--green)">Đáp án đúng: <b>${esc(w.correct)}</b></div>`;
+      if (w.explain) h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:4px">💡 ${esc(w.explain)}</div>`;
+      h += '</div>';
+    });
+    h += '</div>';
+  } else {
+    h += '<div class="quiz-card" style="text-align:center;color:var(--green);font-size:15px">🎉 Không có câu nào sai. Xuất sắc!</div>';
+  }
+  h += '<div style="height:20px"></div>';
+  return h;
+}
+
+// ── NẠP CÂU HỎI TỪ EXCEL / CSV ──
+function parseQuizCorrect(raw, optionTexts) {
+  const v = String(raw == null ? '' : raw).trim();
+  if (!v) return -1;
+  const compact = quizNormBase(v).replace(/[^a-z0-9]/g, '');
+  const letters = { a: 0, b: 1, c: 2, d: 3, e: 4, f: 5 };
+  if (compact.length === 1 && letters[compact] !== undefined) return letters[compact];
+  if (/^[1-6]$/.test(compact)) return parseInt(compact, 10) - 1;
+  const target = quizText(v);
+  for (let i = 0; i < optionTexts.length; i++) {
+    if (quizText(optionTexts[i]) === target) return i;
+  }
+  return -1;
+}
+
+// Đọc sheet thành danh sách câu hỏi. Hỗ trợ 2 kiểu bảng:
+//  (1) Bảng ngang  : mỗi dòng là 1 câu, có các cột đáp án A / B / C / D
+//  (2) Bảng dọc    : cột "Phân Loại" đánh dấu Q (câu hỏi) / A (đáp án),
+//                    cột "Đáp án đúng" đánh dấu X vào hàng đáp án đúng
+// Dòng tiêu đề được tự tìm nên file có dòng tiêu đề bộ đề ở trên vẫn đọc được.
+function parseQuizSheet(ws) {
+  const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', blankrows: false });
+
+  // Tìm dòng tiêu đề: dòng đầu tiên có ô "Câu hỏi" hoặc có từ 2 cột A/B/C/D
+  let hIdx = -1;
+  for (let i = 0; i < Math.min(aoa.length, 30); i++) {
+    const keys = (aoa[i] || []).map(c => quizKey(c));
+    if (keys.indexOf('cauhoi') >= 0) { hIdx = i; break; }
+    if (keys.filter(k => k === 'a' || k === 'b' || k === 'c' || k === 'd').length >= 2) { hIdx = i; break; }
+  }
+  if (hIdx < 0) {
+    return {
+      questions: [], skipped: 0,
+      reason: 'Không tìm thấy dòng tiêu đề. Cần một dòng có ô “Câu hỏi” (kèm các cột đáp án A, B, C, D), hoặc cột “Câu hỏi” cùng cột “Phân Loại” và “Đáp án đúng”.'
+    };
+  }
+
+  const headers = (aoa[hIdx] || []).map(c => quizKey(c));
+  const col = function() {
+    for (let a = 0; a < arguments.length; a++) {
+      const idx = headers.indexOf(quizKey(arguments[a]));
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  };
+  const iQ = col('CAU HOI', 'CAUHOI', 'NOI DUNG', 'NOIDUNG', 'QUESTION');
+  const iType = col('PHAN LOAI', 'LOAI', 'TYPE', 'KY HIEU');
+  const iGt = col('GIAI THICH', 'GIAITHICH', 'EXPLAIN', 'LY DO');
+  const iOpts = [
+    col('A', 'DAP AN A', 'DAPANA', 'LUA CHON A', 'OPTION A'),
+    col('B', 'DAP AN B', 'DAPANB', 'LUA CHON B', 'OPTION B'),
+    col('C', 'DAP AN C', 'DAPANC', 'LUA CHON C', 'OPTION C'),
+    col('D', 'DAP AN D', 'DAPAND', 'LUA CHON D', 'OPTION D')
+  ];
+  const nOptCols = iOpts.filter(i => i >= 0).length;
+  let iCorrect = col('DAP AN DUNG', 'DAPANDUNG', 'DAP AN', 'CORRECT', 'DAPAN');
+  // Dự phòng: tên cột hơi khác (vd "Đáp án đún" do bị cắt) — lấy cột bắt đầu bằng "dapan"
+  if (iCorrect < 0) {
+    iCorrect = headers.findIndex((h, i) => h.indexOf('dapan') === 0 && iOpts.indexOf(i) < 0);
+  }
+  const cell = (r, i) => (i >= 0 && r[i] != null ? String(r[i]).trim() : '');
+  const rows = aoa.slice(hIdx + 1);
+  const questions = [];
+  let skipped = 0;
+
+  // (1) Bảng ngang — có các cột đáp án A, B, C, D
+  if (nOptCols >= 2) {
+    rows.forEach(r => {
+      const text = cell(r, iQ);
+      const options = iOpts.map(i => cell(r, i)).filter(Boolean);
+      if (!text || options.length < 2) { skipped++; return; }
+      const ci = parseQuizCorrect(cell(r, iCorrect), options);
+      if (ci < 0 || ci >= options.length) { skipped++; return; }
+      questions.push({ q: text, options: options, correct: ci, explain: cell(r, iGt) });
+    });
+    return { questions: questions, skipped: skipped };
+  }
+
+  if (iQ < 0) {
+    return { questions: [], skipped: 0, reason: 'Không tìm thấy cột “Câu hỏi”.' };
+  }
+  if (iType < 0) {
+    return {
+      questions: [], skipped: 0,
+      reason: 'Thiếu cột đáp án. Cần hoặc các cột A, B, C, D, hoặc cột “Phân Loại” (Q/A) kèm cột “Đáp án đúng” đánh dấu X.'
+    };
+  }
+
+  // (2) Bảng dọc — cột Phân Loại quyết định hàng nào là câu hỏi, hàng nào là đáp án
+  let cur = null;
+  let noAnswerCount = 0;   // số câu bị bỏ vì không thấy dấu X ở cột đáp án đúng
+  const flush = () => {
+    if (cur && cur.q && cur.options.length >= 2 && cur.correct >= 0 && cur.correct < cur.options.length) {
+      questions.push(cur);
+    } else {
+      skipped++;
+      if (cur && cur.q && cur.options.length >= 2 && cur.correct < 0) noAnswerCount++;
+    }
+    cur = null;
+  };
+  rows.forEach(r => {
+    const type = cell(r, iType).toLowerCase();
+    const text = cell(r, iQ);
+    if (!text) return;                                  // dòng trống thì bỏ qua
+    const isQ = type === 'q' || type === 'ch' || quizKey(type).indexOf('cauhoi') === 0;
+    const isA = !isQ && (type === 'a' || type === 'd' || quizKey(type).indexOf('dapan') === 0);
+    if (isQ) {
+      if (cur) flush();
+      cur = { q: text, options: [], correct: -1, explain: cell(r, iGt) };
+    } else if (isA) {
+      if (!cur) return;                                 // đáp án mồ côi thì bỏ qua
+      if (cell(r, iCorrect)) cur.correct = cur.options.length;   // có dấu X = đáp án đúng
+      cur.options.push(text);
+    }
+    // các hàng khác (ghi chú, tiêu đề phụ...) bị bỏ qua
+  });
+  if (cur) flush();
+  let reason = '';
+  if (!questions.length) {
+    if (iCorrect < 0) reason = 'Không tìm thấy cột “Đáp án đúng”. Cần một cột tên “Đáp án đúng” để biết đáp án nào đúng.';
+    else if (noAnswerCount) reason = 'Không thấy dấu X ở cột “Đáp án đúng” cho câu nào. Hãy đánh dấu X vào hàng đáp án đúng.';
+  }
+  return { questions: questions, skipped: skipped, noAnswer: noAnswerCount, reason: reason };
+}
+
+function pickSetFiles() { document.getElementById('quizFileInput').click(); }
+function pickSetDir() { document.getElementById('quizDirInput').click(); }
+
+// Một nút trong "thanh tab" thư viện: nút đang chọn dùng nền xanh (.big-upload-btn),
+// hai nút còn lại dùng kiểu viền (.quiz-btn). Kích thước do .lib-act quyết định nên
+// đổi qua lại giữa hai kiểu không làm nút nhảy cỡ.
+function libActBtn(key, label, title) {
+  const on = _libAct === key;
+  return '<button class="' + (on ? 'big-upload-btn' : 'quiz-btn') + ' lib-act"'
+    + ' onclick="useLibAct(\'' + key + '\')"'
+    + ' title="' + title + '"'
+    + (on ? ' aria-current="true"' : '') + '>' + label + '</button>';
+}
+
+// Đổi màu nút vừa bấm rồi mới chạy hành động của nút đó. Gọi hành động TRƯỚC và
+// vẽ lại `.main` SAU: hộp thoại chọn file là thẻ <input> nằm ngoài `.main` nên
+// không bị vẽ lại mất, còn renderQuiz() chỉ dựng lại #quizPane.
+function useLibAct(key) {
+  if (!LIB_ACTS[key]) return;
+  _libAct = key;
+  try { localStorage.setItem(LIB_ACT_KEY, key); } catch (e) {}
+  if (key === 'file') pickSetFiles();
+  else if (key === 'dir') pickSetDir();
+  else openLibPanel();
+  renderQuiz();
+}
+const EXCEL_EXT = /\.(xlsx|xls|csv)$/i;
+
+function readFileAsArrayBuffer(f) {
+  return new Promise(function (resolve, reject) {
+    const r = new FileReader();
+    r.onload = function (e) { resolve(e.target.result); };
+    r.onerror = function () { reject(new Error('không đọc được file')); };
+    r.readAsArrayBuffer(f);
+  });
+}
+
+function setNameFromFile(fileName) {
+  const base = String(fileName || '').replace(/\.[^.]+$/, '').trim();
+  return base || 'Bộ đề';
+}
+
+// Mỗi file thành một bộ đề. File trùng tên thì CẬP NHẬT lại nội dung bộ đề đó.
+async function handleQuizImport(inp) {
+  const all = Array.prototype.slice.call(inp.files || []);
+  try { inp.value = ''; } catch (e) {}
+  if (!all.length) return;
+  if (typeof XLSX === 'undefined') {
+    alert('Thư viện đọc Excel chưa được tải. Kiểm tra kết nối mạng rồi thử lại.');
+    return;
+  }
+  // Khi chọn cả thư mục, Chromium đưa mọi file vào (kể cả file tạm ~$ và file lạ)
+  const files = all.filter(function (f) {
+    return EXCEL_EXT.test(f.name) && f.name.indexOf('~$') !== 0;
+  });
+  const skippedFiles = all.length - files.length;
+  if (!files.length) {
+    alert(skippedFiles
+      ? 'Không thấy file Excel nào. Thư mục đang chọn chỉ có ' + skippedFiles + ' file không phải .xlsx/.xls/.csv.'
+      : 'Không có file nào được chọn.');
+    return;
+  }
+
+  let added = 0, updated = 0, qTotal = 0, skippedTotal = 0;
+  const failed = [];
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    try {
+      const buf = await readFileAsArrayBuffer(f);
+      const wb = readWorkbook(buf, f.name);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const parsed = parseQuizSheet(ws);
+      if (!parsed.questions.length) throw new Error(parsed.reason || 'không đọc được câu hỏi nào');
+      const name = setNameFromFile(f.name);
+      const qs = parsed.questions.map(function (q) {
+        return { id: quizNewId(), q: q.q, options: q.options, correct: q.correct, explain: q.explain || '' };
+      });
+      const same = quizLib.filter(function (s) { return s.name.trim().toLowerCase() === name.trim().toLowerCase(); })[0];
+      if (same) { same.questions = qs; same.addedAt = Date.now(); updated++; }
+      else { quizLib.push(normalizeSet({ name: name, questions: qs })); added++; }
+      qTotal += qs.length;
+      skippedTotal += parsed.skipped || 0;
+    } catch (err) {
+      failed.push(f.name + ' — ' + ((err && err.message) || err));
+    }
+  }
+
+  saveLib();
+  resetMixDefaults();
+  _quizMode = 'home';
+  renderQuiz();
+
+  let msg = 'Đã nạp ' + qTotal + ' câu từ ' + (added + updated) + '/' + files.length + ' file.';
+  if (added) msg += '\n• ' + added + ' bộ đề mới';
+  if (updated) msg += '\n• ' + updated + ' bộ đề cũ được cập nhật (file trùng tên, nội dung cũ bị thay)';
+  if (skippedTotal) msg += '\n• bỏ qua ' + skippedTotal + ' dòng thiếu dữ liệu';
+  if (skippedFiles) msg += '\n• bỏ qua ' + skippedFiles + ' file không phải Excel (hoặc file tạm ~$)';
+  if (failed.length) msg += '\n\nKhông đọc được ' + failed.length + ' file:\n• ' + failed.join('\n• ');
+  alert(msg);
+}
+
+// ── RÚT GỌN TÊN BỘ ĐỀ ────────────────────────────────────────────────
+// Tên file hay bị mất dấu cách ("Cáctìnhhuốngviphạm…"), nên cần tách lại thành
+// âm tiết tiếng Việt. Âm tiết = [âm đầu] + [vần] + [âm cuối].
+const VN_BASE = {
+  'a':'a','á':'a','à':'a','ả':'a','ã':'a','ạ':'a','ă':'a','ắ':'a','ằ':'a','ẳ':'a','ẵ':'a','ặ':'a',
+  'â':'a','ấ':'a','ầ':'a','ẩ':'a','ẫ':'a','ậ':'a',
+  'e':'e','é':'e','è':'e','ẻ':'e','ẽ':'e','ẹ':'e','ê':'e','ế':'e','ề':'e','ể':'e','ễ':'e','ệ':'e',
+  'i':'i','í':'i','ì':'i','ỉ':'i','ĩ':'i','ị':'i',
+  'o':'o','ó':'o','ò':'o','ỏ':'o','õ':'o','ọ':'o','ô':'o','ố':'o','ồ':'o','ổ':'o','ỗ':'o','ộ':'o',
+  'ơ':'o','ớ':'o','ờ':'o','ở':'o','ỡ':'o','ợ':'o',
+  'u':'u','ú':'u','ù':'u','ủ':'u','ũ':'u','ụ':'u','ư':'u','ứ':'u','ừ':'u','ử':'u','ữ':'u','ự':'u',
+  'y':'y','ý':'y','ỳ':'y','ỷ':'y','ỹ':'y','ỵ':'y','d':'d','đ':'d'
+};
+const VN_ONSETS = ['ngh', 'ng', 'nh', 'ch', 'gh', 'gi', 'kh', 'ph', 'th', 'tr', 'qu',
+  'b', 'c', 'd', 'g', 'h', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', ''];
+const VN_NUCLEI = ['ieu', 'yeu', 'oai', 'oao', 'oay', 'oeo', 'uay', 'uoi', 'uou', 'uya', 'uye', 'uyu',
+  'ai', 'ao', 'au', 'ay', 'eo', 'eu', 'ia', 'ie', 'iu', 'oa', 'oe', 'oi', 'oo', 'ua', 'ue', 'ui', 'uo', 'uu', 'uy', 'ya', 'ye',
+  'a', 'e', 'i', 'o', 'u', 'y'];
+const VN_CODAS = ['ch', 'ng', 'nh', 'c', 'm', 'n', 'p', 't', ''];
+
+function baseOf(ch) {
+  const low = ch.toLowerCase();
+  return VN_BASE[low] || low;
+}
+function matchAt(run, i, piece) {
+  if (!piece) return true;
+  if (i + piece.length > run.length) return false;
+  for (let k = 0; k < piece.length; k++) {
+    if (baseOf(run[i + k]) !== piece[k]) return false;
+  }
+  return true;
+}
+// Độ dài âm đầu dài nhất khớp tại vị trí i (0 = âm tiết sau bắt đầu bằng nguyên âm)
+function onsetLenAt(run, i) {
+  let len = 0;
+  for (let k = 0; k < VN_ONSETS.length; k++) {
+    const on = VN_ONSETS[k];
+    if (on.length > len && matchAt(run, i, on)) len = on.length;
+  }
+  return len;
+}
+function cmpScore(a, b) {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
+
+// Âm cuối "ch"/"nh" không đứng sau ă/â; "ng"/"c" không đứng sau i/y/ê
+function codaOk(nucText, coda) {
+  if (!coda) return true;
+  const low = nucText.toLowerCase();
+  if (coda === 'ch' || coda === 'nh') {
+    if (low.indexOf('ă') >= 0 || low.indexOf('â') >= 0) return false;
+    return true;
+  }
+  if (coda === 'ng' || coda === 'c') {
+    if (low === 'i' || low === 'y' || low === 'ê') return false;
+  }
+  return true;
+}
+
+// Từ điển âm tiết lấy từ chính câu hỏi trong thư viện, để chọn cách tách đúng:
+// "văn hóa" (cả hai đều có thật) phải thắng "vă nhóa".
+const VN_SEED = ('văn hóa hệ thống thu thập thị trường vi phạm điện năng kinh doanh nội quy ' +
+  'lao động chăm sóc khách hàng đo đếm ngân dữ liệu từ xa tình huống cách xử lý các và sử ' +
+  'dụng đúng sai câu hỏi đáp án chuẩn mực đạo đức an toàn bậc phụ lục nghiệp vụ quản lý ' +
+  'cung cấp chất lượng dịch ngày càng trách nhiệm môi trường cộng đồng giá trị cốt lõi sứ ' +
+  'mệnh tầm nhìn khẩu hiệu triết lý người nhân viên công ty tập đoàn').split(' ');
+let _vnVocab = null;
+function vnVocab() {
+  if (_vnVocab) return _vnVocab;
+  const set = new Set(VN_SEED);
+  quizLib.forEach(function (s) {
+    s.questions.forEach(function (q) {
+      String(q.q || '').concat(' ', (q.options || []).join(' '), ' ', q.explain || '')
+        .toLowerCase().match(/\p{L}+/gu) 
+        ?.forEach(function (w) { if (w.length > 1) set.add(w); });
+    });
+  });
+  _vnVocab = set;
+  return set;
+}
+
+// Tách một mạch chữ thành các âm tiết; trả về null nếu không tách trọn được
+function parseRun(run) {
+  const n = run.length;
+  const vocab = vnVocab();
+  const cache = new Map();
+  function best(i) {
+    if (i === n) return { syls: [], known: 0 };
+    if (cache.has(i)) return cache.get(i);
+    let pick = null, pickScore = null;
+    for (let oi = 0; oi < VN_ONSETS.length; oi++) {
+      const on = VN_ONSETS[oi];
+      if (!matchAt(run, i, on)) continue;
+      const oEnd = i + on.length;
+      for (let ni = 0; ni < VN_NUCLEI.length; ni++) {
+        const nu = VN_NUCLEI[ni];
+        if (!matchAt(run, oEnd, nu)) continue;
+        const nEnd = oEnd + nu.length;
+        for (let ci = 0; ci < VN_CODAS.length; ci++) {
+          const co = VN_CODAS[ci];
+          if (!matchAt(run, nEnd, co)) continue;
+          if (!codaOk(run.slice(oEnd, nEnd), co)) continue;
+          const end = nEnd + co.length;
+          if (end > n) continue;
+          const rest = best(end);
+          if (rest === null) continue;
+          const syl = run.slice(i, end);
+          const cand = { syls: [syl].concat(rest.syls), known: rest.known + (vocab.has(syl.toLowerCase()) ? 1 : 0) };
+          // Ưu tiên: ít âm tiết nhất → nhiều âm tiết có thật trong từ điển nhất →
+          // âm tiết sau có âm đầu → âm đầu đó dài nhất.
+          const nextLen = rest.syls.length ? onsetLenAt(run, end) : 0;
+          const sc = [cand.syls.length, -cand.known,
+            rest.syls.length ? (nextLen > 0 ? 0 : 1) : 2, -nextLen, -nu.length, -co.length];
+          if (pick === null || cmpScore(sc, pickScore) < 0) { pick = cand; pickScore = sc; }
+        }
+      }
+    }
+    cache.set(i, pick);
+    return pick;
+  }
+  const res = best(0);
+  return res ? res.syls : null;
+}
+
+function isUpperLetter(ch) {
+  const up = ch.toUpperCase();
+  return ch === up && ch !== ch.toLowerCase();
+}
+// Cụm 2+ chữ HOA liền nhau (KT, CNKD, NHCH, EVN...) là từ viết tắt, giữ nguyên
+function tidyRun(run) {
+  if (run.length <= 4) return run;
+  const n = run.length;
+  const isAc = new Array(n).fill(false);
+  let i = 0;
+  while (i < n) {
+    if (isUpperLetter(run[i])) {
+      let j = i;
+      while (j < n && isUpperLetter(run[j])) j++;
+      if (j - i >= 2) for (let k = i; k < j; k++) isAc[k] = true;
+      i = j;
+    } else i++;
+  }
+  const groups = [];
+  let s = 0;
+  for (let k = 1; k <= n; k++) {
+    if (k === n || isAc[k] !== isAc[k - 1]) { groups.push({ text: run.slice(s, k), ac: isAc[s] }); s = k; }
+  }
+  return groups.map(function (g) {
+    if (g.ac) return g.text;
+    const syls = parseRun(g.text);
+    return (syls && syls.length > 1) ? syls.join(' ') : g.text;
+  }).join(' ');
+}
+
+function tidyToken(tok) {
+  return tok.replace(/\p{L}+/gu, function (run) { return tidyRun(run); });
+}
+
+function tidySetName(raw) {
+  let s = String(raw == null ? '' : raw).trim();
+  if (!s) return String(raw == null ? '' : raw);
+  const original = s;
+  s = s.replace(/\.(xlsx|xls|csv|txt)$/i, '');
+  s = s.replace(/(?<=\p{L})_(?=\p{L})/gu, ' ');          // gạch dưới giữa hai chữ -> dấu cách
+  s = s.replace(/^\s*\d{1,3}\s*[.)\-–:]\s*/, ' ');        // số thứ tự đầu tên: "2.", "11. ", "3 -"
+  s = s.replace(/\b\d{1,4}[.\/\-]\d{1,2}[.\/\-]\d{2,4}\b/g, ' ');   // ngày đầy đủ
+  s = s.replace(/\b(19|20)\d{2}\b/g, ' ');                // năm lẻ
+  s = s.replace(/^\s*\([^)]*\)\s*/, ' ');               // ngoặc đơn mở đầu tên
+  s = s.replace(/\s*\([^)]*\)/g, function (m) {          // ngoặc chỉ có số/ngày thì bỏ
+    const letters = m.replace(/[0-9.\-\/_ ]/g, '').replace(/[()]/g, '');
+    return letters.trim() ? m : ' ';
+  });
+  s = s.replace(/\s+(final|last|new)$/i, ' ');
+  s = s.replace(/(\p{L})[.\-_]([A-Za-z0-9]{1,4})$/u, function (m, p1, p2) {  // đuôi mã: ".2K", ".v2"
+    return /[0-9]/.test(p2) ? p1 : m;
+  });
+  s = s.split(/\s+/).filter(Boolean).map(tidyToken).join(' ');
+  s = s.replace(/\s{2,}/g, ' ').replace(/^[\s\-–_.,;:&]+|[\s\-–_.,;:&]+$/g, '').trim();
+  if (!s) return original;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// ── XEM TRƯỚC KHI ĐỔI TÊN ──
+function openRenamePreview() {
+  _vnVocab = null;                                  // từ điển dựng lại theo thư viện hiện tại
+  _renamePreview = quizLib.map(function (s) {
+    return { id: s.id, oldName: s.name, next: tidySetName(s.name) };
+  });
+  renderLibPanel();
+}
+function cancelRenamePreview() { _renamePreview = null; renderLibPanel(); }
+
+function renderRenamePreview(body) {
+  const changed = _renamePreview.filter(function (r) { return r.next !== r.oldName; }).length;
+  let h = '';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
+  h += '<div style="font-size:17px;font-weight:500">✨ Rút gọn tên bộ đề</div>';
+  h += '<button class="quiz-btn" style="padding:6px 10px" onclick="cancelRenamePreview()" aria-label="Đóng">✕</button>';
+  h += '</div>';
+  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:4px">Bỏ số thứ tự, ngày tháng và tách chữ dính. Xem qua rồi mới áp dụng.</div>';
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px">${changed}/${_renamePreview.length} bộ sẽ đổi tên. Bỏ dấu ✓ ở dòng muốn giữ nguyên, hoặc sửa lại tên trong ô.</div>`;
+
+  _renamePreview.forEach(function (r) {
+    const diff = r.next !== r.oldName;
+    h += '<div class="arc-item" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--card)">';
+    h += '<div style="display:flex;align-items:center;gap:8px">';
+    h += `<input type="checkbox" id="rpOn-${r.id}"${diff ? ' checked' : ''} style="width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)">`;
+    h += `<input id="rpName-${r.id}" class="quiz-input" style="flex:1;min-width:0" value="${esc(r.next)}">`;
+    h += '</div>';
+    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px;line-height:1.4">cũ: ${esc(r.oldName)}</div>`;
+    if (!diff) h += '<div style="font-size:15px;font-weight:400;color:var(--gold);margin-top:3px">Không có gì để rút gọn</div>';
+    h += '</div>';
+  });
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">';
+  h += `<button class="quiz-btn primary"${changed ? '' : ' disabled'} onclick="applyRenamePreview()">✅ Áp dụng ${changed} tên mới</button>`;
+  h += '<button class="quiz-btn" onclick="cancelRenamePreview()">Hủy, giữ nguyên</button>';
+  h += '</div>';
+  body.innerHTML = h;
+}
+
+function applyRenamePreview() {
+  if (!_renamePreview) return;
+  let n = 0;
+  _renamePreview.forEach(function (r) {
+    const cb = document.getElementById('rpOn-' + r.id);
+    const inp = document.getElementById('rpName-' + r.id);
+    if (cb && !cb.checked) return;
+    const v = ((inp && inp.value) || '').trim();
+    const s = libSet(r.id);
+    if (!s || !v || v === s.name) return;
+    s.name = v;
+    n++;
+  });
+  _renamePreview = null;
+  saveLib();
+  renderLibPanel(); renderQuiz();
+  alert('Đã đổi tên ' + n + ' bộ đề.');
+}
+
+// ── SAO LƯU / PHỤC HỒI THƯ VIỆN ──────────────────────────────────────
+// Cả thư viện nằm trong localStorage của một trình duyệt, xoá dữ liệu duyệt web
+// là mất sạch. Bản sao lưu là một file JSON chứa đủ tên bộ đề + câu hỏi +
+// đáp án + giải thích, phục hồi được trên máy khác.
+const BACKUP_KIND = 'trac-nghiem-thu-vien';
+const BACKUP_VERSION = 1;
+
+function backupStamp() {
+  const d = new Date();
+  const p = function (n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+    + ' ' + p(d.getHours()) + 'h' + p(d.getMinutes()) + 'm' + p(d.getSeconds());
+}
+
+function exportLibrary() {
+  if (!quizLib.length) { alert('Thư viện đang trống, không có gì để sao lưu.'); return; }
+  const payload = {
+    kind: BACKUP_KIND,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    sets: quizLib.map(function (s) {
+      return {
+        name: s.name,
+        addedAt: s.addedAt,
+        questions: s.questions.map(function (q) {
+          return { q: q.q, options: q.options.slice(), correct: q.correct, explain: q.explain || '' };
+        })
+      };
+    })
+  };
+  const fname = 'trac-nghiem-thu-vien-' + backupStamp() + '.json';
+  let url = '';
+  try {
+    const blob = new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' });
+    url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (e) {
+    if (url) { try { URL.revokeObjectURL(url); } catch (e2) {} }
+    alert('Không xuất được file: ' + ((e && e.message) || e));
+    return;
+  }
+  setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} }, 60000);
+  alert('Đã sao lưu ' + quizLib.length + ' bộ đề · ' + totalQuestions() + ' câu ra file:\n' + fname
+    + '\n\nFile nằm ở thư mục Tải về (Downloads). Hãy chép nó sang USB / Google Drive / OneDrive để không mất khi xoá dữ liệu duyệt web hoặc đổi máy.');
+}
+
+function pickRestoreFile() { document.getElementById('quizRestoreInput').click(); }
+function cancelRestore() { _restorePreview = null; _restoreConfirm = false; renderLibPanel(); }
+
+function handleRestoreFile(inp) {
+  const f = (inp.files || [])[0];
+  try { inp.value = ''; } catch (e) {}
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    let data = null;
+    try { data = JSON.parse(String(e.target.result)); } catch (err) { data = null; }
+    if (!data || typeof data !== 'object') {
+      alert('File “' + f.name + '” không phải file sao lưu của app (không đọc được nội dung JSON).\nHãy chọn đúng file .json do nút “💾 Sao lưu ra file” tạo ra.');
+      return;
+    }
+    // Chấp nhận cả file có vỏ { kind, sets } lẫn mảng bộ đề trần.
+    const rawSets = Array.isArray(data.sets) ? data.sets : (Array.isArray(data) ? data : null);
+    if (!rawSets) {
+      alert('File “' + f.name + '” không có danh sách bộ đề.\nFile sao lưu đúng phải là .json do app tạo ra (không phải file Excel).');
+      return;
+    }
+    const sets = rawSets.map(function (s) {
+      return normalizeSet({
+        name: (s && s.name) || 'Bộ đề',
+        addedAt: (s && s.addedAt) || Date.now(),
+        questions: (s && s.questions) || []
+      });
+    }).filter(function (s) { return s.questions.length; });
+    if (!sets.length) { alert('File sao lưu không có câu hỏi nào đọc được.'); return; }
+
+    let add = 0, update = 0, total = 0;
+    sets.forEach(function (s) {
+      total += s.questions.length;
+      const same = quizLib.some(function (x) {
+        return x.name.trim().toLowerCase() === s.name.trim().toLowerCase();
+      });
+      if (same) update++; else add++;
+    });
+    _restorePreview = { fileName: f.name, exportedAt: data.exportedAt || '', sets: sets, add: add, update: update, total: total };
+    _restoreConfirm = false;
+    openLibPanel();
+  };
+  reader.onerror = function () { alert('Không đọc được file “' + f.name + '”.'); };
+  reader.readAsText(f);
+}
+
+/** Với bộ trùng tên khi THÊM VÀO: giữ nguyên bộ cũ, chỉ thay câu hỏi.
+ *  Với bộ mới: tạo bộ mới mang mốc thời gian ghi trong file. */
+function restoreCopyQuestions(src) {
+  return src.questions.map(function (q) {
+    return { id: quizNewId(), q: q.q, options: q.options.slice(), correct: q.correct, explain: q.explain || '' };
+  });
+}
+
+// Thêm vào: bộ trùng tên thì cập nhật, bộ khác giữ nguyên — không mất gì.
+function applyRestore() {
+  if (!_restorePreview) return;
+  let added = 0, updated = 0;
+  _restorePreview.sets.forEach(function (src) {
+    const name = src.name.trim() || 'Bộ đề';
+    const same = quizLib.filter(function (x) {
+      return x.name.trim().toLowerCase() === name.toLowerCase();
+    })[0];
+    // Giữ mốc thời gian trong file, để bảng thư viện vẫn hiện đúng ngày nhập gốc.
+    if (same) { same.questions = restoreCopyQuestions(src); same.addedAt = src.addedAt || Date.now(); updated++; }
+    else { quizLib.push(normalizeSet({ name: name, addedAt: src.addedAt || Date.now(), questions: restoreCopyQuestions(src) })); added++; }
+  });
+  const kept = quizLib.length - added - updated;
+  _restorePreview = null; _restoreConfirm = false;
+  saveLib(); resetMixDefaults(); _vnVocab = null;
+  _quizMode = 'home';
+  renderLibPanel(); renderQuiz();
+  alert('Đã phục hồi từ file:\n• ' + added + ' bộ đề mới\n• ' + updated + ' bộ đề được cập nhật'
+    + (kept ? '\n• giữ nguyên ' + kept + ' bộ đề cũ không có trong file' : '')
+    + '\n\nThư viện hiện có ' + quizLib.length + ' bộ đề · ' + totalQuestions() + ' câu.');
+}
+
+// Thay thế toàn bộ: bấm lần đầu chỉ hỏi lại, bấm lần hai mới xoá thật.
+function applyRestoreReplace() {
+  if (!_restorePreview) return;
+  if (!_restoreConfirm) { _restoreConfirm = true; renderLibPanel(); return; }
+  const removed = quizLib.length;
+  quizLib = _restorePreview.sets.map(function (src) {
+    return normalizeSet({
+      name: src.name.trim() || 'Bộ đề',
+      addedAt: src.addedAt,
+      questions: restoreCopyQuestions(src)
+    });
+  });
+  _restorePreview = null; _restoreConfirm = false;
+  _libPending = null; _libSetId = null; _renamingSetId = null; _vnVocab = null;
+  saveLib(); resetMixDefaults();
+  _quizMode = 'home';
+  renderLibPanel(); renderQuiz();
+  alert('Đã thay thế toàn bộ thư viện:\n• xoá ' + removed + ' bộ đề cũ\n• nạp lại ' + quizLib.length
+    + ' bộ đề · ' + totalQuestions() + ' câu từ file.');
+}
+
+function renderRestorePreview(body) {
+  const r = _restorePreview;
+  let h = '';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
+  h += '<div style="font-size:17px;font-weight:500">📂 Phục hồi từ file</div>';
+  h += '<button class="quiz-btn" style="padding:6px 10px" onclick="cancelRestore()" aria-label="Đóng">✕</button>';
+  h += '</div>';
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:4px;line-height:1.5">${esc(r.fileName)}</div>`;
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px">Trong file: <b>${r.sets.length} bộ đề · ${r.total} câu</b>`
+    + (r.exportedAt ? ' · sao lưu ' + fmtTime(Date.parse(r.exportedAt)) : '') + '</div>';
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px;line-height:1.5">Thư viện hiện tại: ${quizLib.length} bộ · ${totalQuestions()} câu — trong đó <b style="color:var(--green)">${r.add} bộ mới</b> và <b style="color:var(--gold)">${r.update} bộ trùng tên sẽ được cập nhật nội dung</b>.</div>`;
+
+  r.sets.forEach(function (s) {
+    const same = quizLib.some(function (x) {
+      return x.name.trim().toLowerCase() === s.name.trim().toLowerCase();
+    });
+    h += '<div class="arc-item" style="border:1px solid var(--border);border-radius:10px;padding:9px 10px;margin-bottom:6px;background:var(--card);display:flex;align-items:center;gap:8px">';
+    h += '<div style="flex:1;min-width:0">';
+    h += `<div style="font-size:17px;font-weight:500;line-height:1.35;white-space:normal" title="${esc(s.name)}">${esc(s.name)}</div>`;
+    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
+    h += '</div>';
+    h += same
+      ? '<span style="font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0">cập nhật</span>'
+      : '<span style="font-size:12px;font-weight:700;color:var(--green);flex-shrink:0">mới</span>';
+    h += '</div>';
+  });
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px">';
+  h += `<button class="quiz-btn primary" onclick="applyRestore()">➕ Thêm ${r.add} bộ mới, cập nhật ${r.update} bộ</button>`;
+  h += '</div>';
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px">';
+  if (_restoreConfirm) {
+    h += `<button class="quiz-btn danger" onclick="applyRestoreReplace()">Xác nhận xoá ${quizLib.length} bộ cũ?</button>`;
+    h += '<button class="quiz-btn" onclick="cancelRestore()">Hủy</button>';
+  } else {
+    h += '<button class="quiz-btn" onclick="applyRestoreReplace()">♻️ Thay thế toàn bộ (xoá thư viện hiện tại)</button>';
+  }
+  h += '</div>';
+  if (_restoreConfirm) {
+    h += `<div style="font-size:15px;font-weight:400;color:var(--red);padding-top:8px;line-height:1.5">Thao tác này xoá hết ${quizLib.length} bộ đề đang có và thay bằng ${r.sets.length} bộ trong file. Không khôi phục được.</div>`;
+  }
+  body.innerHTML = h;
+}
+
+// ── THƯ VIỆN BỘ ĐỀ (panel 📦) ─────────────────────────────────────────
+function fmtTime(ts) {
+  if (!ts) return '—';
+  try {
+    return new Date(ts).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return '—'; }
+}
+
+function openLibPanel() {
+  _libPending = null; _renamingSetId = null;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderLibPanel();
+}
+
+function renderLibPanel() {
+  const body = document.getElementById('modalBody');
+  if (!body) return;
+  if (_renamePreview) { renderRenamePreview(body); return; }
+  if (_restorePreview) { renderRestorePreview(body); return; }
+  let h = '';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
+  h += '<div style="font-size:17px;font-weight:500">📦 Thư viện bộ đề</div>';
+  h += '<button class="quiz-btn" style="padding:6px 10px" onclick="closeModalDirect()" aria-label="Đóng">✕</button>';
+  h += '</div>';
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px">${quizLib.length} bộ đề · ${totalQuestions()} câu hỏi</div>`;
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:12px">';
+  h += '<button class="quiz-btn primary" onclick="closeModalDirect(); pickSetFiles()">📥 Nạp hoặc nạp lại file bộ đề</button>';
+  h += '<button class="quiz-btn" onclick="closeModalDirect(); pickSetDir()">📁 Nạp cả thư mục</button>';
+  h += `<button class="quiz-btn"${quizLib.length ? '' : ' disabled'} onclick="openRenamePreview()">✨ Rút gọn tên tự động</button>`;
+  h += '</div>';
+
+  // Sao lưu / phục hồi phải luôn bấm được, kể cả khi thư viện trống (máy mới).
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:12px">';
+  h += `<button class="quiz-btn"${quizLib.length ? '' : ' disabled'} onclick="exportLibrary()">💾 Sao lưu ra file</button>`;
+  h += '<button class="quiz-btn" onclick="pickRestoreFile()">📂 Phục hồi từ file</button>';
+  h += '</div>';
+
+  if (!quizLib.length) {
+    h += '<div style="padding:20px 0;text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">Thư viện đang trống.<br>Bấm “Chọn file” (hoặc “Thư mục”) và chọn các file Excel/CSV.</div>';
+    body.innerHTML = h;
+    return;
+  }
+
+  quizLib.forEach(s => {
+    h += '<div class="arc-item" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--card)">';
+    if (_renamingSetId === s.id) {
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+      h += `<input id="libRename" class="quiz-input" style="flex:1;min-width:120px" value="${esc(s.name)}" onkeydown="if(event.key==='Enter')renameSet('${s.id}')">`;
+      h += `<button class="quiz-btn primary" onclick="renameSet('${s.id}')">Lưu</button>`;
+      h += '<button class="quiz-btn" onclick="cancelRename()">Hủy</button>';
+      h += '</div>';
+      h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px">${s.questions.length} câu</div>`;
+    } else {
+      h += '<div style="display:flex;align-items:center;gap:8px">';
+      h += '<div style="flex:1;min-width:0">';
+      h += `<div style="font-size:17px;font-weight:500;line-height:1.35;white-space:normal" title="${esc(s.name)}">${esc(s.name)}</div>`;
+      h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu · thêm ${fmtTime(s.addedAt)}</div>`;
+      h += '</div>';
+      if (_libPending && _libPending.kind === 'del' && _libPending.setId === s.id) {
+        h += `<button class="quiz-btn danger" onclick="deleteSet('${s.id}')">Xóa?</button>`;
+        h += '<button class="quiz-btn" onclick="cancelLibPending()">Hủy</button>';
+      } else {
+        h += `<button class="quiz-btn" onclick="startRename('${s.id}')" title="Đổi tên">✏️</button>`;
+        h += `<button class="quiz-btn" onclick="askDeleteSet('${s.id}')" title="Xoá bộ đề này">🗑</button>`;
+      }
+      h += '</div>';
+      if (_libPending && _libPending.kind === 'del' && _libPending.setId === s.id) {
+        h += `<div style="font-size:15px;font-weight:400;color:var(--gold);margin-top:6px">Xoá cả bộ ${s.questions.length} câu. Không khôi phục được.</div>`;
+      }
+    }
+    h += '</div>';
+  });
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">';
+  if (_libPending && _libPending.kind === 'all') {
+    h += `<button class="quiz-btn danger" onclick="clearLibrary()">Xác nhận xoá tất cả ${quizLib.length} bộ</button>`;
+    h += '<button class="quiz-btn" onclick="cancelLibPending()">Hủy</button>';
+  } else {
+    h += '<button class="quiz-btn" onclick="askClearLibrary()">🗑 Xoá tất cả bộ đề</button>';
+  }
+  h += '</div>';
+  body.innerHTML = h;
+}
+
+function startRename(id) { _renamingSetId = id; renderLibPanel(); }
+function cancelRename() { _renamingSetId = null; renderLibPanel(); }
+function renameSet(id) {
+  const s = libSet(id);
+  if (!s) return;
+  const el = document.getElementById('libRename');
+  const v = ((el && el.value) || '').trim();
+  if (!v) { alert('Tên bộ đề không được để trống.'); return; }
+  s.name = v;
+  _renamingSetId = null;
+  saveLib(); renderLibPanel(); renderQuiz();
+}
+
+function askDeleteSet(id) { _libPending = { kind: 'del', setId: id }; renderLibPanel(); }
+function cancelLibPending() {
+  _libPending = null;
+  const modal = document.getElementById('modal');
+  if (modal && modal.classList.contains('open')) renderLibPanel();
+  renderQuiz();
+}
+function deleteSet(id) {
+  quizLib = quizLib.filter(s => s.id !== id);
+  if (_libSetId === id) _libSetId = null;
+  _libPending = null;
+  saveLib(); resetMixDefaults();
+  renderLibPanel(); renderQuiz();
+}
+function askClearLibrary() { _libPending = { kind: 'all' }; renderLibPanel(); }
+function clearLibrary() {
+  quizLib = []; _libSetId = null;
+  _libPending = null; _renamingSetId = null;
+  saveLib(); resetMixDefaults();
+  renderLibPanel(); renderQuiz();
+}
+
+// ── HỌC BÀI: mọi câu trên một màn, chọn sai thì chọn lại ─────────────
+function quizStudyHtml() {
+  const st = _quizState;
+  if (!st || !st.items.length) return '<div class="quiz-card">Không có câu hỏi.</div>';
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  let h = '<div class="quiz-card quiz-all-head">';
+  h += '<div class="head-row">';
+  h += `<div style="flex:1;min-width:0;font-size:17px;font-weight:500">📖 ${st.title ? esc(st.title) : 'Học bài'} · ${st.items.length} câu</div>`;
+  h += homeBtnHtml();
+  h += '</div>';
+  h += '<div id="studySummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px"></div>';
+  h += '</div>';
+
+  st.items.forEach((it, qi) => {
+    h += `<div class="quiz-card" id="qb-${qi}">`;
+    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:12px', qi + 1);
+    it.opts.forEach((o, oi) => {
+      const tried = it.tried.indexOf(oi) >= 0;
+      let cls = 'quiz-opt';
+      let mark = '';
+      if (it.done && o.ok) { cls += ' correct'; mark = '<span class="mark">✅</span>'; }
+      else if (tried) { cls += ' wrong'; mark = '<span class="mark">❌</span>'; }
+      h += `<button class="${cls}" id="qo-${qi}-${oi}"${it.done ? ' disabled' : ''} onclick="studyPick(${qi},${oi})">`;
+      h += `<span class="quiz-badge">${letters[oi]}</span><span style="flex:1">${esc(o.t)}</span>${mark}`;
+      h += '</button>';
+    });
+    let fbCls = 'quiz-fb';
+    let fbTxt = '';
+    if (it.done) {
+      fbCls += ' show ok';
+      fbTxt = it.wrongFirst
+        ? '✅ <b>Đúng rồi!</b> — câu này bạn đã chọn sai ' + it.tried.length + ' lần trước khi đúng.'
+        : '✅ <b>Chính xác ngay lần đầu!</b>';
+      if (it.explain) fbTxt += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
+    } else if (it.tried.length) {
+      fbCls += ' show no';
+      fbTxt = '❌ <b>Chưa đúng.</b> Chọn lại đáp án khác nhé.';
+    }
+    h += `<div class="${fbCls}" id="qfb-${qi}">${fbTxt}</div>`;
+    h += '</div>';
+  });
+
+  h += '<div class="quiz-card" style="text-align:center">';
+  h += '<button class="big-upload-btn" style="width:100%" onclick="finishQuiz()">🏁 Xem kết quả</button>';
+  h += '<div style="margin-top:8px"><button class="quiz-btn" onclick="quitQuiz()">Thoát</button></div>';
+  h += '</div>';
+  return h;
+}
+
+function updateStudySummary() {
+  const st = _quizState;
+  const el = document.getElementById('studySummary');
+  if (!st || !el) return;
+  const done = st.items.filter(x => x.done).length;
+  el.innerHTML = `Đã xong <b>${done}</b>/${st.items.length} · `
+    + `Đúng ngay lần đầu <b style="color:var(--green)">${st.score}</b> · `
+    + `Phải chọn lại <b style="color:var(--red)">${st.wrong.length}</b>`;
+}
+
+function studyPick(qi, oi) {
+  const st = _quizState;
+  if (!st) return;
+  const it = st.items[qi];
+  if (!it || it.done || !it.opts[oi]) return;
+  if (it.tried.indexOf(oi) >= 0) return;          // ô này đã thử rồi
+
+  if (it.opts[oi].ok) {
+    it.done = true;
+    if (!it.wrongFirst) st.score++;
+  } else {
+    it.tried.push(oi);
+    if (!it.wrongFirst) {
+      it.wrongFirst = true;
+      const right = it.opts.filter(o => o.ok)[0];
+      st.wrong.push({ q: it.q, chosen: it.opts[oi].t, correct: right ? right.t : '—', explain: it.explain });
+    }
+  }
+
+  // Cập nhật ngay tại chỗ để không mất vị trí cuộn
+  it.opts.forEach((o, i) => {
+    const btn = document.getElementById('qo-' + qi + '-' + i);
+    if (!btn) return;
+    const tried = it.tried.indexOf(i) >= 0;
+    btn.className = 'quiz-opt' + ((it.done && o.ok) ? ' correct' : (tried ? ' wrong' : ''));
+    btn.disabled = !!it.done;
+    const old = btn.querySelector('.mark');
+    if (old) old.parentNode.removeChild(old);
+    const mark = (it.done && o.ok) ? '✅' : (tried ? '❌' : '');
+    if (mark) btn.insertAdjacentHTML('beforeend', '<span class="mark">' + mark + '</span>');
+  });
+
+  const fb = document.getElementById('qfb-' + qi);
+  if (fb) {
+    if (it.done) {
+      fb.className = 'quiz-fb show ok';
+      let s = it.wrongFirst
+        ? '✅ <b>Đúng rồi!</b> — câu này bạn đã chọn sai ' + it.tried.length + ' lần trước khi đúng.'
+        : '✅ <b>Chính xác ngay lần đầu!</b>';
+      if (it.explain) s += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
+      fb.innerHTML = s;
+    } else {
+      fb.className = 'quiz-fb show no';
+      fb.innerHTML = '❌ <b>Chưa đúng.</b> Chọn lại đáp án khác nhé.';
+    }
+  }
+  updateStudySummary();
+}
+
+// ── KHỞI ĐỘNG ──────────────────────────
+loadLib();
+resetMixDefaults();
+renderQuiz();
+</script>
+</body>
+</html>

@@ -361,7 +361,7 @@ body.light-mode .arc-item { background: #ffffff !important; border-color: #c9d1d
 
 <div class="main" id="quizPane"></div>
 
-<input type="file" id="quizFileInput" accept=".xlsx,.xls,.csv" multiple onchange="handleQuizImport(this)">
+<input type="file" id="quizFileInput" accept=".xlsx,.xls,.csv,.zip,application/zip" multiple onchange="handleQuizImport(this)">
 <input type="file" id="quizDirInput" webkitdirectory directory multiple onchange="handleQuizImport(this)">
 <input type="file" id="quizRestoreInput" accept=".json,application/json" onchange="handleRestoreFile(this)">
 
@@ -373,6 +373,7 @@ body.light-mode .arc-item { background: #ffffff !important; border-color: #c9d1d
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 // ── HELPERS ────────────────────────────────────────────────────────────
 function esc(s) {
@@ -606,7 +607,7 @@ function quizHomeHtml() {
   // Ba nút xếp cùng một hàng: nhãn phải ngắn mới vừa, nên phần giải thích dài
   // được đẩy vào title (tooltip) thay vì nằm trong nhãn.
   h += '<div class="lib-act-row">';
-  h += libActBtn('file', 'Chọn file', 'Nạp file bộ đề — chọn được nhiều file cùng lúc');
+  h += libActBtn('file', 'Chọn file', 'Nạp file bộ đề — chọn được nhiều file Excel/CSV cùng lúc, hoặc 1 file .zip chứa cả thư mục');
   h += libActBtn('dir', 'Thư mục', 'Nạp cả thư mục — mọi file Excel bên trong');
   h += libActBtn('lib', 'Thư viện', 'Quản lý thư viện: đổi tên, xoá, sao lưu, phục hồi');
   h += '</div>';
@@ -623,7 +624,7 @@ function quizHomeHtml() {
 
   if (!nQ) {
     h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">'
-      + 'Chưa có bộ đề nào.<br>Bấm “Chọn file” rồi chọn các file Excel/CSV.<br>Mỗi file sẽ thành một bộ đề riêng.</div>';
+      + 'Chưa có bộ đề nào.<br>Bấm “Chọn file” rồi chọn các file Excel/CSV — hoặc 1 file .zip chứa cả thư mục.<br>Mỗi file sẽ thành một bộ đề riêng.</div>';
     return h;
   }
 
@@ -634,7 +635,7 @@ function quizHomeHtml() {
   quizLib.forEach(s => {
     const off = s.questions.length ? '' : ' disabled';
     h += '<div class="set-box" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
-    h += `<div style="font-size:17px;font-weight:500;line-height:1.4">${esc(s.name)}</div>`;
+    h += `<div style="font-size:17px;font-weight:500;line-height:1.4" title="${esc(s.name)}">${esc(dispName(s.name))}</div>`;
     h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
     h += '<div class="set-acts">';
     h += `<button class="quiz-btn primary"${off} onclick="startSetExam('${s.id}','single')">▶️ Từng câu</button>`;
@@ -656,7 +657,7 @@ function quizBrowseHtml() {
   if (!s) { _quizMode = 'home'; return quizHomeHtml(); }
   const n = s.questions.length;
   let h = '<div class="quiz-card">';
-  h += `<div style="font-size:17px;font-weight:500;line-height:1.35">${esc(s.name)}</div>`;
+  h += `<div style="font-size:17px;font-weight:500;line-height:1.35" title="${esc(s.name)}">${esc(dispName(s.name))}</div>`;
   h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:4px 0 12px">${n} câu hỏi</div>`;
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
   h += `<button class="quiz-btn primary"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','single')">▶️ Thi từng câu</button>`;
@@ -728,7 +729,7 @@ function quizMixHtml() {
   h += '</div>';
   rows.forEach(r => {
     h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}">${esc(r.set.name)}</div>`;
+    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}">${esc(dispName(r.set.name))}</div>`;
     h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center" value="${r.pct}" oninput="onMixInput()">`;
     h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim)">%</div>';
     h += `<div id="mixCnt-${r.set.id}" style="width:62px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${r.got} câu</div>`;
@@ -904,7 +905,7 @@ function startSetExam(setId, mode) {
   const s = libSet(setId);
   if (!s || !s.questions.length) { alert('Bộ đề này chưa có câu hỏi.'); return; }
   _libSetId = s.id;
-  startExam(s.questions, s.name, mode);
+  startExam(s.questions, dispName(s.name), mode);   // điện thoại: dùng tên gọn ở đầu bài thi
 }
 
 function replayExam() { if (_exam) startExam(_exam.questions, _exam.title, _exam.mode); }
@@ -1276,6 +1277,50 @@ function useLibAct(key) {
   renderQuiz();
 }
 const EXCEL_EXT = /\.(xlsx|xls|csv)$/i;
+const ZIP_EXT = /\.zip$/i;
+
+// Điện thoại KHÔNG chọn được thư mục (thuộc tính `webkitdirectory` bị bỏ qua), nên
+// người dùng nén cả thư mục thành MỘT file .zip rồi chọn file đó. Mở zip ra và biến
+// từng file Excel bên trong thành một đối tượng File thật — nhờ vậy toàn bộ đường
+// ống nạp file ở dưới (đọc, lọc, đặt tên, tạo bộ đề) chạy y hệt như khi chọn từng file.
+// Bỏ qua thư mục rỗng, rác macOS (`__MACOSX/`, `._tên`) và file không phải Excel.
+async function expandZip(zipFile) {
+  if (typeof JSZip === 'undefined') {
+    throw new Error('chưa tải được thư viện đọc ZIP — kiểm tra kết nối mạng rồi thử lại');
+  }
+  const zip = await JSZip.loadAsync(zipFile);
+  const out = [];
+  const paths = Object.keys(zip.files);
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    const entry = zip.files[path];
+    if (!entry || entry.dir) continue;
+    const base = path.split('/').pop();
+    if (path.indexOf('__MACOSX/') >= 0 || base.charAt(0) === '.') continue;
+    if (!EXCEL_EXT.test(base)) continue;
+    const buf = await entry.async('arraybuffer');
+    out.push(new File([buf], base, { type: 'application/octet-stream' }));
+  }
+  return out;
+}
+
+// Tách mọi file .zip trong danh sách chọn thành các file Excel bên trong.
+// Trả về { files, failed, empty } để chỗ gọi báo được lý do khi zip không dùng được.
+async function expandZips(list) {
+  const files = [];
+  const failed = [];
+  let empty = 0;
+  for (let i = 0; i < list.length; i++) {
+    try {
+      const inner = await expandZip(list[i]);
+      if (!inner.length) { empty++; continue; }
+      files.push.apply(files, inner);
+    } catch (err) {
+      failed.push(list[i].name + ' — ' + ((err && err.message) || err));
+    }
+  }
+  return { files: files, failed: failed, empty: empty };
+}
 
 function readFileAsArrayBuffer(f) {
   return new Promise(function (resolve, reject) {
@@ -1291,6 +1336,91 @@ function setNameFromFile(fileName) {
   return base || 'Bộ đề';
 }
 
+// ── TÊN GỌN KHI XEM TRÊN ĐIỆN THOẠI ──────────────────────────────────
+// Trên màn hình hẹp, tên bộ đề dài làm danh sách cao và khó quét mắt — nhất là các
+// nhóm cùng tiền tố ("Kinh doanh điện năng-Thị trường điện&DPPA", "KT điện cho
+// CNKD-Bậc7_7"). Hàm dưới cắt PHẦN HIỂN THỊ: tiền tố chung của một nhóm (từ 2 bộ
+// trở lên) được bỏ đi vì phần còn lại mới là chỗ phân biệt, và tên quá dài được
+// cắt ở ranh giới từ rồi thêm “…”.
+// QUAN TRỌNG: chỉ là tên hiển thị — tên thật trong dữ liệu, trong bản sao lưu và
+// trong bảng 📦 vẫn nguyên, nên không mất thông tin và không cần sửa lại tên.
+// Tên đầy đủ vẫn tra được ở tooltip (title) tại những chỗ có thể trỏ chuột.
+const MOBILE_W = 480;        // ngưỡng coi là màn hình điện thoại
+// 34 ký tự là mức vừa ĐÚNG MỘT DÒNG thẻ ở khung nhìn hẹp nhất (327px, chữ 17px).
+// Để 30 thì "Hệ thống thu thập dữ liệu từ xa" (31 ký tự) bị cắt oan thành
+// "Hệ thống thu thập dữ liệu từ…", còn "Các tình huống vi phạm sử dụng điện và cách
+// xử lý" bị cắt giữa cụm ("…vi phạm sử…").
+const DISP_MAX = 34;
+let _dispMap = {};
+let _dispKey = '';
+
+function isNarrowScreen() { return window.innerWidth <= MOBILE_W; }
+
+// Cắt ở ranh giới từ để không chặt đôi một từ.
+function cutAtWord(s, max) {
+  if (s.length <= max) return s;
+  let t = s.slice(0, max);
+  const sp = t.lastIndexOf(' ');
+  if (sp >= Math.floor(max / 2)) t = t.slice(0, sp);
+  return t.replace(/[-–—:,&;.]+$/, '').trim() + '…';
+}
+
+function dispMap() {
+  const key = isNarrowScreen() ? 'm|' + quizLib.map(s => s.name).join('¦') : 'wide';
+  if (key === _dispKey) return _dispMap;
+  _dispKey = key;
+  _dispMap = {};
+  if (!isNarrowScreen() || quizLib.length < 2) return _dispMap;
+  const names = quizLib.map(s => s.name);
+  // 1. Gom tiền tố chung của từng cặp, cắt về ranh giới từ gần nhất.
+  const cands = [];
+  for (let i = 0; i < names.length; i++) {
+    for (let j = i + 1; j < names.length; j++) {
+      const a = names[i].toLowerCase(), b = names[j].toLowerCase();
+      let k = 0;
+      while (k < a.length && k < b.length && a.charAt(k) === b.charAt(k)) k++;
+      for (let t = k; t >= 8; t--) {
+        const ch = names[i].charAt(t - 1);
+        if (ch === '-' || ch === '–' || ch === '—' || ch === ':' || ch === ' ' || ch === '&') {
+          if (t >= 8) cands.push(names[i].slice(0, t));
+          break;
+        }
+      }
+    }
+  }
+  // 2. Áp dụng tiền tố DÀI nhất trước; mỗi tên chỉ bị cắt một lần.
+  cands.sort(function (x, y) { return y.length - x.length; });
+  cands.forEach(function (p) {
+    const lp = p.toLowerCase();
+    const hit = names.filter(function (n) { return n.toLowerCase().indexOf(lp) === 0 && !(n in _dispMap); });
+    if (hit.length < 2) return;
+    hit.forEach(function (n) {
+      const rest = n.slice(p.length).replace(/^[-–—:,&;\s]+/, '').trim();
+      if (rest.length >= 3) _dispMap[n] = rest;
+    });
+  });
+  // 3. Tên còn quá dài thì cắt ở ranh giới từ.
+  names.forEach(function (n) {
+    const d = _dispMap[n] || n;
+    if (d.length > DISP_MAX) _dispMap[n] = cutAtWord(d, DISP_MAX);
+    else if (_dispMap[n]) _dispMap[n] = d;
+  });
+  // 4. Chốt an toàn: nếu hai bộ ra CÙNG một tên gọn, hoặc tên gọn trùng tên đầy đủ
+  // của bộ khác, thì bỏ rút gọn cho những bộ đó — thà dài mà phân biệt được.
+  const seen = {};
+  names.forEach(function (n) { const d = _dispMap[n]; if (d) seen[d] = (seen[d] || 0) + 1; });
+  names.forEach(function (n) {
+    const d = _dispMap[n];
+    if (!d) return;
+    const clash = seen[d] > 1 || (names.indexOf(d) >= 0 && d !== n);
+    if (clash) delete _dispMap[n];
+  });
+  return _dispMap;
+}
+
+// Tên hiển thị của một bộ đề (điện thoại: tên gọn; máy tính: tên đầy đủ).
+function dispName(name) { const m = dispMap(); return m[name] || name; }
+
 // Mỗi file thành một bộ đề. File trùng tên thì CẬP NHẬT lại nội dung bộ đề đó.
 async function handleQuizImport(inp) {
   const all = Array.prototype.slice.call(inp.files || []);
@@ -1300,15 +1430,36 @@ async function handleQuizImport(inp) {
     alert('Thư viện đọc Excel chưa được tải. Kiểm tra kết nối mạng rồi thử lại.');
     return;
   }
+  // File .zip được mở ra trước, các file Excel bên trong nhập vào danh sách như vừa
+  // được chọn trực tiếp (đây là đường nạp duy nhất dùng được trên điện thoại).
+  const zips = all.filter(function (f) { return ZIP_EXT.test(f.name); });
+  let expanded = { files: [], failed: [], empty: 0 };
+  let fromZip = 0;
+  if (zips.length) {
+    expanded = await expandZips(zips);
+    fromZip = expanded.files.length;
+  }
+  const plain = all.filter(function (f) { return !ZIP_EXT.test(f.name); });
+  const pool = plain.concat(expanded.files);
+
   // Khi chọn cả thư mục, Chromium đưa mọi file vào (kể cả file tạm ~$ và file lạ)
-  const files = all.filter(function (f) {
+  const files = pool.filter(function (f) {
     return EXCEL_EXT.test(f.name) && f.name.indexOf('~$') !== 0;
   });
-  const skippedFiles = all.length - files.length;
+  const skippedFiles = pool.length - files.length;
   if (!files.length) {
-    alert(skippedFiles
-      ? 'Không thấy file Excel nào. Thư mục đang chọn chỉ có ' + skippedFiles + ' file không phải .xlsx/.xls/.csv.'
-      : 'Không có file nào được chọn.');
+    let why = '';
+    if (!pool.length && zips.length) {
+      why = expanded.empty
+        ? 'File .zip đang chọn không có file Excel/CSV nào bên trong (chỉ có thư mục, ảnh hoặc định dạng khác).'
+        : 'Không đọc được file .zip đang chọn.';
+    } else {
+      why = skippedFiles
+        ? 'Không thấy file Excel nào. Đã chọn ' + skippedFiles + ' file không phải .xlsx/.xls/.csv.'
+        : 'Không có file nào được chọn.';
+    }
+    if (expanded.failed.length) why += '\n\nLỗi:\n• ' + expanded.failed.join('\n• ');
+    alert(why);
     return;
   }
 
@@ -1346,7 +1497,10 @@ async function handleQuizImport(inp) {
   if (updated) msg += '\n• ' + updated + ' bộ đề cũ được cập nhật (file trùng tên, nội dung cũ bị thay)';
   if (skippedTotal) msg += '\n• bỏ qua ' + skippedTotal + ' dòng thiếu dữ liệu';
   if (skippedFiles) msg += '\n• bỏ qua ' + skippedFiles + ' file không phải Excel (hoặc file tạm ~$)';
-  if (failed.length) msg += '\n\nKhông đọc được ' + failed.length + ' file:\n• ' + failed.join('\n• ');
+  if (fromZip) msg += '\n• lấy từ ' + zips.length + ' file .zip: ' + fromZip + ' file Excel';
+  if (expanded.empty) msg += '\n• ' + expanded.empty + ' file .zip không có file Excel nào bên trong';
+  const allFailed = failed.concat(expanded.failed);
+  if (allFailed.length) msg += '\n\nKhông đọc được ' + allFailed.length + ' file:\n• ' + allFailed.join('\n• ');
   alert(msg);
 }
 
@@ -2016,6 +2170,19 @@ function studyPick(qi, oi) {
 loadLib();
 resetMixDefaults();
 renderQuiz();
+
+// Khi bề ngang đổi qua lại ngưỡng điện thoại (xoay máy, kéo cửa sổ), tên bộ đề phải
+// đổi giữa dạng gọn và dạng đầy đủ. Chỉ vẽ lại ở MÀN TRANG CHỦ: vẽ lại giữa bài thi
+// sẽ làm mất vị trí cuộn của bài 30-60 câu.
+(function watchWidth() {
+  let wasNarrow = isNarrowScreen();
+  window.addEventListener('resize', function () {
+    const now = isNarrowScreen();
+    if (now === wasNarrow) return;
+    wasNarrow = now;
+    if (_quizMode === 'home') renderQuiz();
+  });
+})();
 </script>
 </body>
 </html>

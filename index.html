@@ -426,9 +426,46 @@ body.light-mode .mix-name { background: rgba(16,185,129,0.06); color: #134e4a; }
 /* Ô số của bảng trộn — lớp RIÊNG để thu nhỏ (19/9/2026 "cho ô số nhỏ lại") mà không kéo theo
    .quiz-input (ô đổi tên bộ đề dùng chung lớp đó, phải giữ 17px/10px lề). 46×35 thay vì 62×41:
    đủ chỗ cho 3 chữ số "100", và trả lại ~16px cho cột tên bộ đề. */
-.mix-input { width: 46px; padding: 7px 4px; text-align: center; font-size: 15px; }
+.mix-input { width: 40px; padding: 5px 3px; text-align: center; font-size: 15px; }
+/* Nhỏ thêm lần nữa (19/9/2026 — "cho ô số nhỏ thêm"): 46×35 → 40×30.
+   Cỡ CHỮ vẫn 15px, chỉ cắt lề trong: chữ số là thứ phải đọc được, còn lề thừa mới là thứ
+   chiếm chỗ. Lòng ô còn 32px, đủ cho "100" (đo được 26px) nên không bị cắt số 3 chữ số.
+   Chiều cao hàng KHÔNG đổi (36px): cặp ▲▼ và nút 📌 vẫn cao 36px — nếu muốn cả hàng thấp
+   xuống thì phải thu cả ba thứ đó, mà như vậy thì ngón tay khó chạm hơn khi dùng điện thoại. */
 .mix-step button:hover { border-color: var(--accent-glow); color: var(--text); }
 .mix-step button:active { background: rgba(127, 127, 127, 0.22); color: var(--text); }
+
+/* ── NÚT GHIM (📌) ngay TRƯỚC ô số (19/9/2026 — "muốn ô ghim dời qua trước ô số"; trước đó nó
+   đứng sau cặp ▲▼ theo đúng yêu cầu ban đầu "thêm nút dừng kế mũi tên lên xuống").
+   Rộng 23px và lề PHẢI ÂM 4px — đổi từ lề trái sang khi dời vị trí, vì khe cần thu hẹp bây
+   giờ là khe với Ô SỐ ở bên phải: hàng rất chật ở bề ngang 409px, lề âm làm khe hở thật
+   xuống 4px nên chỉ lấy thêm ~19px của cột tên bộ đề thay vì 27px.
+   Màu khi ghim theo đúng quy ước xanh lá của app: #34d399 ở chế độ tối (sáng), #166534 ở
+   chế độ sáng (đậm) — cùng cặp màu .mix-name đang dùng, vì #10b981/#15803d không đủ tương phản. */
+.mix-lock {
+  width: 23px; height: 36px; margin-right: -4px; padding: 0; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1;
+  background: none; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text-dim); cursor: pointer;
+  /* Chưa ghim thì icon mờ + xám. Cần thiết vì hai emoji ghim (📍 và 📌) TRÔNG GẦN NHƯ NHAU
+     ở cỡ 13px — đo trên ảnh chụp 19/9/2026: cả 18 hàng đều ra cây ghim đỏ, không phân biệt
+     được hàng nào đang ghim. Làm mờ bằng filter nên chỉ icon đổi, viền xám giữ nguyên. */
+  filter: grayscale(1) opacity(0.5);
+}
+.mix-lock:hover { border-color: var(--accent-glow); color: var(--text); filter: none; }
+/* Hàng ĐANG GHIM: icon giữ nguyên màu + nền xanh nhạt + viền xanh → nổi hơn hẳn hàng bên
+   cạnh dù hai icon gần giống nhau. */
+.mix-lock.on {
+  filter: none; border-color: #34d399; color: #34d399;
+  background: rgba(52, 211, 153, 0.18);
+}
+body.light-mode .mix-lock.on {
+  border-color: #166534; color: #166534; background: rgba(22, 101, 52, 0.12);
+}
+/* Dấu chỉ hàng đang ghim trên chính tên bộ đề. Dùng box-shadow inset, KHÔNG dùng border:
+   border làm ô nhích 2px và hàng đổi chiều cao, còn inset thì không đổi bố cục. */
+.mix-name.pinned { box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.7); }
 input[id^="mixPct-"]::-webkit-outer-spin-button,
 input[id^="mixPct-"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[id^="mixPct-"] { -moz-appearance: textfield; appearance: textfield; }
@@ -760,7 +797,9 @@ const FIXED_SET_PCT = [
   ['hethongthuthapdulieu', 3],   // Hệ thống thu thập dữ liệu từ xa
   ['cactinhhuong', 7]            // Các tình huống vi phạm sử dụng điện
 ];
-let _mix = { total: MIX_DEFAULT_TOTAL, pct: {} };   // pct[setId] = phần trăm của bộ đó trong đề trộn
+// locked[setId] = 1 → hàng đó được GHIM: giữ đúng số phần trăm hiện tại, không nhường và
+// không nhận khi người dùng chỉnh các hàng khác (xem rebalanceAround).
+let _mix = { total: MIX_DEFAULT_TOTAL, pct: {}, locked: {} };   // pct[setId] = phần trăm của bộ đó trong đề trộn
 
 function quizNewId(prefix) { return (prefix || 'q') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
@@ -978,6 +1017,39 @@ function clampPct(v) {
 }
 function pctOf(id) { return clampPct(_mix.pct[id]); }
 
+// ── GHIM MỘT HÀNG (19/9/2026) ─────────────────────────────
+// Yêu cầu: "thêm nút dừng kế mũi tên lên xuống, khi nhấn nút đó thì số lượng câu đã chọn
+// sẽ đứng yên, không bị ảnh hưởng bởi những lựa chọn khác."
+// Cách làm: hàng ghim bị loại khỏi danh sách "các bộ còn lại" trong rebalanceAround(), nên
+// nó không nhường điểm khi hàng khác tăng và cũng không nhận điểm khi hàng khác giảm.
+// Ô nhập và cặp ▲▼ của hàng ghim VẪN dùng được — người dùng tự sửa tay thì số đó đổi.
+function isMixLocked(id) { return !!(_mix.locked && _mix.locked[id]); }
+
+function toggleMixLock(id) {
+  if (!_mix.locked) _mix.locked = {};
+  if (_mix.locked[id]) delete _mix.locked[id]; else _mix.locked[id] = 1;
+  paintMixLock(id);
+  paintMix();
+  saveMix();                       // ghim là lựa chọn của người dùng → phải nhớ
+}
+
+// Vẽ lại ĐÚNG MỘT nút ghim tại chỗ. Cố ý không render lại cả bảng: trên điện thoại, render
+// lại sẽ đẩy màn hình về đầu và người dùng mất chỗ đang xem.
+function paintMixLock(id) {
+  const on = isMixLocked(id);
+  const b = document.getElementById('mixLock-' + id);
+  if (b) {
+    b.classList.toggle('on', on);
+    b.textContent = on ? '📌' : '📍';
+    b.title = on
+      ? 'Đang ghim: các bộ khác chỉnh không làm đổi số của bộ này. Nhấn để bỏ ghim.'
+      : 'Ghim số câu của bộ này — các bộ khác chỉnh sẽ không làm đổi số này.';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  const n = document.getElementById('mixName-' + id);
+  if (n) n.classList.toggle('pinned', on);
+}
+
 function mixTotalValue() {
   const available = Math.max(1, totalQuestions());
   let t = parseInt(_mix.total, 10);
@@ -998,7 +1070,8 @@ function mixRows() {
   while (left > 0 && order.length) { counts[order[k % order.length].i]++; left--; k++; }
   return rows.map((r, i) => ({
     set: r.s, pct: r.pct, want: counts[i],
-    got: Math.min(counts[i], r.s.questions.length)
+    got: Math.min(counts[i], r.s.questions.length),
+    locked: isMixLocked(r.s.id)
   }));
 }
 
@@ -1033,7 +1106,12 @@ function saveMix() {
       total: _mix.total,
       sig: quizLib.map(s => s.id).join(','),
       pct: _mix.pct,
-      keyed: quizLib.map(s => [quizKey(s.name), pctOf(s.id)])
+      keyed: quizLib.map(s => [quizKey(s.name), pctOf(s.id)]),
+      // Ghim lưu song song hai dạng như pct: theo ID (thư viện không đổi) và theo TÊN
+      // (thư viện đã đổi) — hai danh sách phải luôn đi cùng nhau, nếu không thì sau khi
+      // nạp file mới, tỷ lệ được ghép theo tên mà ghim thì mất.
+      locked: _mix.locked || {},
+      lockedKeyed: quizLib.filter(s => isMixLocked(s.id)).map(s => [quizKey(s.name), 1])
     }));
   } catch (e) {}
 }
@@ -1053,6 +1131,10 @@ function restoreMix() {
   if (saved.pct && saved.sig === quizLib.map(s => s.id).join(',')) {
     _mix.pct = {};
     quizLib.forEach(s => { _mix.pct[s.id] = clampPct(saved.pct[s.id]); });
+    if (saved.locked && typeof saved.locked === 'object') {
+      _mix.locked = {};
+      quizLib.forEach(s => { if (saved.locked[s.id]) _mix.locked[s.id] = 1; });
+    }
     return true;
   }
   // Nhánh 2 — thư viện đã đổi: ghép lại theo TÊN. Bộ khớp giữ đúng số người dùng đặt,
@@ -1062,10 +1144,19 @@ function restoreMix() {
   saved.keyed.forEach(function (row) {
     if (Array.isArray(row) && row.length === 2) byKey[row[0]] = row[1];
   });
+  // Ghim phục hồi theo TÊN, đúng cách tỷ lệ được ghép ở nhánh này.
+  const lockKey = {};
+  if (Array.isArray(saved.lockedKeyed)) {
+    saved.lockedKeyed.forEach(function (row) {
+      if (Array.isArray(row) && row.length === 2 && row[1]) lockKey[row[0]] = 1;
+    });
+  }
+  _mix.locked = {};
   let hit = 0;
   quizLib.forEach(s => {
     const k = quizKey(s.name);
     if (k in byKey) { _mix.pct[s.id] = clampPct(byKey[k]); hit++; }
+    if (lockKey[k]) _mix.locked[s.id] = 1;
   });
   if (!hit) return false;   // thư viện hoàn toàn khác → để mặc định, đừng bịa số
   balanceMixTo100();
@@ -1085,11 +1176,26 @@ function restoreMix() {
 function balanceMixTo100() {
   const ids = quizLib.map(s => s.id);
   if (!ids.length) return;
-  const cur = ids.map(id => pctOf(id));
+  // Hàng ghim KHÔNG bị cân: nó giữ đúng số đang có, và chỉ phần 100 - (tổng hàng ghim) được
+  // chia cho các hàng còn lại. Nhờ vậy việc nạp/xoá bộ (đường ghép-theo-tên) không phá số
+  // người dùng đã ghim.
+  const pinned = ids.filter(isMixLocked);
+  const free = ids.filter(id => !isMixLocked(id));
+  const pinSum = pinned.reduce((a, id) => a + pctOf(id), 0);
+  if (!free.length) {
+    // Cả bảng đều ghim → không còn ai để chia. Chỉ cắt bớt khi tổng vượt 100, nếu không
+    // ba nút trộn sẽ bị khoá vĩnh viễn mà người dùng không hiểu vì sao.
+    if (pinSum > 100) {
+      let left = 100;
+      pinned.forEach(id => { const v = Math.min(pctOf(id), left); _mix.pct[id] = v; left -= v; });
+    }
+    return;
+  }
+  const cur = free.map(id => pctOf(id));
   const sum = cur.reduce((a, v) => a + v, 0);
-  if (sum === 100) return;
-  if (sum <= 0) { Object.assign(_mix.pct, splitPctEven(ids, 100)); return; }
-  const raw = cur.map(v => v * 100 / sum);
+  const budget = Math.max(0, 100 - pinSum);
+  if (sum <= 0) { Object.assign(_mix.pct, splitPctEven(free, budget)); return; }
+  const raw = cur.map(v => v * budget / sum);
   const out = raw.map(v => Math.floor(v));
   let left = 100 - out.reduce((a, v) => a + v, 0);
   const order = raw
@@ -1104,7 +1210,7 @@ function balanceMixTo100() {
     out.forEach((v, i) => { if (v > out[big]) big = i; });
     out[big] = Math.max(0, out[big] + left);
   }
-  ids.forEach((id, i) => { _mix.pct[id] = Math.max(0, out[i]); });
+  free.forEach((id, i) => { _mix.pct[id] = Math.max(0, out[i]); });
 }
 
 // Nút "↺ Mặc định": quên tỷ lệ chỉnh tay, VỀ mặc định của app trong mã, và ghi luôn mặc
@@ -1174,7 +1280,10 @@ function quizMixHtml() {
   h += '</div>';
   rows.forEach(r => {
     h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span class="mix-name">${esc(r.set.name)}</span></div>`;
+    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span id="mixName-${r.set.id}" class="mix-name${r.locked ? ' pinned' : ''}">${esc(r.set.name)}</span></div>`;
+    // Nút ghim ĐỨNG TRƯỚC ô số (19/9/2026 — "muốn ô ghim dời qua trước ô số"). Đặt trước
+    // cũng hợp lý hơn về nghĩa: ghim là thuộc tính CỦA HÀNG, không phải của cặp ▲▼.
+    h += `<button type="button" id="mixLock-${r.set.id}" class="mix-lock${r.locked ? ' on' : ''}" aria-pressed="${r.locked ? 'true' : 'false'}" title="${r.locked ? 'Đang ghim: các bộ khác chỉnh không làm đổi số của bộ này. Nhấn để bỏ ghim.' : 'Ghim số câu của bộ này — các bộ khác chỉnh sẽ không làm đổi số này.'}" onclick="toggleMixLock('${r.set.id}')">${r.locked ? '📌' : '📍'}</button>`;
     h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input mix-input" value="${r.pct}" oninput="onMixTyped()" onchange="onMixCommit('${r.set.id}')" onblur="onMixCommit('${r.set.id}')">`;
     // Đè ngón tay là tự lặp (xem mixStepStart): đổi 0 → 15 bằng một lần giữ, khỏi bấm 15 lần.
     h += `<div class="mix-step">`;
@@ -1218,9 +1327,19 @@ function paintMix() {
   const short = rows.filter(r => r.want > r.got);
   const warnEl = document.getElementById('mixWarn');
   if (warnEl) {
-    warnEl.textContent = short.length
-      ? 'Không đủ câu: ' + short.map(r => r.set.name + ' cần ' + r.want + ' nhưng bộ chỉ có ' + r.set.questions.length + ' câu').join(', ')
-      : '';
+    // Hai cảnh báo có thể CÙNG đúng một lúc (đo được 19/9/2026: 6 hàng ghim + một hàng không
+    // đủ câu). Trước đây chúng loại trừ nhau nên cái sau che mất cái trước — giờ ghép lại.
+    const msgs = [];
+    if (short.length) {
+      msgs.push('Không đủ câu: ' + short.map(r => r.set.name + ' cần ' + r.want + ' nhưng bộ chỉ có ' + r.set.questions.length + ' câu').join(', '));
+    }
+    const lockedRows = rows.filter(r => r.locked);
+    if (pctSum !== 100 && lockedRows.length) {
+      // Hàng ghim không nhường, nên phần vượt/thiếu có thể không có ai bù. Nói thẳng ra đây
+      // thay vì để ba nút trộn tắt im lặng — đó là kiểu "app tự nhiên hỏng" khó hiểu nhất.
+      msgs.push('Đang ghim ' + lockedRows.length + ' bộ (' + lockedRows.reduce((a, r) => a + r.pct, 0) + '%) nên các bộ còn lại không tự bù được về 100% — nhấn 📌 để bỏ ghim, hoặc chỉnh tay các bộ còn lại.');
+    }
+    warnEl.textContent = msgs.join(' ');
   }
   ['mixBtnSingle', 'mixBtnAll', 'mixBtnStudy'].forEach(id => {
     const b = document.getElementById(id);
@@ -1365,9 +1484,18 @@ function takeFromSets(list, amount) {
 // Bộ đang 0% KHÔNG được nhận thêm: đang 0% nghĩa là "bộ này không lấy câu nào", nhất quán
 // với luật nhập 0 ở dưới.
 function rebalanceAround(id) {
-  const others = quizLib.filter(s => s.id !== id);
+  // Hàng GHIM bị loại khỏi "các bộ còn lại": nó không nhường khi hàng khác tăng và không
+  // nhận khi hàng khác giảm — đúng nghĩa "đứng yên, không bị ảnh hưởng".
+  const others = quizLib.filter(s => s.id !== id && !isMixLocked(s.id));
   const have = others.reduce((a, s) => a + pctOf(s.id), 0);
-  const diff = (100 - pctOf(id)) - have;      // >0 các bộ khác phải tăng, <0 phải giảm
+  // PHẢI trừ cả phần của các hàng ghim khỏi ngân sách 100. Bỏ sót chỗ này thì hàng ghim vừa
+  // không nhường, vừa không bị tính vào ngân sách → tổng vọt lên đúng bằng số của nó (đo
+  // được 19/9/2026: ghim một bộ 8% rồi nâng bộ khác, tổng ra 108% chứ không phải 100%).
+  const pinnedSum = quizLib
+    .filter(s => s.id !== id && isMixLocked(s.id))
+    .reduce((a, s) => a + pctOf(s.id), 0);
+  const budget = 100 - pinnedSum;
+  const diff = (budget - pctOf(id)) - have;   // >0 các bộ khác phải tăng, <0 phải giảm
   if (diff === 0) return false;
   if (diff < 0) return takeFromSets(others, -diff);
   const live = others.filter(s => pctOf(s.id) > 0);
@@ -1423,6 +1551,10 @@ function splitPctEven(ids, budget) {
 function resetMixDefaults() {
   _mix.total = Math.min(MIX_DEFAULT_TOTAL, Math.max(1, totalQuestions()));
   _mix.pct = {};
+  // Ghim bị xoá cùng tỷ lệ: nút "↺ Mặc định" là "quên hết chỉnh tay", mà ghim là một dạng
+  // chỉnh tay. Đường nạp/xoá bộ thì KHÁC — ở đó refreshMix() gọi resetMixDefaults() rồi
+  // restoreMix() phục hồi lại ghim theo TÊN bộ, nên ghim không mất khi thư viện đổi.
+  _mix.locked = {};
   if (!quizLib.length) return;
   let fixed = [];        // [{ s, pct }]
   const zero = [];

@@ -1148,7 +1148,7 @@ function quizMixHtml() {
   rows.forEach(r => {
     h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
     h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span class="mix-name">${esc(r.set.name)}</span></div>`;
-    h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center;font-size:15px" value="${r.pct}" oninput="onMixInput()" onchange="onMixCommit('${r.set.id}')">`;
+    h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center;font-size:15px" value="${r.pct}" oninput="onMixTyped()" onchange="onMixCommit('${r.set.id}')">`;
     h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim)">%</div>';
     h += `<div id="mixCnt-${r.set.id}" style="width:84px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${mixCountText(r)}</div>`;
     h += '</div>';
@@ -1207,6 +1207,26 @@ function onMixInput() {
   // vài ô rồi đóng luôn, và một lần ghi ~1KB là không đáng kể. Cũng KHÔNG cần chờ tổng
   // đúng 100 — tỷ lệ dở dang (ví dụ 95%) vẫn phải được nhớ đúng như nó đang là.
   saveMix();
+}
+
+// Chờ người dùng NGỪNG GÕ rồi mới chia lại (19/9/2026 — lỗi báo từ ĐIỆN THOẠI: "khi chỉnh số
+// tỷ lệ tăng giảm thì các bộ đề khác không tự chia"). Nguyên nhân: trên Android, nút "ẩn bàn
+// phím" KHÔNG làm ô mất tiêu điểm, mà change chỉ chạy khi RỜI Ô — nên bảng đứng im dù người
+// dùng đã sửa xong. Hẹn giờ thì không phụ thuộc vào việc ô có mất tiêu điểm hay không.
+// Gõ "0" rồi "5" vẫn an toàn: mỗi nhịp gõ đều đặt lại đồng hồ, và nếu có chia sớm thì lần chốt
+// cuối vẫn ghim ĐÚNG số cuối cùng của dòng đó rồi chia lại phần còn lại (luật ở rebalanceAround).
+const MIX_COMMIT_DELAY_MS = 700;
+let _mixCommitTimer = null;
+
+function onMixTyped() {
+  onMixInput();                                  // đọc + ghi vào máy NGAY như cũ
+  clearTimeout(_mixCommitTimer);
+  _mixCommitTimer = setTimeout(function () {
+    _mixCommitTimer = null;
+    const el = document.activeElement;
+    const id = (el && el.id && el.id.indexOf('mixPct-') === 0) ? el.id.slice(7) : null;
+    onMixCommit(id);                             // id rỗng = chỉ vẽ lại, không chia
+  }, MIX_COMMIT_DELAY_MS);
 }
 
 // Ghi _mix.pct trở lại các Ô NHẬP. Cần riêng hàm này vì paintMix() chỉ vẽ cột số câu,

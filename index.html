@@ -141,7 +141,7 @@ body {
    thành một cột khi cửa sổ hẹp hơn ~248px — không bao giờ tràn chữ. */
 .chip-row {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px; margin-top: 10px;
+  gap: 8px; margin-top: 8px;
 }
 .quiz-toggle.chip { padding: 7px 8px; text-align: center; }
 
@@ -165,9 +165,13 @@ body {
 .lib-act-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
 
 /* ── QUIZ ───────────────────────── */
+/* Lề giữa các bảng trên trang chủ, siết 19/9/2026 ("khoảng cách các bảng này nhỏ lại"):
+   chủ yếu là PADDING chứ không phải margin — nhìn vào khe giữa hai thẻ là thấy 10px lề
+   trong + 5px margin + 10px lề trong, nên chỉ hạ margin thì gần như không đổi. Đây là chỗ
+   NGƯỢC với thanh dính (thanh dính siết để đỡ che nội dung, còn ở đây chỉ để đỡ trống). */
 .quiz-card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 11px; margin: 8px 0;
+  border-radius: 12px; padding: 10px; margin: 5px 0;
 }
 .quiz-input {
   width: 100%; padding: 10px; border-radius: 10px;
@@ -284,7 +288,7 @@ body {
    ≈108px chỗ cho chữ. Bốn nút trên MỘT hàng là không thể ở cỡ 17px (mỗi nút chỉ
    còn ≈78px, không đủ cho nhãn), nên 2×2 là cách duy nhất để cả bốn đều nhau. */
 .set-acts {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 9px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;
   grid-auto-rows: 1fr;   /* cửa sổ rất hẹp: có nhãn phải xuống 2 dòng thì cả bốn nút vẫn cao bằng nhau */
 }
 .set-acts .quiz-btn { width: 100%; padding: 9px 6px; text-align: center; }
@@ -359,7 +363,11 @@ body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --bo
 body.light-mode .set-name {
   background: rgba(29,78,216,0.10);
   border-color: rgba(29,78,216,0.6);
-  color: #000000;
+  /* Chữ XANH DƯƠNG ĐẬM (yêu cầu 19/9/2026) — trước là đen tuyền. Dùng #1e40af chứ không
+     phải --accent #1d4ed8: đây đúng là màu chữ xanh đậm app đã dùng cho chip đang bật ở
+     chế độ sáng, đo trên nền đã pha được 7,45:1. Chế độ tối vẫn giữ chữ TRẮNG — xanh đậm
+     trên nền tối là không đọc được, và luật cũ của người dùng vẫn là “trắng ở dark mode”. */
+  color: #1e40af;
 }
 /* Tên bộ đề trong bảng 🎲 Trộn đề: nền XANH LÁ NHẸ + chữ cùng tông (yêu cầu 18/9/2026).
    Cùng dáng với nhãn .set-name ở danh sách bộ đề nhưng KHÁC TÔNG màu (đỏ vs xanh lá)
@@ -379,14 +387,35 @@ body.light-mode .set-name {
   color: #ffffff;
   padding: 3px 8px; border-radius: 8px;
 }
-body.light-mode .mix-name { background: rgba(16,185,129,0.06); color: #000000; }
+/* Chế độ sáng: chữ XANH ĐEN (#134e4a), không phải đen tuyền (yêu cầu 19/9/2026).
+   Đổi màu chữ chứ KHÔNG đổi màu nền: nền vẫn là tint xanh lá 0,06 của .mix-name.
+   Đo trên nền đã pha (tint trên thẻ trắng #ffffff = rgb(241,251,247)): #134e4a được
+   8,97:1 — còn dễ đọc hơn cả đen tuyền vì bớt tương phản gắt. Đừng dùng #166534 ở đây:
+   đó là xanh LÁ (đang dùng cho đáp án đúng), trùng tông với nền tint của chính nhãn. */
+body.light-mode .mix-name { background: rgba(16,185,129,0.06); color: #134e4a; }
+/* Nút "↺ Mặc định" trong thẻ Trộn đề. Chỉ là CHỮ XANH có viền mảnh, không phải nút khối:
+   nó là lối thoát cho việc tỷ lệ đã được lưu vào máy, nên phải có nhưng không được tranh
+   chỗ với ba nút trộn thật. Vì là chữ trong thẻ nên phải dùng --accent-glow, KHÔNG dùng
+   --text-dim (chữ mờ trong thẻ này là chữ phụ 15px/400, nút cần nổi hơn một bậc).
+   KHÔNG dùng --accent ở đây: #1d4ed8 là màu cho NỀN NÚT (chữ trắng trên nó), làm màu
+   chữ trên nền thẻ tối chỉ đạt 4,0:1 — đúng cái bẫy --accent-glow sinh ra để tránh. */
+.mix-reset {
+  background: none; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--accent-glow); font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 400; padding: 4px 9px; cursor: pointer;
+}
+.mix-reset:hover { border-color: var(--accent-glow); }
+/* Chế độ sáng: #60a5fa trên thẻ trắng chỉ 2,5:1 — phải đổi sang xanh ĐẬM, cùng màu
+   #1e40af mà .quiz-toggle.on dùng ở chế độ sáng (7,45:1 trên nền chip). */
+body.light-mode .mix-reset { color: #1e40af; border-color: rgba(0,0,0,0.35); }
+body.light-mode .mix-reset:hover { border-color: #1e40af; }
 
 /* ── SEARCH ───────────────────────── */
 /* Thanh tìm kiếm đứng RIÊNG, ngay dưới thanh xanh trên cùng và TRÊN thẻ “📚 Thư viện
    bộ đề” (19/9/2026 — trước đó nó nằm trong thẻ). Vì ở ngoài thẻ nên KHÔNG có nền hay
    viền của .quiz-card: chỉ ô nhập (--navy-mid + viền --border) nổi trên nền trang.
    Lề trên 8px trùng nhịp với .main 0 8px hai bên, để nó thẳng hàng với các thẻ bên dưới. */
-.search-wrap { position: relative; margin: 8px 0 10px; }
+.search-wrap { position: relative; margin: 8px 0 6px; }
 .search-input {
   width: 100%; padding: 9px 12px 9px 34px;
   border-radius: 10px; border: 1.5px solid var(--border);
@@ -658,16 +687,52 @@ function saveSetAct() {
 function isSetActOn(setId, key) {
   return _setActSel.setId === setId && _setActSel.key === key;
 }
-// Mặc định của đề trộn: bài 100 câu, trong đó nhóm "kỹ năng mềm" chỉ chiếm 20 câu.
+// Mặc định của đề trộn: bài 100 câu, nên SỐ PHẦN TRĂM TRÙNG VỚI SỐ CÂU.
 const MIX_DEFAULT_TOTAL = 100;
-const SOFT_SET_SHARE = 20;   // % tổng bài dành cho CẢ nhóm bên dưới (không phải mỗi bộ)
-const SOFT_SET_KEYS = ['vanhoadoanhnghiep', 'chuanmucdaoduc', 'noiquylaodong'];
-const ZERO_SET_KEYS = ['bac67'];   // bộ mặc định 0% khi trộn (vẫn tự nâng lên được)
-// Bộ mặc định ĐÚNG một số phần trăm (không chia đều, không phải 0%). Mỗi dòng là
-// [từ khoá trong tên, phần trăm]. "Hệ thống thu thập dữ liệu từ xa" chỉ có 10 câu nên
-// tỷ lệ chia đều (12%) xin 12 câu — nhiều hơn số nó có, bài trộn bị hụt. 7% = 7 câu,
-// và 5% dôi ra được chia cho các bộ còn lại.
-const FIXED_SET_PCT = [['hethongthuthapdulieu', 7]];
+// Tỷ lệ tự chỉnh lưu ở đây. Đây là tỷ lệ DUY NHẤT trong app được lưu vào máy: các con
+// số kia (mặc định) là quy luật trong mã, còn cái này là công chỉnh tay của người dùng.
+const MIX_KEY = 'qlno_mix';
+// Trọng số để chia phần TĂNG/GIẢM giữa các bộ khi người dùng sửa một ô (yêu cầu 19/9/2026:
+// "khi tăng số lượng đề nào thì đề khác sẽ giảm tương ứng theo tỷ lệ số câu hỏi của từng
+// bộ đề"). 'questions' = bộ càng nhiều câu thì nhường/nhận càng nhiều (đang dùng).
+// Đổi sang 'share' là chia theo phần trăm hiện có (giữ nguyên tương quan) — một chữ ở đây.
+// MỘT luật dùng cho MỌI thay đổi (tăng, giảm, và cả khi nhập 0) để bảng chỉ có một cách
+// cư xử; trước 19/9 có luật riêng cho trường hợp nhập 0, đã gỡ để khỏi mâu thuẫn nhau.
+const MIX_REBALANCE_BY = 'questions';
+// Bộ mặc định 0% khi trộn (người dùng vẫn tự nâng lên được bằng tay). Danh sách do người
+// dùng chốt ngày 19/9/2026 — "còn lại chia đều cho các bộ đề khác, trừ bậc 6-7, các dịch vụ
+// điện, ghi điện và đo xa, giá điện, kiểm tra, lập hđ, tiết kiệm điện, tổn thất không chia".
+// LƯU Ý: bản trước của danh sách này có thêm 'chamsockh' (Chăm sóc KH), người dùng đã bỏ ra —
+// bộ đó giờ nằm trong nhóm chia đều. Đổi danh sách này là đổi MẶC ĐỊNH, không đụng tỷ lệ đang
+// lưu; muốn thấy mặc định mới phải bấm "↺ Mặc định" hoặc nạp lại thư viện.
+// So khớp bằng "chỉ chữ và số" giống nhóm ghim, nên 'ghidien&doxa' phải viết là
+// 'ghidiendoxa' (dấu & bị bỏ trước khi so). KHÔNG có từ khoá nào là chuỗi con của từ khoá khác
+// trong danh sách này, nhưng nếu thêm thì phải đặt dòng dài trước (some() chỉ cần một khớp).
+const ZERO_SET_KEYS = [
+  'bac67',            // KT điện cho CNKD-Bậc6_7   (mặc định cũ, vẫn giữ)
+  'cacdichvudien',    // Các dịch vụ điện
+  'ghidiendoxa',      // Ghi điện & Đo xa
+  'giadien',          // Giá điện
+  'kiemtra',          // Kiểm tra
+  'laphd',            // Lập HĐ
+  'tietkiemdien',     // Tiết kiệm điện & NLTT
+  'tonthat'           // Tổn thất & HSKV
+];
+// SÁU bộ mặc định đúng số câu của mình (không chia đều, không phải 0%). Mỗi dòng là
+// [từ khoá trong tên, số câu]. So khớp bằng "chỉ chữ và số" nên "Nội quy lao động BD-SHN"
+// vẫn khớp 'noiquylaodong'. Tổng sáu bộ = 40 câu; 60 câu còn lại chia đều cho các bộ khác
+// (thư viện 18 bộ hiện tại: 8 bộ bị loại ở trên, còn 4 bộ nhận 15 câu mỗi bộ).
+// Thứ tự dòng chỉ quan trọng khi có khoá này là CHUỖI CON của khoá khác: find() lấy dòng
+// khớp ĐẦU TIÊN, nên dòng dài phải đứng trước. Sáu khoá dưới đây không lồng nhau.
+// 'cnkdbac77' cố ý viết đủ để KHÔNG khớp "Bậc6_7" (…cnkdbac67), bộ đó thuộc nhóm 0%.
+const FIXED_SET_PCT = [
+  ['noiquylaodong', 8],          // Nội quy lao động BD-SHN
+  ['chuanmucdaoduc', 7],         // Chuẩn mực đạo đức
+  ['vanhoadoanhnghiep', 5],      // Văn hóa doanh nghiệp
+  ['cnkdbac77', 10],             // CNKD-Bậc7_7
+  ['hethongthuthapdulieu', 3],   // Hệ thống thu thập dữ liệu từ xa
+  ['cactinhhuong', 7]            // Các tình huống vi phạm sử dụng điện
+];
 let _mix = { total: MIX_DEFAULT_TOTAL, pct: {} };   // pct[setId] = phần trăm của bộ đó trong đề trộn
 
 function quizNewId(prefix) { return (prefix || 'q') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -796,7 +861,7 @@ function quizHomeHtml() {
   // ── Thư viện ──
   h += '<div class="quiz-card">';
   h += '<div style="font-size:17px;font-weight:500;margin-bottom:4px">📚 Thư viện bộ đề</div>';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:12px">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
+  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:9px">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
   // Trang chủ chỉ còn MỘT nút, mở bảng 📦. Nạp file, nạp cả thư mục, sao lưu và
   // phục hồi đều nằm trong bảng đó, nên hai nút “Chọn file”/“Thư mục” đã bị bỏ.
   h += '<div class="lib-act-row">';
@@ -823,10 +888,10 @@ function quizHomeHtml() {
   // ── Thi từng bộ đề ──
   h += '<div class="quiz-card">';
   h += '<div style="font-size:17px;font-weight:500;margin-bottom:2px">📝 Thi từng bộ đề</div>';
-  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:12px">Làm riêng từng bộ, hoặc mở để xem lại câu hỏi.</div>';
+  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:9px">Làm riêng từng bộ, hoặc mở để xem lại câu hỏi.</div>';
   quizLib.forEach(s => {
     const off = s.questions.length ? '' : ' disabled';
-    h += '<div class="set-box" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
+    h += '<div class="set-box" style="border:1px solid var(--border);border-radius:10px;padding:9px;margin-bottom:5px">';
     h += `<div style="font-size:17px;font-weight:500;line-height:1.4" title="${esc(s.name)}">`
       + `<span class="set-name">${esc(s.name)}</span></div>`;
     h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
@@ -910,6 +975,123 @@ function mixRows() {
   }));
 }
 
+// Cột số câu của bảng trộn: "lấy bao nhiêu / bộ có bao nhiêu" (yêu cầu 19/9/2026:
+// "thêm tổng số câu phía sau, ví dụ 7/20 câu").
+// Luôn đủ CẢ HAI đầu để đọc ra ngay mức độ phủ — "7/10" nói ngay là bộ chỉ có 10 câu.
+// Dấu "/" ở đây CHỈ có một nghĩa (lấy/tổng); chuyện THIẾU câu không nhét vào cột này nữa mà
+// do dòng cảnh báo nói rõ ("cần 12 nhưng bộ chỉ có 10"), trước đây cột dùng "/" cho cả hai
+// nghĩa nên "10/12" vừa là lấy/tổng vừa là lấy/cần — không đọc được.
+function mixCountText(r) {
+  return r.got + '/' + r.set.questions.length + ' câu';
+}
+
+// ── LƯU / KHÔI PHỤC TỶ LỆ TRỘN VÀO MÁY ──
+// Yêu cầu 19/9/2026: "Lưu tỷ lệ trộn đề mà tôi tự chỉnh vào máy, để mở app lần sau vẫn
+// giữ đúng tỷ lệ đó."
+//
+// File lưu có BỐN trường, và trường `keyed` mới là trường quan trọng:
+//   total : tổng số câu của bài
+//   sig   : id các bộ theo đúng thứ tự thư viện — "dấu vân tay" để biết thư viện còn
+//           Y HỆT lần lưu hay không
+//   pct   : { setId: phần trăm } — dùng khi sig khớp
+//   keyed : [[khoá tên, phần trăm]] — dùng khi sig KHÁC (nạp thêm bộ, xoá bộ, hoặc phục
+//           hồi từ file .json làm MỌI id đổi mới). Nếu chỉ lưu theo id thì mỗi lần phục
+//           hồi file là tỷ lệ chỉnh tay mất sạch — mà đây lại là thao tác người dùng làm
+//           nhiều lần trong ngày (3 lần trong phiên 19/9).
+// Khoá tên dùng quizKey() nên khớp được cả khi tên có gạch dưới/khoảng trắng khác nhau;
+// hai bộ TRÙNG tên thì dòng sau thắng — chấp nhận, vì chúng cũng trùng số câu.
+function saveMix() {
+  try {
+    localStorage.setItem(MIX_KEY, JSON.stringify({
+      total: _mix.total,
+      sig: quizLib.map(s => s.id).join(','),
+      pct: _mix.pct,
+      keyed: quizLib.map(s => [quizKey(s.name), pctOf(s.id)])
+    }));
+  } catch (e) {}
+}
+
+// Trả về true nếu đọc lại được tỷ lệ đã lưu (false = giữ nguyên mặc định).
+// LUÔN gọi SAU resetMixDefaults(), vì đường ghép theo tên dựa vào mặc định cho những bộ
+// không có trong file lưu.
+function restoreMix() {
+  if (!quizLib.length) return false;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(MIX_KEY) || 'null'); } catch (e) { saved = null; }
+  if (!saved || typeof saved !== 'object') return false;
+  const t = parseInt(saved.total, 10);
+  if (t > 0) _mix.total = Math.min(t, Math.max(1, totalQuestions()));
+  // Nhánh 1 — thư viện không đổi: dùng thẳng id, không suy diễn gì thêm, và CHỈ nhận id
+  // còn tồn tại (bộ đã xoá thì mục của nó bị bỏ, không hồi sinh số 0 lạ).
+  if (saved.pct && saved.sig === quizLib.map(s => s.id).join(',')) {
+    _mix.pct = {};
+    quizLib.forEach(s => { _mix.pct[s.id] = clampPct(saved.pct[s.id]); });
+    return true;
+  }
+  // Nhánh 2 — thư viện đã đổi: ghép lại theo TÊN. Bộ khớp giữ đúng số người dùng đặt,
+  // bộ mới/không khớp giữ mặc định vừa tính, rồi cân cả bảng về 100.
+  if (!Array.isArray(saved.keyed)) return false;
+  const byKey = {};
+  saved.keyed.forEach(function (row) {
+    if (Array.isArray(row) && row.length === 2) byKey[row[0]] = row[1];
+  });
+  let hit = 0;
+  quizLib.forEach(s => {
+    const k = quizKey(s.name);
+    if (k in byKey) { _mix.pct[s.id] = clampPct(byKey[k]); hit++; }
+  });
+  if (!hit) return false;   // thư viện hoàn toàn khác → để mặc định, đừng bịa số
+  balanceMixTo100();
+  return true;
+}
+
+// Cân lại _mix.pct cho tổng đúng 100, GIỮ NGUYÊN tỷ lệ tương đối. Dùng ở nhánh ghép-theo-tên
+// và ở chỗ tự chia lại khi một bộ về 0.
+//
+// Chia phần lẻ theo "SỐ DƯ LỚN NHẤT" (đúng cách mixRows() chia câu): lấy phần nguyên trước,
+// rồi mỗi hàng có phần lẻ lớn nhất nhận thêm 1 — mỗi hàng NHIỀU NHẤT 1 điểm.
+// Đừng quay lại cách cũ (Math.round từng hàng rồi dồn hết phần lệch vào hàng lớn nhất):
+// với 18 bộ, làm tròn sinh tổng lệch tới 3 điểm, dồn hết vào một hàng làm bộ ghim 10% tụt
+// còn 8% trong khi các hàng khác lại tăng — đo được đúng như vậy ngày 19/9/2026.
+// Hàng đang 0% KHÔNG bao giờ nhận điểm: chúng bị loại khỏi danh sách chia phần lẻ, nếu không
+// một bộ đang bị loại (ví dụ Bậc 6-7) có thể thành 1%.
+function balanceMixTo100() {
+  const ids = quizLib.map(s => s.id);
+  if (!ids.length) return;
+  const cur = ids.map(id => pctOf(id));
+  const sum = cur.reduce((a, v) => a + v, 0);
+  if (sum === 100) return;
+  if (sum <= 0) { Object.assign(_mix.pct, splitPctEven(ids, 100)); return; }
+  const raw = cur.map(v => v * 100 / sum);
+  const out = raw.map(v => Math.floor(v));
+  let left = 100 - out.reduce((a, v) => a + v, 0);
+  const order = raw
+    .map((v, i) => ({ i: i, frac: v - Math.floor(v), live: cur[i] > 0 }))
+    .filter(x => x.live)
+    .sort((a, b) => b.frac - a.frac);
+  let k = 0;
+  while (left > 0 && k < order.length) { out[order[k].i]++; left--; k++; }
+  // Chốt an toàn cho trường hợp bất thường (số âm / NaN): dồn nốt vào hàng lớn nhất.
+  if (left) {
+    let big = 0;
+    out.forEach((v, i) => { if (v > out[big]) big = i; });
+    out[big] = Math.max(0, out[big] + left);
+  }
+  ids.forEach((id, i) => { _mix.pct[id] = Math.max(0, out[i]); });
+}
+
+// Nút "↺ Mặc định": quên tỷ lệ chỉnh tay, VỀ mặc định của app trong mã, và ghi luôn mặc
+// định đó vào máy — nếu không thì lần mở sau tỷ lệ cũ lại quay về.
+function resetMixToDefaults() {
+  resetMixDefaults();
+  saveMix();
+  renderQuiz();
+}
+
+// Gọi mỗi khi THƯ VIỆN đổi (nạp file, xoá bộ, phục hồi). Tính lại mặc định rồi ghép tỷ lệ
+// đã lưu lên trên: nạp thêm bộ không làm mất công chỉnh tay, mà bộ mới vẫn được chia phần.
+function refreshMix() { resetMixDefaults(); restoreMix(); }
+
 // ── SEARCH ────────────────────────────────────────────────
 // Tìm kiếm câu hỏi theo nội dung. Hiển thị câu hỏi + đáp án đúng.
 function onSearch() {
@@ -958,17 +1140,23 @@ function quizMixHtml() {
   h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:2px 0 12px">Đặt phần trăm cho từng bộ; tổng phải đúng 100%.</div>';
   h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
   h += '<div style="flex:1;font-size:15px;font-weight:400">Tổng số câu của bài</div>';
-  h += `<input id="mixTotal" type="number" min="1" max="${Math.max(1, totalQuestions())}" class="quiz-input" style="width:88px;text-align:center" value="${mixTotalValue()}" oninput="onMixInput()">`;
+  // Ô nhập trong bảng trộn để cỡ 15px cho BẰNG các chữ xung quanh (yêu cầu 19/9/2026).
+  // Cố ý KHÔNG hạ .quiz-input xuống 15px: lớp đó còn dùng cho ô đổi tên bộ đề ở bảng 📦
+  // (ô nhập tên là chữ chính, phải giữ 17px/500). Chỉ hai ô của bảng trộn hạ cỡ.
+  h += `<input id="mixTotal" type="number" min="1" max="${Math.max(1, totalQuestions())}" class="quiz-input" style="width:88px;text-align:center;font-size:15px" value="${mixTotalValue()}" oninput="onMixInput()">`;
   h += '</div>';
   rows.forEach(r => {
     h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
     h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span class="mix-name">${esc(r.set.name)}</span></div>`;
-    h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center" value="${r.pct}" oninput="onMixInput()">`;
+    h += `<input id="mixPct-${r.set.id}" type="number" min="0" max="100" class="quiz-input" style="width:62px;text-align:center;font-size:15px" value="${r.pct}" oninput="onMixInput()" onchange="onMixCommit('${r.set.id}')">`;
     h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim)">%</div>';
-    h += `<div id="mixCnt-${r.set.id}" style="width:62px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${r.got} câu</div>`;
+    h += `<div id="mixCnt-${r.set.id}" style="width:84px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${mixCountText(r)}</div>`;
     h += '</div>';
   });
-  h += '<div id="mixSum" style="font-size:15px;font-weight:400;margin-top:10px"></div>';
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-top:10px">';
+  h += '<div id="mixSum" style="flex:1;font-size:15px;font-weight:400"></div>';
+  h += '<button class="mix-reset" onclick="resetMixToDefaults()" title="Về tỷ lệ mặc định của app">↺ Mặc định</button>';
+  h += '</div>';
   h += '<div id="mixWarn" style="font-size:15px;font-weight:400;color:var(--gold);margin-top:4px"></div>';
   h += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">';
   h += `<button id="mixBtnSingle" class="big-upload-btn" style="width:100%" onclick="mixExam('single')">🎲 Trộn &amp; thi từng câu</button>`;
@@ -991,14 +1179,14 @@ function paintMix() {
   rows.forEach(r => {
     const el = document.getElementById('mixCnt-' + r.set.id);
     if (!el) return;
-    el.textContent = (r.want === r.got ? r.got : r.got + '/' + r.want) + ' câu';
+    el.textContent = mixCountText(r);
     el.style.color = (r.want === r.got) ? 'var(--text-dim)' : 'var(--gold)';
   });
   const short = rows.filter(r => r.want > r.got);
   const warnEl = document.getElementById('mixWarn');
   if (warnEl) {
     warnEl.textContent = short.length
-      ? 'Không đủ câu: ' + short.map(r => r.set.name + ' chỉ có ' + r.set.questions.length + ' câu').join(', ')
+      ? 'Không đủ câu: ' + short.map(r => r.set.name + ' cần ' + r.want + ' nhưng bộ chỉ có ' + r.set.questions.length + ' câu').join(', ')
       : '';
   }
   ['mixBtnSingle', 'mixBtnAll', 'mixBtnStudy'].forEach(id => {
@@ -1015,13 +1203,97 @@ function onMixInput() {
     if (el) _mix.pct[s.id] = clampPct(parseInt(el.value, 10));
   });
   paintMix();
+  // Ghi vào máy NGAY mỗi lần gõ, không chờ rời ô hay đóng app: người dùng thường chỉnh
+  // vài ô rồi đóng luôn, và một lần ghi ~1KB là không đáng kể. Cũng KHÔNG cần chờ tổng
+  // đúng 100 — tỷ lệ dở dang (ví dụ 95%) vẫn phải được nhớ đúng như nó đang là.
+  saveMix();
 }
 
-// Nhóm "kỹ năng mềm": khớp theo TỪ KHOÁ trong tên bộ đề (bỏ dấu, bỏ gạch dưới),
-// nên đổi tên kiểu "Văn hóa doanh nghiệp EVN" vẫn nhận ra.
-function isSoftSet(name) {
-  const k = quizKey(name);
-  return SOFT_SET_KEYS.some(w => k.indexOf(w) >= 0);
+// Ghi _mix.pct trở lại các Ô NHẬP. Cần riêng hàm này vì paintMix() chỉ vẽ cột số câu,
+// không động vào giá trị trong ô — sau khi tự chia lại mà không ghi lại thì màn hình vẫn
+// hiện số CŨ dù bảng đã tính theo số MỚI.
+function syncMixInputs() {
+  quizLib.forEach(s => {
+    const el = document.getElementById('mixPct-' + s.id);
+    if (el) el.value = pctOf(s.id);
+  });
+}
+
+// Trọng số của một bộ khi chia phần tăng/giảm: số câu hỏi bộ đó có (hoặc phần trăm đang
+// đặt, nếu MIX_REBALANCE_BY = 'share').
+function mixWeight(s) {
+  return MIX_REBALANCE_BY === 'share'
+    ? Math.max(0, pctOf(s.id))
+    : Math.max(0, (s.questions || []).length);
+}
+
+// Chia `amount` điểm cho danh sách theo TRỌNG SỐ, trả về mảng số nguyên tổng đúng bằng
+// `amount` — cùng phương pháp "số dư lớn nhất" với mixRows()/balanceMixTo100().
+function splitByWeight(list, amount) {
+  const out = list.map(() => 0);
+  if (amount <= 0 || !list.length) return out;
+  const totalW = list.reduce((a, s) => a + mixWeight(s), 0);
+  if (totalW <= 0) return out;   // mọi trọng số = 0 (bộ không có câu nào) → chia được gì thì chia
+  const raw = list.map(s => amount * mixWeight(s) / totalW);
+  raw.forEach((v, i) => { out[i] = Math.floor(v); });
+  let left = amount - out.reduce((a, v) => a + v, 0);
+  const order = raw.map((v, i) => ({ i: i, frac: v - Math.floor(v) }))
+    .sort((a, b) => b.frac - a.frac);
+  let k = 0;
+  while (left > 0 && k < order.length) { out[order[k].i]++; left--; k++; }
+  return out;
+}
+
+// Lấy bớt `amount` điểm khỏi danh sách, KHÔNG để bộ nào xuống dưới 0. Bộ nào không đủ để
+// nhường thì nhường hết phần mình có, phần còn thiếu chia tiếp cho các bộ khác — nên bộ
+// nhỏ không bao giờ bị đẩy thành số âm (tổng sẽ sai ngay nếu có số âm).
+function takeFromSets(list, amount) {
+  let left = amount, guard = 0;
+  while (left > 0 && guard++ < 30) {
+    const live = list.filter(s => pctOf(s.id) > 0);
+    if (!live.length) break;
+    const step = splitByWeight(live, left);
+    let taken = 0;
+    live.forEach((s, i) => {
+      const take = Math.min(step[i], pctOf(s.id));
+      _mix.pct[s.id] = pctOf(s.id) - take;
+      taken += take;
+    });
+    if (!taken) break;               // không lấy được gì nữa → thoát, đừng lặp vô hạn
+    left -= taken;
+  }
+  return left === 0;
+}
+
+// Cân lại quanh bộ vừa được sửa: giữ ĐÚNG giá trị người dùng vừa nhập cho bộ đó, rồi
+// - nếu tổng đang thiếu (bộ kia bị TĂNG): lấy bớt từ các bộ còn lại
+// - nếu tổng đang thừa (bộ kia bị GIẢM): chia thêm cho các bộ còn lại
+// theo trọng số mixWeight() — mặc định là số câu hỏi của từng bộ.
+// Bộ đang 0% KHÔNG được nhận thêm: đang 0% nghĩa là "bộ này không lấy câu nào", nhất quán
+// với luật nhập 0 ở dưới.
+function rebalanceAround(id) {
+  const others = quizLib.filter(s => s.id !== id);
+  const have = others.reduce((a, s) => a + pctOf(s.id), 0);
+  const diff = (100 - pctOf(id)) - have;      // >0 các bộ khác phải tăng, <0 phải giảm
+  if (diff === 0) return false;
+  if (diff < 0) return takeFromSets(others, -diff);
+  const live = others.filter(s => pctOf(s.id) > 0);
+  if (!live.length) return false;             // không còn ai để nhận → để nguyên, cảnh báo lo
+  const add = splitByWeight(live, diff);
+  live.forEach((s, i) => { _mix.pct[s.id] = pctOf(s.id) + add[i]; });
+  return true;
+}
+
+// Chạy khi RỜI Ô (hoặc Enter) — cố ý KHÔNG chạy ở sự kiện input: gõ "0" hay "1" có thể chỉ
+// là bước trung gian khi sửa 15 → 0 rồi 5, chạy ngay lúc đó thì bảng đã chia lại xong mới
+// nhận nốt chữ số và tổng vọt lên quá 100. Ở sự kiện change thì giá trị đã chốt.
+function onMixCommit(id) {
+  onMixInput();                                   // đọc lại hết các ô trước khi tính
+  if (!id) { paintMix(); return; }
+  if (!rebalanceAround(id)) { paintMix(); return; }
+  syncMixInputs();
+  paintMix();
+  saveMix();                                      // số mới là số phải nhớ, không phải số cũ
 }
 
 // Nhóm "mặc định 0%": bộ KHÔNG được lấy câu khi trộn (người dùng vẫn tự nâng phần
@@ -1050,47 +1322,40 @@ function splitPctEven(ids, budget) {
   return out;
 }
 
-// Tỷ lệ mặc định chia làm BỐN nhóm, xét theo thứ tự:
-//   1. kỹ năng mềm (SOFT_SET_KEYS)  → cả nhóm 20% chia nhau (bài 100 câu -> 20 câu)
-//   2. cố định (FIXED_SET_PCT)      → mỗi bộ đúng số phần trăm của nó
-//   3. 0% (ZERO_SET_KEYS)           → không lấy câu nào
-//   4. còn lại                      → chia đều phần còn lại (100 - 20 - cố định)
+// Tỷ lệ mặc định chia làm BA nhóm, xét theo thứ tự:
+//   1. cố định (FIXED_SET_PCT)  → mỗi bộ đúng số câu của nó (8/7/5/10/3/7 = 40 câu)
+//   2. 0% (ZERO_SET_KEYS)       → không lấy câu nào (bậc 6-7)
+//   3. còn lại                  → chia đều 100 - 40 = 60 câu
+// Bộ nào bị ĐỔI TÊN đến mất khoá thì tự rơi xuống nhóm chia đều — không vỡ app.
 function resetMixDefaults() {
   _mix.total = Math.min(MIX_DEFAULT_TOTAL, Math.max(1, totalQuestions()));
   _mix.pct = {};
   if (!quizLib.length) return;
-  const soft = [];
   let fixed = [];        // [{ s, pct }]
   const zero = [];
   let rest = [];
   quizLib.forEach(s => {
-    if (isSoftSet(s.name)) { soft.push(s); return; }
     const f = fixedPctFor(s.name);
     if (f !== null) { fixed.push({ s: s, pct: f }); return; }
     if (isZeroSet(s.name)) { zero.push(s); return; }
     rest.push(s);
   });
-  // Nhóm kỹ năng mềm lấy 20%, TRỪ khi không có bộ nào khớp (đổi tên hết) thì các bộ
-  // còn lại phải nhận đủ 100%, nếu không tổng sẽ là 80% và nút trộn bị khoá.
-  let softBudget = soft.length ? SOFT_SET_SHARE : 0;
   let fixedBudget = fixed.reduce((a, x) => a + x.pct, 0);
   // Chốt an toàn: nếu người dùng đổi tên nhiều bộ trùng khoá cố định đến mức tổng
   // vượt 100 thì cắt nhóm cố định lại, để phần chia đều không bị âm (số âm sẽ làm
   // splitPctEven chia ra số vô lý và nút trộn bị khoá).
-  if (fixedBudget + softBudget > 100) fixedBudget = Math.max(0, 100 - softBudget);
+  if (fixedBudget > 100) fixedBudget = 100;
   // Nhóm cố định và nhóm 0% nhận phần của mình — nhưng nếu KHÔNG còn bộ nào nhận
-  // phần chia đều (thư viện chỉ có bộ kỹ năng mềm / cố định / 0%) thì phần đó phải
-  // trả về cho một trong các nhóm kia, nếu không tổng không đủ 100% và cả ba nút
-  // trộn bị khoá. Ưu tiên trả về cho nhóm 0%, rồi mới đến nhóm cố định; nếu thư
-  // viện chỉ toàn bộ kỹ năng mềm thì chính nhóm đó nhận đủ 100%.
+  // phần chia đều (thư viện chỉ có bộ cố định và bộ 0%) thì phần đó phải trả về cho
+  // một trong hai nhóm kia, nếu không tổng không đủ 100% và các nút trộn bị khoá.
+  // Ưu tiên trả về cho nhóm 0%, rồi mới đến nhóm cố định.
   if (!rest.length) {
     if (zero.length) rest = zero;
     else if (fixed.length) { rest = fixed.map(x => x.s); fixed = []; fixedBudget = 0; }
-    else softBudget = 100;
   }
-  // Nhóm cố định: mỗi bộ nhận ĐÚNG số của nó — không dùng splitPctEven vì hai bộ
-  // cố định khác số nhau (7% và 5%) mà chia đều thì thành 6/6. Nếu chốt an toàn ở
-  // trên phải cắt thì cắt theo tỷ lệ và dồn phần lẻ vào bộ cuối để tổng vẫn đúng.
+  // Nhóm cố định: mỗi bộ nhận ĐÚNG số của nó — không dùng splitPctEven vì sáu bộ
+  // khác số nhau (8/7/5/10/3/7) mà chia đều thì thành 6/6/7/7/6/7. Nếu chốt an toàn
+  // ở trên phải cắt thì cắt theo tỷ lệ và dồn phần lẻ vào bộ cuối để tổng vẫn đúng.
   const wantFixed = fixed.reduce((a, x) => a + x.pct, 0);
   const scale = wantFixed > fixedBudget ? fixedBudget / wantFixed : 1;
   let fixedSum = 0;
@@ -1099,8 +1364,7 @@ function resetMixDefaults() {
     _mix.pct[x.s.id] = v;
     fixedSum += v;
   });
-  const restBudget = Math.max(0, 100 - softBudget - fixedSum);
-  Object.assign(_mix.pct, splitPctEven(soft.map(s => s.id), softBudget));
+  const restBudget = Math.max(0, 100 - fixedSum);
   Object.assign(_mix.pct, splitPctEven(rest.map(s => s.id), restBudget));
   // Bộ mặc định 0% (khi không phải nhóm dự phòng ở trên) ghi rõ 0% cho dễ đọc code.
   zero.forEach(s => { if (!(s.id in _mix.pct)) _mix.pct[s.id] = 0; });
@@ -1613,7 +1877,7 @@ async function handleQuizImport(inp) {
   }
 
   saveLib();
-  resetMixDefaults();
+  refreshMix();
   _quizMode = 'home';
   renderQuiz();
 
@@ -1748,7 +2012,7 @@ function applyRestore() {
   });
   const kept = quizLib.length - added - updated;
   _restorePreview = null; _restoreConfirm = false;
-  saveLib(); resetMixDefaults();
+  saveLib(); refreshMix();
   _quizMode = 'home';
   renderLibPanel(); renderQuiz();
   alert('Đã phục hồi từ file:\n• ' + added + ' bộ đề mới\n• ' + updated + ' bộ đề được cập nhật'
@@ -1770,7 +2034,7 @@ function applyRestoreReplace() {
   });
   _restorePreview = null; _restoreConfirm = false;
   _libPending = null; _libSetId = null; _renamingSetId = null;
-  saveLib(); resetMixDefaults();
+  saveLib(); refreshMix();
   _quizMode = 'home';
   renderLibPanel(); renderQuiz();
   alert('Đã thay thế toàn bộ thư viện:\n• xoá ' + removed + ' bộ đề cũ\n• nạp lại ' + quizLib.length
@@ -1929,14 +2193,14 @@ function deleteSet(id) {
   quizLib = quizLib.filter(s => s.id !== id);
   if (_libSetId === id) _libSetId = null;
   _libPending = null;
-  saveLib(); resetMixDefaults();
+  saveLib(); refreshMix();
   renderLibPanel(); renderQuiz();
 }
 function askClearLibrary() { _libPending = { kind: 'all' }; renderLibPanel(); }
 function clearLibrary() {
   quizLib = []; _libSetId = null;
   _libPending = null; _renamingSetId = null;
-  saveLib(); resetMixDefaults();
+  saveLib(); refreshMix();
   renderLibPanel(); renderQuiz();
 }
 
@@ -2050,7 +2314,7 @@ function studyPick(qi, oi) {
 
 // ── KHỞI ĐỘNG ──────────────────────────
 loadLib();
-resetMixDefaults();
+refreshMix();   // = resetMixDefaults() + ghép lại tỷ lệ trộn đã lưu trong máy
 renderQuiz();
 
 </script>

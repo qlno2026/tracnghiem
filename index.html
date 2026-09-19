@@ -183,6 +183,43 @@ body {
   color: var(--text); font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
 }
 .quiz-input:focus { outline: none; border-color: var(--accent); }
+/* ── DROPDOWN CHỌN BỘ ĐỀ: VIỀN XANH DƯƠNG NEON (19/9/2026 — "tôi muốn có viền xanh dương neon
+   ở tab dropdow"). Chỉ đụng viền + quầng sáng, KHÔNG đổi nền và chữ: quầng sáng mà đặt trên nền
+   sáng thì chữ sẽ khó đọc, còn viền thì không ảnh hưởng gì.
+   Hai lần viền: 1px lằn ngoài (làm viền trông dày mà không phải tăng border-width — tăng
+   border sẽ nhảy bố cục 0,5px) + quầng toả 10px phía sau cho ra cảm giác "neon".
+   Chế độ SÁNG phải dùng xanh ĐẬM hơn (#0ea5e9 → thấy rõ trên nền trắng); #38bdf8 trên nền trắng
+   gần như tan biến, còn trên nền tối thì #0ea5e9 lại quá tối để gọi là neon. */
+#setSelect {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.55), 0 0 10px rgba(56, 189, 248, 0.45);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#setSelect:hover, #setSelect:focus {
+  border-color: #7dd3fc;
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.85), 0 0 15px rgba(56, 189, 248, 0.65);
+}
+body.light-mode #setSelect {
+  /* Nền TRẮNG XÁM cho chính ô dropdown (19/9/2026 — "tôi muốn nền dropdow màu trắng xám").
+     Trước đó chỉ bảng xổ xuống là trắng xám còn ô nhập vẫn trắng tinh (do luật
+     `body.light-mode .quiz-input`), nên hai phần nhìn lệch nhau.
+     Lấy đúng #e9ecef = nền trang ở chế độ sáng, trùng màu bảng xổ xuống.
+     Khai báo ở đây là thắng chắc: `body.light-mode #setSelect` (1,1,1) mạnh hơn
+     `body.light-mode .quiz-input` (0,2,1) nhờ có ID, không phụ thuộc thứ tự. */
+  background: #e9ecef;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.5), 0 0 9px rgba(14, 165, 233, 0.35);
+}
+/* Ô chọn màu chữ/mũi tên của <select> do TRÌNH DUYỆT vẽ, không theo CSS của trang. Chỉ khai báo
+   để mũi tên không hoà vào nền; không thêm mũi tên riêng vì như vậy sẽ thành hai mũi tên. */
+#setSelect option { background: var(--navy-mid); color: var(--text); }
+/* Bảng XỔ XUỐNG của dropdown ở CHẾ ĐỘ SÁNG phải có nền TRẮNG XÁM (19/9/2026 — ảnh chụp của người
+   dùng: danh sách bộ đề vẫn đen trong khi app đang ở chế độ sáng).
+   Lý do lỗi: luật trên dùng --navy-mid (#1a1d24) mà khối body.light-mode KHÔNG hề đổi biến đó —
+   nền của ô nhập thì đã trắng, nhưng danh sách xổ ra vẫn lấy màu tối.
+   Màu nền lấy đúng #e9ecef (nền trang ở chế độ sáng) để bảng xổ trông liền với trang; những mục
+   được trỏ vào do trình duyệt tự tô xanh, không cần khai báo. */
+body.light-mode #setSelect option { background: #e9ecef; color: #1e293b; }
 .quiz-opt {
   display: flex; align-items: flex-start; gap: 8px; width: 100%;
   text-align: left; padding: 9px; margin-bottom: 6px;
@@ -229,6 +266,12 @@ body {
 .quiz-fb.show { display: block; }
 .quiz-fb.ok { background: rgba(16,185,129,0.14); border: 1px solid var(--green); }
 .quiz-fb.no { background: rgba(239,68,68,0.14); border: 1px solid var(--red); }
+/* Chọn SAI thì KHÔNG còn hộp đỏ "Chưa đúng" (19/9/2026 — "tôi chỉ muốn bỏ bảng chưa đúng").
+   Vẫn dùng đúng thẻ div đó (JS chỉ đổi class, không phải sửa chỗ nào khác) nhưng bỏ nền, viền
+   và lề trong — còn lại một dòng chữ nêu ĐÁP ÁN ĐÚNG, thứ người dùng yêu cầu khôi phục.
+   KHÔNG gắn class 'no' cùng lúc với 'plain': body.light-mode .quiz-fb.no (0,3,0) sẽ thắng
+   .quiz-fb.plain (0,2,0) và hộp đỏ quay lại ở chế độ sáng. */
+.quiz-fb.plain { background: none; border: none; padding: 0; }
 .quiz-all-head {
   position: sticky; z-index: 5;
   top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
@@ -427,6 +470,24 @@ body.light-mode .mix-name { background: rgba(16,185,129,0.06); color: #134e4a; }
    .quiz-input (ô đổi tên bộ đề dùng chung lớp đó, phải giữ 17px/10px lề). 46×35 thay vì 62×41:
    đủ chỗ cho 3 chữ số "100", và trả lại ~16px cho cột tên bộ đề. */
 .mix-input { width: 40px; padding: 5px 3px; text-align: center; font-size: 15px; }
+/* Ô SỐ (%) của bảng trộn: NỀN XANH NHẸ + CHỮ XANH + VIỀN XANH (19/9/2026 — "tôi muốn hàng số có
+   nền xanh nhẹ và chữ xanh, viền xanh"). Cùng cặp màu với viền neon của #setSelect nên hai chỗ
+   nhìn như một bộ.
+   Chỉ khai báo trên .mix-input — KHÔNG đụng .quiz-input: lớp đó còn là ô ĐỔI TÊN bộ đề trong
+   bảng 📦, và nếu tô ở đó thì ô đổi tên cũng xanh theo mà người dùng không hề yêu cầu.
+   Chữ phải là xanh SÁNG (#7dd3fc): chữ trắng trên nền tint xanh vẫn đọc được nhưng mất hẳn ý
+   "chữ xanh" người dùng muốn. */
+/* "cho nền và viền xanh nhẹ hơn" (19/9/2026, sau khi xem ảnh chụp): hạ độ đậm của NỀN và VIỀN.
+   Nền: alpha 0,14 → 0,08. Viền: thay màu ĐẶC bằng màu TRONG SUỐT (alpha 0,55) — cách này làm viền
+   nhạt đi mà KHÔNG phải giảm border-width, nên ô vẫn cao 31px như cũ (giảm độ dày viền sẽ làm
+   nhảy bố cục 0,5px, xem ghi chú của #setSelect).
+   Chữ giữ nguyên #7dd3fc: nền nhạt đi thì chữ phải giữ độ sáng mới còn đọc được. */
+.mix-input {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #7dd3fc;
+}
+.mix-input:focus { border-color: #7dd3fc; }
 /* Nhỏ thêm lần nữa (19/9/2026 — "cho ô số nhỏ thêm"): 46×35 → 40×30.
    Cỡ CHỮ vẫn 15px, chỉ cắt lề trong: chữ số là thứ phải đọc được, còn lề thừa mới là thứ
    chiếm chỗ. Lòng ô còn 32px, đủ cho "100" (đo được 26px) nên không bị cắt số 3 chữ số.
@@ -534,6 +595,15 @@ body.light-mode .modal { background: #f0f1f4; }
 body.light-mode .modal-handle { background: rgba(0,0,0,0.15); }
 body.light-mode .quiz-card { background: #ffffff; border-color: #c9d1da; }
 body.light-mode .quiz-input { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+/* Ô số của bảng trộn ở CHẾ ĐỘ SÁNG. Phải khai báo SAU `body.light-mode .quiz-input` ở trên:
+   hai luật cùng độ ưu tiên (0,2,0) nên luật nào đứng sau mới thắng — đặt trước là màu trắng
+   của .quiz-input đè mất, và lỗi này chỉ hiện ở chế độ sáng.
+   Chữ xanh ở đây phải ĐẬM (#075985): #38bdf8 trên nền trắng gần như không đọc được. */
+body.light-mode .mix-input {
+  background: rgba(14, 165, 233, 0.06);
+  border-color: rgba(14, 165, 233, 0.45);
+  color: #075985;
+}
 body.light-mode .quiz-btn { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
 body.light-mode .quiz-btn.primary { background: #1d4ed8; color: #ffffff; border-color: #1d4ed8; }
 body.light-mode .quiz-btn.danger { background: #dc2626; color: #ffffff; border-color: #dc2626; }
@@ -903,6 +973,14 @@ function setActBtn(setId, key, label, title, off) {
 
 // Ghi nhớ ô vừa bấm RỒI mới chạy hành động của ô đó: hành động mở màn khác nên không
 // kịp vẽ lại hàng nút, màu sẽ đúng ngay khi quay về trang chủ.
+function onSetSelect() {
+  const sel = document.getElementById('setSelect');
+  if (!sel) return;
+  _libSetId = sel.value;
+  saveSetAct();
+  renderQuiz();
+}
+
 function useSetAct(setId, key) {
   if (!SET_ACTS[key]) return;
   _setActSel = { setId: setId, key: key };
@@ -951,23 +1029,31 @@ function quizHomeHtml() {
     return h;
   }
 
-  // ── Thi từng bộ đề ──
+  // ── Thi từng bộ đề ── (dropdown thay vì list card)
   h += '<div class="quiz-card">';
   h += '<div style="font-size:17px;font-weight:500;margin-bottom:2px">📝 Thi từng bộ đề</div>';
-  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:9px">Làm riêng từng bộ, hoặc mở để xem lại câu hỏi.</div>';
+  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-bottom:9px">Chọn bộ đề trong dropdown rồi bấm nút thi bên dưới.</div>';
+  // Dropdown chọn bộ đề
+  h += '<div style="margin-bottom:12px">';
+  h += '<select id="setSelect" class="quiz-input" style="width:100%;padding:10px;font-size:15px;font-weight:500" onchange="onSetSelect()">';
   quizLib.forEach(s => {
-    const off = s.questions.length ? '' : ' disabled';
-    h += '<div class="set-box" style="border:1px solid var(--border);border-radius:10px;padding:9px;margin-bottom:5px">';
-    h += `<div style="font-size:17px;font-weight:500;line-height:1.4" title="${esc(s.name)}">`
-      + `<span class="set-name">${esc(s.name)}</span></div>`;
-    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
-    h += '<div class="set-acts">';
-    h += setActBtn(s.id, 'single', '▶️ Từng câu', 'Làm từng câu một', off);
-    h += setActBtn(s.id, 'all', '📋 Cả bộ', 'Làm cả bộ trong một trang', off);
-    h += setActBtn(s.id, 'study', '📖 Học', 'Học: chọn sai thì chọn lại', off);
-    h += setActBtn(s.id, 'browse', '👁 Câu hỏi', 'Xem danh sách câu hỏi của bộ này', '');
-    h += '</div></div>';
+    const sel = _libSetId === s.id ? ' selected' : '';
+    h += `<option value="${s.id}"${sel}>${esc(s.name)} (${s.questions.length} câu)</option>`;
   });
+  h += '</select>';
+  h += '</div>';
+  // Nút thi cho bộ đề được chọn
+  const selSet = libSet(_libSetId) || quizLib[0];
+  if (selSet) {
+    const off = selSet.questions.length ? '' : ' disabled';
+    h += '<div class="set-acts">';
+    h += setActBtn(selSet.id, 'single', '▶️ Từng câu', 'Làm từng câu một', off);
+    h += setActBtn(selSet.id, 'all', '📋 Cả bộ', 'Làm cả bộ trong một trang', off);
+    h += setActBtn(selSet.id, 'study', '📖 Học', 'Học: chọn sai thì chọn lại', off);
+    h += setActBtn(selSet.id, 'browse', '👁 Câu hỏi', 'Xem danh sách câu hỏi của bộ này', '');
+    h += '</div>';
+    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:8px">Bộ "${esc(selSet.name)}" có ${selSet.questions.length} câu hỏi</div>`;
+  }
   h += '</div>';
 
   // ── Trộn đề ──
@@ -1003,7 +1089,15 @@ function quizBrowseHtml() {
   s.questions.forEach((q, i) => {
     h += '<div style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
     h += `<div style="font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(q.q)}</div>`;
-    h += `<div style="font-size:15px;color:var(--green);margin-top:6px;font-weight:400">✓ ${esc(q.options[q.correct] || '—')}</div>`;
+    // Dòng đáp án đúng trong danh sách câu hỏi. Đã từng bị bỏ (19/9/2026 sáng) rồi được KHÔI PHỤC
+    // cùng ngày ("tôi muốn khôi phục câu đáp án trong ô câu hỏi") — đây là danh sách để HỌC,
+    // thiếu đáp án thì mở ra không dùng được gì.
+    // `correct` có thể là MỘT chỉ số hoặc MẢNG chỉ số (câu nhiều đáp án đúng): xử lý cả hai, giống
+    // onSearch() đang làm — in thẳng q.options[q.correct] với mảng sẽ ra undefined.
+    const ans = Array.isArray(q.correct)
+      ? q.correct.map(ix => q.options[ix] || '—').join(', ')
+      : (q.options[q.correct] || '—');
+    h += `<div style="font-size:15px;color:var(--green);margin-top:6px;font-weight:400">✓ ${esc(ans)}</div>`;
     h += '</div>';
   });
   h += '</div>';
@@ -1719,12 +1813,19 @@ function quizPlayHtml() {
   });
   if (answered) {
     const isRight = !!it.opts[st.chosen].ok;
-    const rightOpt = it.opts.find(o => o.ok);
-    h += '<div style="margin-top:6px;padding:11px;border-radius:10px;font-size:14px;line-height:1.55;' +
-      (isRight ? 'background:rgba(16,185,129,0.14);border:1px solid var(--green)' : 'background:rgba(239,68,68,0.14);border:1px solid var(--red)') + '">';
-    h += isRight ? '✅ <b>Chính xác!</b>' : '❌ <b>Chưa đúng.</b> Đáp án đúng: <b>' + esc(rightOpt ? rightOpt.t : '—') + '</b>';
-    if (it.explain) h += '<div style="margin-top:6px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
-    h += '</div>';
+    if (isRight) {
+      h += '<div style="margin-top:6px;padding:11px;border-radius:10px;font-size:14px;line-height:1.55;background:rgba(16,185,129,0.14);border:1px solid var(--green)">';
+      h += '✅ <b>Chính xác!</b>';
+      if (it.explain) h += '<div style="margin-top:6px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
+      h += '</div>';
+    } else if (it.explain) {
+      // Chọn SAI thì KHÔNG còn gì dưới các đáp án (19/9/2026 — "bỏ luôn hàng này cho gọn"): trước
+      // đó là hộp đỏ "Chưa đúng", rồi thu lại thành dòng "Đáp án đúng: …", giờ bỏ nốt. Hai đáp án
+      // ngay trên đã nói đủ: đáp án đúng viền xanh ✅, đáp án vừa chọn viền đỏ ❌.
+      // Chỉ còn LỜI GIẢI (💡) nếu file nguồn có cột giải thích — hiện thư viện không câu nào có,
+      // nên thực tế hàng này biến mất hoàn toàn.
+      h += '<div style="margin-top:6px;font-size:14px;line-height:1.55;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
+    }
     const last = st.idx === total - 1;
     h += `<button class="big-upload-btn" style="width:100%;margin-top:12px" onclick="${last ? 'finishQuiz()' : 'nextQuiz()'}">${last ? '🏁 Xem kết quả' : 'Câu tiếp →'}</button>`;
   }
@@ -1733,10 +1834,25 @@ function quizPlayHtml() {
   return h;
 }
 
+// Lớp của hộp phản hồi: đúng → hộp xanh; SAI → 'quiz-fb show plain' (đúng thẻ div đó nhưng
+// không nền/viền, xem .quiz-fb.plain). Dùng cặp hàm này ở cả "Cả bộ" và "Học" để hai chế độ
+// không lệch nhau.
+// Chọn ĐÚNG → hộp xanh ('show ok'). Chọn SAI → chỉ còn 'quiz-fb' TRẦN, không 'show', nghĩa là
+// CẢ HÀNG biến mất (19/9/2026 — "bỏ luôn hàng này cho gọn"). Đừng đổi nhánh sai thành 'show plain'
+// nữa: class đó tuy không vẽ hộp nhưng vẫn là display:block nên vẫn chiếm một khoảng trống.
+function quizFeedbackCls(it) {
+  if (it.opts[it.chosen].ok) return 'quiz-fb show ok';
+  // Sai: bình thường KHÔNG hiện gì ('quiz-fb' trần = display:none). Chỉ khi câu đó có LỜI GIẢI mới
+  // hiện, và lúc đó phải dùng 'plain' chứ không được dùng 'no' (nền đỏ) — hàng chỉ có chữ 💡.
+  return it.explain ? 'quiz-fb show plain' : 'quiz-fb';
+}
+
 function quizFeedbackHtml(it) {
   const isRight = !!it.opts[it.chosen].ok;
-  const right = it.opts.find(o => o.ok);
-  let s = isRight ? '✅ <b>Chính xác!</b>' : '❌ <b>Chưa đúng.</b> Đáp án đúng: <b>' + esc(right ? right.t : '—') + '</b>';
+  // Sai → rỗng. Hai đáp án ngay trên đã chỉ rõ đâu là đáp án đúng (viền xanh ✅) và đâu là đáp
+  // án vừa chọn (viền đỏ ❌), nên một dòng chữ nữa chỉ làm hàng dài thêm.
+  if (!isRight) return it.explain ? '<span style="color:var(--text-dim)">💡 ' + esc(it.explain) + '</span>' : '';
+  let s = '✅ <b>Chính xác!</b>';
   if (it.explain) s += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
   return s;
 }
@@ -1755,7 +1871,6 @@ function quizAllHtml() {
 
   st.items.forEach((it, qi) => {
     const done = it.chosen !== null;
-    const isRight = done && !!it.opts[it.chosen].ok;
     h += `<div class="quiz-card" id="qb-${qi}">`;
     h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
@@ -1769,7 +1884,7 @@ function quizAllHtml() {
       h += `<span class="quiz-badge">${letters[oi]}</span><span style="flex:1">${esc(o.t)}</span>${mark}`;
       h += '</button>';
     });
-    h += `<div class="quiz-fb${done ? ' show ' + (isRight ? 'ok' : 'no') : ''}" id="qfb-${qi}">${done ? quizFeedbackHtml(it) : ''}</div>`;
+    h += `<div class="${done ? quizFeedbackCls(it) : 'quiz-fb'}" id="qfb-${qi}">${done ? quizFeedbackHtml(it) : ''}</div>`;
     h += '</div>';
   });
 
@@ -1810,7 +1925,7 @@ function answerAll(qi, oi) {
     else if (i === oi) { btn.classList.add('wrong'); btn.insertAdjacentHTML('beforeend', '<span class="mark">❌</span>'); }
   });
   const fb = document.getElementById('qfb-' + qi);
-  if (fb) { fb.className = 'quiz-fb show ' + (isRight ? 'ok' : 'no'); fb.innerHTML = quizFeedbackHtml(it); }
+  if (fb) { fb.className = quizFeedbackCls(it); fb.innerHTML = quizFeedbackHtml(it); }
   updateAllSummary();
 }
 
@@ -2468,8 +2583,10 @@ function quizStudyHtml() {
         : '✅ <b>Chính xác ngay lần đầu!</b>';
       if (it.explain) fbTxt += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
     } else if (it.tried.length) {
-      fbCls += ' show no';
-      fbTxt = '❌ <b>Chưa đúng.</b> Chọn lại đáp án khác nhé.';
+      // Chế độ HỌC: chọn sai vẫn phải có LỜI NHẮC chọn lại (đó là toàn bộ ý nghĩa của mục
+      // "Học"), nhưng không còn HỘP đỏ "Chưa đúng" — chỉ một dòng chữ mờ, không nền/viền.
+      fbCls += ' show plain';
+      fbTxt = 'Đáp án này chưa đúng, chọn lại nhé.';
     }
     h += `<div class="${fbCls}" id="qfb-${qi}">${fbTxt}</div>`;
     h += '</div>';
@@ -2534,8 +2651,8 @@ function studyPick(qi, oi) {
       if (it.explain) s += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
       fb.innerHTML = s;
     } else {
-      fb.className = 'quiz-fb show no';
-      fb.innerHTML = '❌ <b>Chưa đúng.</b> Chọn lại đáp án khác nhé.';
+      fb.className = 'quiz-fb show plain';
+      fb.innerHTML = 'Đáp án này chưa đúng, chọn lại nhé.';
     }
   }
   updateStudySummary();

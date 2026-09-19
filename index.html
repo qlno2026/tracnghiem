@@ -1813,19 +1813,12 @@ function quizPlayHtml() {
   });
   if (answered) {
     const isRight = !!it.opts[st.chosen].ok;
-    if (isRight) {
-      h += '<div style="margin-top:6px;padding:11px;border-radius:10px;font-size:14px;line-height:1.55;background:rgba(16,185,129,0.14);border:1px solid var(--green)">';
-      h += '✅ <b>Chính xác!</b>';
-      if (it.explain) h += '<div style="margin-top:6px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
-      h += '</div>';
-    } else if (it.explain) {
-      // Chọn SAI thì KHÔNG còn gì dưới các đáp án (19/9/2026 — "bỏ luôn hàng này cho gọn"): trước
-      // đó là hộp đỏ "Chưa đúng", rồi thu lại thành dòng "Đáp án đúng: …", giờ bỏ nốt. Hai đáp án
-      // ngay trên đã nói đủ: đáp án đúng viền xanh ✅, đáp án vừa chọn viền đỏ ❌.
-      // Chỉ còn LỜI GIẢI (💡) nếu file nguồn có cột giải thích — hiện thư viện không câu nào có,
-      // nên thực tế hàng này biến mất hoàn toàn.
-      h += '<div style="margin-top:6px;font-size:14px;line-height:1.55;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
-    }
+    // KHÔNG hộp phản hồi nào nữa: đúng cũng không, sai cũng không (19/9/2026 — "bỏ luôn ô này",
+    // nối tiếp "bỏ luôn hàng này cho gọn" của câu sai). Các đáp án ngay trên đã nói đủ: đáp án
+    // đúng viền xanh ✅, đáp án vừa chọn viền đỏ ❌.
+    // Chỉ còn LỜI GIẢI (💡) nếu file nguồn có cột giải thích — hiện thư viện không câu nào có,
+    // nên thực tế dưới các đáp án chỉ còn mỗi nút "Câu tiếp →".
+    if (it.explain) h += '<div style="margin-top:6px;font-size:14px;line-height:1.55;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
     const last = st.idx === total - 1;
     h += `<button class="big-upload-btn" style="width:100%;margin-top:12px" onclick="${last ? 'finishQuiz()' : 'nextQuiz()'}">${last ? '🏁 Xem kết quả' : 'Câu tiếp →'}</button>`;
   }
@@ -1837,24 +1830,17 @@ function quizPlayHtml() {
 // Lớp của hộp phản hồi: đúng → hộp xanh; SAI → 'quiz-fb show plain' (đúng thẻ div đó nhưng
 // không nền/viền, xem .quiz-fb.plain). Dùng cặp hàm này ở cả "Cả bộ" và "Học" để hai chế độ
 // không lệch nhau.
-// Chọn ĐÚNG → hộp xanh ('show ok'). Chọn SAI → chỉ còn 'quiz-fb' TRẦN, không 'show', nghĩa là
-// CẢ HÀNG biến mất (19/9/2026 — "bỏ luôn hàng này cho gọn"). Đừng đổi nhánh sai thành 'show plain'
-// nữa: class đó tuy không vẽ hộp nhưng vẫn là display:block nên vẫn chiếm một khoảng trống.
+// KHÔNG còn hộp phản hồi nào — đúng hay sai đều không có hộp (19/9/2026). Hàng này chỉ còn dùng
+// cho LỜI GIẢI (💡) khi file nguồn có cột giải thích; không câu nào có thì nó là 'quiz-fb' TRẦN
+// = display:none, và cả hàng biến mất, không chiếm một pixel nào.
+// Nếu ai muốn trả lại hộp xanh/đỏ: đây là chỗ DUY NHẤT phải sửa, và các class .quiz-fb.ok /
+// .quiz-fb.no / .quiz-fb.plain vẫn còn nguyên trong CSS.
 function quizFeedbackCls(it) {
-  if (it.opts[it.chosen].ok) return 'quiz-fb show ok';
-  // Sai: bình thường KHÔNG hiện gì ('quiz-fb' trần = display:none). Chỉ khi câu đó có LỜI GIẢI mới
-  // hiện, và lúc đó phải dùng 'plain' chứ không được dùng 'no' (nền đỏ) — hàng chỉ có chữ 💡.
   return it.explain ? 'quiz-fb show plain' : 'quiz-fb';
 }
 
 function quizFeedbackHtml(it) {
-  const isRight = !!it.opts[it.chosen].ok;
-  // Sai → rỗng. Hai đáp án ngay trên đã chỉ rõ đâu là đáp án đúng (viền xanh ✅) và đâu là đáp
-  // án vừa chọn (viền đỏ ❌), nên một dòng chữ nữa chỉ làm hàng dài thêm.
-  if (!isRight) return it.explain ? '<span style="color:var(--text-dim)">💡 ' + esc(it.explain) + '</span>' : '';
-  let s = '✅ <b>Chính xác!</b>';
-  if (it.explain) s += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
-  return s;
+  return it.explain ? '<span style="color:var(--text-dim)">💡 ' + esc(it.explain) + '</span>' : '';
 }
 
 function quizAllHtml() {
@@ -2577,10 +2563,13 @@ function quizStudyHtml() {
     let fbCls = 'quiz-fb';
     let fbTxt = '';
     if (it.done) {
-      fbCls += ' show ok';
-      fbTxt = it.wrongFirst
-        ? '✅ <b>Đúng rồi!</b> — câu này bạn đã chọn sai ' + it.tried.length + ' lần trước khi đúng.'
-        : '✅ <b>Chính xác ngay lần đầu!</b>';
+      // Hộp xanh cũng bỏ (19/9/2026 — "bỏ luôn ô này"): chỉ còn một dòng chữ xanh, không nền/viền.
+      // Giữ lại CÂU CHỮ vì đây là chế độ HỌC — nó nói câu này đã xong và đã sai mấy lần, đúng
+      // thứ mà bảng tổng kết của chế độ này đang đếm.
+      fbCls += ' show plain';
+      fbTxt = '<span style="color:var(--green)">' + (it.wrongFirst
+        ? '✅ Đúng rồi! — câu này bạn đã chọn sai ' + it.tried.length + ' lần trước khi đúng.'
+        : '✅ Chính xác ngay lần đầu!') + '</span>';
       if (it.explain) fbTxt += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
     } else if (it.tried.length) {
       // Chế độ HỌC: chọn sai vẫn phải có LỜI NHẮC chọn lại (đó là toàn bộ ý nghĩa của mục
@@ -2644,10 +2633,10 @@ function studyPick(qi, oi) {
   const fb = document.getElementById('qfb-' + qi);
   if (fb) {
     if (it.done) {
-      fb.className = 'quiz-fb show ok';
-      let s = it.wrongFirst
-        ? '✅ <b>Đúng rồi!</b> — câu này bạn đã chọn sai ' + it.tried.length + ' lần trước khi đúng.'
-        : '✅ <b>Chính xác ngay lần đầu!</b>';
+      fb.className = 'quiz-fb show plain';
+      let s = '<span style="color:var(--green)">' + (it.wrongFirst
+        ? '✅ Đúng rồi! — câu này bạn đã chọn sai ' + it.tried.length + ' lần trước khi đúng.'
+        : '✅ Chính xác ngay lần đầu!') + '</span>';
       if (it.explain) s += '<div style="margin-top:5px;color:var(--text-dim)">💡 ' + esc(it.explain) + '</div>';
       fb.innerHTML = s;
     } else {

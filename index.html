@@ -16,8 +16,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&display=swap');
 
 :root {
-  --navy: #111318;
-  --navy-mid: #1a1d24;
+  /* ── NỀN TỐI = XÁM THUẦN (19/9/2026 — "áp bảng màu xám thuần trong ảnh"). ──
+     Trước đây CẢ dải nền tối đều PHA XANH (B > R): #111318, #1a1d24, #262a33, #21252e.
+     Ảnh mẫu người dùng gửi có nền #171717 và tấm #262626 — xám THUẦN (R = G = B).
+     Đã thay TOÀN BỘ các bề mặt tối, không chỉ hai chỗ được nêu, để app không còn hai hệ
+     xám chồng nhau:
+       --navy        #111318 → #171717   (nền trang)
+       --navy-mid    #1a1d24 → #202020   (bề mặt nâng lên. GIỮ ĐÚNG quan hệ cũ: bằng
+                     --navy hoà 4% trắng — tức đúng màu mà --card rgba(255,255,255,0.04)
+                     cho ra trên nền trang, nhưng ĐỤC, vì thanh dính cần nền đục. Đã kiểm:
+                     #171717 hoà 4% trắng = #202020 — khớp chính xác.)
+       --set-box-bg  #262a33 → #262626   (hộp bộ đề = cùng sắc với tấm đáp án)
+       .modal · đồng hồ · .quiz-opt: đổi theo (xem từng chỗ; .modal giờ dùng biến).
+     Đo lại toàn bộ cặp màu trên nền mới: chữ chính #e2e8f0 14.54:1 · chữ phụ #94a3b8
+     6.99:1 · câu hỏi trên tấm 12.28:1 · ĐÁP ÁN #8394a9 trên tấm mới **4.88:1** (vẫn trên
+     ngưỡng 4.5:1 — nên KHÔNG phải chỉnh màu chữ) · trắng trên nút xanh 6.70:1 · tấm/thẻ 1.08:1.
+     Chế độ SÁNG không đụng tới: nó đè lại mọi biến này trong khối body.light-mode. */
+  --navy: #171717;
+  --navy-mid: #202020;
   /* Màu xanh chính (nút, huy hiệu A/B/C/D, thanh tiến độ). Đã ĐẬM hơn theo yêu cầu
      18/9/2026: #3b82f6 → #1d4ed8 — cùng sắc xanh với đầu dải gradient của .header.
      Đổi luôn cho DỄ ĐỌC hơn: chữ trắng trên #3b82f6 chỉ đạt 3,68:1 (dưới ngưỡng 4.5),
@@ -31,8 +47,24 @@
   --green: #10b981;
   --text: #e2e8f0;
   --text-dim: #94a3b8;
-  --answer: #9aa8bb;   /* chữ đáp án ở chế độ tối: nhạt hơn hẳn chữ câu hỏi (#e2e8f0) cho đỡ chói */
-  --set-box-bg: #262a33;   /* nền hộp từng bộ đề — xám đậm ở chế độ tối, xám nhạt ở chế độ sáng */
+  --answer: #8394a9;   /* chữ đáp án ở chế độ tối. Đường đi cả ngày 19/9/2026 — mỗi nấc đo trên
+                          NỀN ĐANG DÙNG lúc đó, nên các số bên cạnh KHÔNG so sánh chéo được:
+                          #9aa8bb → #6b7d93 → #5f7086 → #5b6c7f →(nền đổi sang #262a33)
+                          → #8b9bb0 → #8394a9 → #7d8ea3 →(nền đổi lần nữa sang #21252e)
+                          → #77879c → **#8394a9** ("sáng hơn").
+                          Trên tấm #21252e (cũ): 4.95:1.
+                          19/9/2026 — cả dải nền tối đổi sang xám THUẦN (nền #171717, tấm #262626):
+                          trên tấm MỚI con số là **4.88:1 — VẪN vượt ngưỡng 4.5:1**, nên giữ nguyên
+                          màu chữ này, KHÔNG phải chỉnh lại màu chữ lần nào nữa.
+                          Chữ câu hỏi cùng tấm mới là 12.28:1 nên vẫn cách xa.
+                          Thang sáng dần trên tấm MỚI: #77879c 4.13 · #7d8ea3 4.52 ·
+                          #8394a9 4.88 (dùng) · #8b9bb0 5.34 · #94a3b8 5.90. */
+  --q-text: #e2e8f0;   /* chữ CÂU HỎI: sáng ở chế độ tối. Ở chế độ sáng là #1f2937 (xám RẤT ĐẬM) —
+                          đã đi qua hai nấc theo yêu cầu: đen mặc định → xanh dương đậm #1e3a8a →
+                          xám đậm #1f2937. Muốn đậm hơn nữa thì dùng #111827 (xám 900). */
+  --set-box-bg: #262626;   /* nền hộp từng bộ đề — xám THUẦN ĐẬM ở chế độ tối (đổi từ #262a33
+                              cùng lượt với --navy #171717 và tấm đáp án #262626, 19/9/2026),
+                              xám nhạt ở chế độ sáng (body.light-mode đè lại) */
   --border: rgba(255,255,255,0.22);   /* viền ô ở chế độ tối: rõ hơn 0.08 cũ */
   --card: rgba(255,255,255,0.04);
   --radius: 12px;
@@ -223,15 +255,60 @@ body.light-mode #setSelect option { background: #e9ecef; color: #1e293b; }
 .quiz-opt {
   display: flex; align-items: flex-start; gap: 8px; width: 100%;
   text-align: left; padding: 9px; margin-bottom: 6px;
-  border-radius: 10px; border: 1.5px solid var(--border);
-  background: var(--navy-mid); color: var(--answer);
+  border-radius: 10px;
+  /* ── VIỀN Ô ĐÁP ÁN — CỐ Ý MẠNH HƠN MỌI Ô KHÁC (19/9/2026: "làm cho tấm đáp án nổi rõ bằng cách
+     định hình bằng VIỀN thay vì hạ nền"). Lý do: nền đã hết dư địa — tấm ở chế độ sáng chỉ còn
+     1,04:1 và ở chế độ tối 1,08:1, gần như KHÔNG còn gánh việc định hình. Viền mới là thứ cho
+     người dùng thấy mỗi ô đáp án bắt đầu và kết thúc ở đâu.
+     Vì thế chỗ này KHÔNG dùng `var(--border)` (0,22) như thẻ/nút/ô nhập nữa — 0,29 là cố ý đậm
+     hơn để ô đáp án nổi hơn phần còn lại. ĐỪNG "thống nhất lại cho khớp" với --border.
+     Độ dày 1,5px → **2px**, và HAI CHẾ ĐỘ ĐƯỢC KHỚP TỈ LỆ với nhau (giải ngược từ mục tiêu
+     2,60:1 so với nền thẻ bao quanh, chứ không chọn bằng mắt):
+       dark  rgba(255,255,255,0.29) trên thẻ #202020 → #606060 → **2,60:1**
+       light #96a2af trên thẻ #ffffff (đè lại bằng luật body.light-mode bên dưới) → **2,60:1**
+     Trước lượt này hai bên còn lệch nhau và đều nhạt: light #b3bfcc 1,87:1 · dark 0,22 → 2,05:1.
+     Muốn đậm nữa thì dùng nấc sẵn có — thang đo trên đúng nền thẻ tương ứng:
+       light #8e9cad 2,80:1 · #8794a5 3,08:1 · #7f8d9f 3,38:1
+       dark  alpha 0,34 → 3,10:1 · 0,42 → 4,01:1 · 0,46 → 4,54:1
+     Đáp án ĐÚNG/SAI vẫn đè viền này bằng --green/--red (chỉ đổi MÀU, không đổi độ dày). */
+  border: 2px solid rgba(255,255,255,0.29);
+  /* Nền ô đáp án ở CHẾ ĐỘ TỐI = XÁM ĐEN. Lịch sử 19/9/2026 (nền thẻ luôn là #1a1d24):
+       var(--navy-mid) #1a1d24 → TRÙNG KHÍT nền thẻ (đo được 1.00:1) nên đáp án KHÔNG thành
+         một tấm riêng, khác hẳn chế độ sáng nơi hộp xám nằm trên thẻ trắng
+     → #262a33  (tấm/thẻ 1.17:1, đúng bằng --set-box-bg của hộp bộ đề ở trang chủ)
+     → #2c323d  ("nhạt hơn 1 tí", tấm/thẻ 1.31:1)
+     → **#21252e** ("đậm hơn", tấm/thẻ 1.10:1) — giờ KHÔNG còn bằng --set-box-bg nữa.
+     Vì sao chọn #21252e chứ không lùi đúng một bước về #262a33: nền đậm lên thì chữ đáp án
+     ĐỠ chìm, nên nấc này kéo #7d8ea3 từ 3.84:1 về **4.58:1** — vượt lại ngưỡng 4.5:1.
+     CẢNH BÁO: tấm/thẻ chỉ còn 1.10:1. Đậm thêm nữa là tấm biến mất (#1e222b = 1.06:1,
+     và #1a1d24 = 1.00:1 chính là lúc nó hoà hẳn vào thẻ).
+     → **#262626** (19/9/2026 — "bảng màu xám thuần": cả dải tối bỏ hẳn sắc XANH, xám thuần
+       R = G = B. Tấm này lấy ĐÚNG màu tấm trong ảnh mẫu, và trùng lại với --set-box-bg).
+       Tấm/thẻ = 1.08:1; chữ đáp án #8394a9 trên tấm mới = **4.88:1** — vẫn trên ngưỡng 4.5:1.
+     Chế độ sáng đè lại bằng luật body.light-mode .quiz-opt ngay bên dưới. */
+  background: #262626; color: var(--answer);
   font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.5;
   font-weight: 500;   /* câu trả lời: 16px, nét 500 */
   cursor: pointer;
 }
 .quiz-opt:disabled { cursor: default; }
-.quiz-opt.correct { border-color: var(--green); background: rgba(16,185,129,0.15); }
-.quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.15); }
+/* ── TRẠNG THÁI ĐÚNG/SAI — đo lại toàn bộ 19/9/2026 ("kiểm và chỉnh tương phản cho trạng thái
+   đáp án ĐÚNG/SAI ở cả hai chế độ, cả khi chọn sai thì đáp án đúng có còn nổi bật không").
+   Hai LỖI THẬT tìm được khi đo (không phải cảm nhận):
+     (1) Ở chế độ SÁNG, viền "đúng" #10b981 chỉ đạt **2,54:1 — YẾU HƠN viền ô bình thường**
+         (#96a2af = 2,60:1). Nghĩa là đáp án ĐÚNG được viền MỜ HƠN một ô chưa trả lời. Sửa ở
+         khối body.light-mode bên dưới.
+     (2) Chữ đáp án trên nền tint thấp hơn ngưỡng 4,5:1: dark "đúng" 4,12:1 và light "sai"
+         4,45:1 → hạ độ đậm của tint (xem từng dòng ngay dưới).
+   QUY TẮC cho mọi lần chỉnh sau: (a) viền trạng thái PHẢI mạnh hơn viền bình thường 2,60:1,
+   (b) chữ đáp án trên nền tint PHẢI ≥ 4,5:1, (c) LIGHT cần màu ĐẬM hơn dark để nổi trên nền
+   trắng — nên hai chế độ KHÔNG dùng chung một mã màu cho trạng thái. */
+.quiz-opt.correct { border-color: var(--green); background: rgba(16,185,129,0.10); }
+/* Tint 0,15 → 0,10: chữ đáp án #8394a9 trên nền tint đi từ 4,12:1 (DƯỚI ngưỡng) → **4,53:1**.
+   Viền --green #10b981 trên nền tối vốn rất mạnh (6,42:1) nên vẫn là tín hiệu chính; nền có
+   nhạt đi một chút (tint/thẻ 1,27 → 1,16) nhưng vẫn thấy rõ là một tấm xanh khác các ô còn lại. */
+.quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.12); }
+/* Tint 0,15 → 0,12: chữ 4,51:1 → **4,67:1** — 4,51 là sát ngưỡng nên lấy khoảng an toàn hơn. */
 .quiz-badge {
   min-width: 22px; height: 22px; border-radius: 50%;
   background: var(--accent); color: #ffffff;
@@ -280,7 +357,7 @@ body.light-mode #setSelect option { background: #e9ecef; color: #1e293b; }
      nhưng ở thanh dính thì 96% trong suốt nên chữ cuộn qua hiện xuyên lên, đè cả
      tiêu đề bộ đề lẫn dòng “Đã trả lời… · Đúng… · Sai…”. Chỉ chế độ tối bị, vì
      `body.light-mode .quiz-card` (độ ưu tiên cao hơn) đã đặt #ffffff đục sẵn.
-     --navy-mid (#1a1d24) chính là --navy (#111318) hoà 4% trắng — đúng cái mà
+     --navy-mid (#202020) chính là --navy (#171717) hoà 4% trắng — đúng cái mà
      rgba(255,255,255,0.04) đang cho ra trên nền trang, nhưng ĐỤC. */
   background: var(--navy-mid);
   /* GỌN: đây là thanh DÍNH, mỗi px chiều cao là một px nội dung bị che, nên padding
@@ -353,7 +430,9 @@ body.light-mode #setSelect option { background: #e9ecef; color: #1e293b; }
 .modal-overlay.open { display: flex; }
 
 .modal {
-  background: #1a1d24;
+  /* 19/9/2026: trước là mã CỨNG #1a1d24 (xám pha xanh) nên khi cả dải tối đổi sang xám thuần
+     thì tấm này vẫn giữ sắc cũ. Đổi sang BIẾN để nó luôn đi cùng --navy-mid. */
+  background: var(--navy-mid);
   border: 1px solid var(--border);
   font-family: 'Inter', sans-serif;
   border-radius: 20px 20px 0 0;
@@ -380,11 +459,12 @@ body.light-mode #setSelect option { background: #e9ecef; color: #1e293b; }
 /* --text-dim đậm hơn #64748b một chút: hộp từng bộ đề giờ có nền xám #f1f3f5, mà
    #64748b trên xám đó chỉ đạt 4.31:1 (dưới ngưỡng 4.5:1). #5b6675 cho 5.27:1 trên
    nền xám và 5.83:1 trên thẻ trắng. */
-body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --border: rgba(0,0,0,0.22); --answer: #1e293b; --set-box-bg: #f1f3f5; }
+body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --border: rgba(0,0,0,0.22); --answer: #5f6b7c; --q-text: #1f2937; --set-box-bg: #f1f3f5; }
 
 /* Hộp từng bộ đề trên trang chủ (📝 Thi từng bộ đề) có nền riêng để tách khỏi thẻ
-   chứa nó: xám ĐẬM #262a33 ở chế độ tối (thẻ tối chỉ ≈#1b1c21 nên hộp nhỉnh lên,
-   đọc ra là một tấm riêng), xám NHẠT #f1f3f5 ở chế độ sáng (thẻ trắng nên hộp lùi
+   chứa nó: xám ĐẬM #262626 ở chế độ tối (thẻ tối chỉ ≈#202020 nên hộp nhỉnh lên,
+   đọc ra là một tấm riêng — tấm/thẻ 1.08:1 — và giờ cùng sắc với tấm đáp án),
+   xám NHẠT #f1f3f5 ở chế độ sáng (thẻ trắng nên hộp lùi
    xuống). Một biến duy nhất, không phải hai luật chồng nhau. */
 .set-box { background: var(--set-box-bg); }
 /* Nhãn tên bộ đề: nền NHẸ (tint trong suốt) + chữ cùng tông, dáng giống hai chip
@@ -607,14 +687,47 @@ body.light-mode .mix-input {
 body.light-mode .quiz-btn { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
 body.light-mode .quiz-btn.primary { background: #1d4ed8; color: #ffffff; border-color: #1d4ed8; }
 body.light-mode .quiz-btn.danger { background: #dc2626; color: #ffffff; border-color: #dc2626; }
-body.light-mode .quiz-opt { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+/* Nền đáp án ở CHẾ ĐỘ SÁNG: gần như TRẮNG, chỉ còn một vệt xám. Đường đi của riêng chỗ này
+   trong ngày 19/9/2026 — sáu nấc, và KHÔNG còn dư địa:
+   #ffffff → #f1f3f5 → #f7f8fa ("nhạt hơn 1 tí") → #f1f3f5 ("nền xám nhẹ") → #f5f6f8
+   ("trắng xám nhẹ", chọn để KHỚP 1,08:1 với tấm ở chế độ tối) → **#fafbfc = ĐANG DÙNG**
+   ("nhạt hơn nữa").
+   **VÙNG NÀY ĐÃ PHẲNG — đây là thông tin quan trọng nhất của cả chuỗi:** từ #fafbfc trở lên
+   chỉ còn #fbfcfd 1,03:1 · #fdfdfe 1,02:1 · #ffffff 1,00:1, tức ba nấc còn lại KHÁC NHAU
+   KHOẢNG MỘT ĐƠN VỊ RGB — mắt không phân biệt được, và #ffffff chính là thẻ nên tấm BIẾN MẤT.
+   Sau nấc này thì thứ định hình ô đáp án là **VIỀN #b3bfcc = 1,87:1 trên thẻ trắng** — mạnh
+   hơn hẳn nền (1,04:1), tức viền đã gánh việc từ lâu rồi. Muốn ô nổi hơn nữa thì ĐẬM VIỀN,
+   đừng hạ nền thêm (không còn gì để hạ).
+   Chữ đáp án vẫn #5f6b7c, KHÔNG phải đổi: 5,22:1 trên tấm mới — nền nhạt đi thì chữ ĐỠ khó
+   đọc, đúng chiều ngược với chế độ tối.
+   Thang đầy đủ trên thẻ #ffffff — (chữ đáp án) · (tấm/thẻ):
+     #f5f6f8 5,00:1 · 1,08:1 (nấc trước) · #f6f7f9 5,05:1 · 1,07:1 · #f7f8fa 5,09:1 · 1,06:1
+     **#f8f9fb 5,14:1 · 1,05:1 · #f9fafb 5,18:1 · 1,05:1 · #fafbfc 5,22:1 · 1,04:1 (đang dùng)**
+     #fbfcfd 5,27:1 · 1,03:1 · #fdfdfe 5,32:1 · 1,02:1 · #ffffff 5,41:1 · 1,00:1 (thẻ — tấm mất)
+   Xám đậm hơn (nếu muốn quay lại): #f1f3f5 4,86:1 · 1,11:1 · #f0f0f0 4,75:1 · 1,14:1 (xám THUẦN
+   R=G=B) · #ededed 4,62:1 · 1,17:1 · #e9ecef 4,56:1 · 1,19:1 (= nền trang, ĐỪNG dùng làm tấm).
+   Chế độ TỐI ngược chiều: ở đó tấm #262626 trên thẻ #202020 = 1,08:1 và nền không đổi. */
+/* VIỀN Ở ĐÂY đã đậm lên #b3bfcc → **#96a2af** (cùng lượt "định hình bằng viền"): đúng giá trị để
+   đạt **2,60:1 trên thẻ trắng — KHỚP CHÍNH XÁC với viền ở chế độ tối** (rgba trắng 0,29 → #606060
+   trên thẻ #202020 cũng 2,60:1). Độ dày 2px lấy từ luật `.quiz-opt` gốc ở trên. Đổi một bên thì
+   phải đo lại bên kia, nếu không hai chế độ lại lệch nhau như trước lượt này (1,87 so với 2,05). */
+body.light-mode .quiz-opt { background: #fafbfc; border-color: #96a2af; color: var(--answer); }
 /* Đáp án đã chọn ở CHẾ ĐỘ SÁNG phải hiện xanh/đỏ y như chế độ tối.
    Luật `body.light-mode .quiz-opt` ở ngay trên có độ ưu tiên cao hơn
    `.quiz-opt.correct/.wrong` (2 class + 1 thẻ so với 2 class), nên nó XOÁ luôn màu của
    chế độ tối — chọn đúng hay sai đều ra nền trắng như nhau. Phải khai báo lại ở đúng
-   mức ưu tiên đó, và dùng đúng hai màu mà chế độ tối dùng. */
-body.light-mode .quiz-opt.correct { border-color: var(--green); background: rgba(16,185,129,0.15); }
-body.light-mode .quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.15); }
+   mức ưu tiên đó. MÀU thì KHÔNG dùng lại của chế độ tối: nền trắng cần màu ĐẬM hơn hẳn mới nổi
+   — xem lý do đo được ở khối ngay dưới. */
+/* 19/9/2026 — viền "đúng" đổi --green (#10b981, chỉ 2,54:1 trên thẻ trắng) → **#059669 = 3,77:1**,
+   tức mạnh hơn hẳn viền bình thường (#96a2af 2,60:1). Trước lượt này đáp án ĐÚNG có viền MỜ HƠN
+   cả một ô chưa trả lời — đúng cái người dùng hỏi ("chọn sai thì đáp án đúng có còn nổi bật
+   không"). Viền "sai" giữ --red #ef4444 (3,76:1 — vốn đã đủ mạnh, và trùng đúng màu đỏ mà nút
+   nguy hiểm ở chế độ sáng đang dùng), chỉ hạ tint.
+   Tint 0,15 → 0,12 ở CẢ HAI: chữ đáp án #5f6b7c trên nền xanh 4,68:1 (đã đạt, giữ được 4,67:1)
+   và trên nền đỏ chỉ 4,45:1 — DƯỚI ngưỡng 4,5:1 — nay **4,64:1**.
+   Kết quả: viền 3,77 và 3,76 — hai trạng thái CÂN NHAU về độ mạnh, thay vì lệch như trước. */
+body.light-mode .quiz-opt.correct { border-color: #059669; background: rgba(5,150,105,0.12); }
+body.light-mode .quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.12); }
 /* Chip bật/tắt ở chế độ sáng: chữ xanh nhạt --accent-glow (#60a5fa) trên nền chip
    xanh nhạt chỉ đạt 2.06:1 — không đọc được. Đổi sang xanh đậm, vì giờ trạng thái
    BẬT chỉ hiện bằng màu (nhãn không còn kèm “: Bật”). Đậm thêm lần nữa theo yêu cầu
@@ -721,7 +834,7 @@ function showClock() {
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center';
     overlay.onclick = function(e) { if (e.target === overlay) overlay.style.display = 'none'; };
     const box = document.createElement('div');
-    box.style.cssText = 'background:#1a1d24;border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.5);min-width:240px';
+    box.style.cssText = 'background:var(--navy-mid);border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.5);min-width:240px';
     box.innerHTML = '<div id="clockDigital" style="font-size:49px;font-weight:200;color:#60a5fa;letter-spacing:2px"></div>' +
       '<div id="clockDate" style="font-size:15px;font-weight:400;color:#94a3b8;margin-top:8px"></div>';
     overlay.appendChild(box);
@@ -1088,7 +1201,7 @@ function quizBrowseHtml() {
   h += '<div style="font-size:17px;font-weight:500;margin-bottom:10px">Danh sách câu hỏi</div>';
   s.questions.forEach((q, i) => {
     h += '<div style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
-    h += `<div style="font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(q.q)}</div>`;
+    h += `<div style="color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(q.q)}</div>`;
     // Dòng đáp án đúng trong danh sách câu hỏi. Đã từng bị bỏ (19/9/2026 sáng) rồi được KHÔI PHỤC
     // cùng ngày ("tôi muốn khôi phục câu đáp án trong ô câu hỏi") — đây là danh sách để HỌC,
     // thiếu đáp án thì mở ra không dùng được gì.
@@ -1798,7 +1911,7 @@ function quizPlayHtml() {
   h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim)">Đúng: <b style="color:var(--green)">${st.score}</b></div>`;
   h += '</div>';
   h += `<div style="height:6px;background:var(--border);border-radius:3px;margin:8px 0 10px;overflow:hidden"><div style="height:100%;width:${Math.round(st.idx / total * 100)}%;background:var(--accent)"></div></div>`;
-  h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:10px', st.idx + 1);
+  h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5;margin-bottom:10px', st.idx + 1);
   it.opts.forEach((o, i) => {
     let cls = 'quiz-opt';
     if (answered) {
@@ -1858,7 +1971,7 @@ function quizAllHtml() {
   st.items.forEach((it, qi) => {
     const done = it.chosen !== null;
     h += `<div class="quiz-card" id="qb-${qi}">`;
-    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
+    h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
       let cls = 'quiz-opt';
       let mark = '';
@@ -1934,7 +2047,7 @@ function quizResultHtml() {
     h += `<div style="font-size:17px;font-weight:500;margin-bottom:10px">📌 Cần ôn lại (${st.wrong.length})</div>`;
     st.wrong.forEach((w, i) => {
       h += '<div style="border-left:3px solid var(--red);padding:8px 10px;margin-bottom:10px;border-radius:0 8px 8px 0">';
-      h += `<div style="font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(w.q)}</div>`;
+      h += `<div style="color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(w.q)}</div>`;
       h += `<div style="font-size:15px;color:var(--red);margin-top:6px">Bạn chọn: ${esc(w.chosen)}</div>`;
       h += `<div style="font-size:15px;color:var(--green)">Đáp án đúng: <b>${esc(w.correct)}</b></div>`;
       if (w.explain) h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:4px">💡 ${esc(w.explain)}</div>`;
@@ -2549,7 +2662,7 @@ function quizStudyHtml() {
 
   st.items.forEach((it, qi) => {
     h += `<div class="quiz-card" id="qb-${qi}">`;
-    h += qTextHtml(esc(it.q), 'font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
+    h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
       const tried = it.tried.indexOf(oi) >= 0;
       let cls = 'quiz-opt';

@@ -50,7 +50,17 @@
      Chế độ sáng cần màu ĐẬM hơn: xem `--red-text` trong khối `body.light-mode`. */
   --red-text: #f87171;
   --green: #10b981;
-  --text: #e2e8f0;
+  /* CHỮ CHÍNH của chế độ tối (20/9/2026 — "chữ nào trắng quá thì tối xuống 1 tí dark mode").
+     #e2e8f0 → **#cbd5e1**, đúng MỘT nấc trên thang sáng của chính file này:
+       #ffffff  = chỉ dành cho chữ TRÊN NỀN MÀU ĐẶC (`--on-accent`) — không phải chữ trên nền xám
+       #cbd5e1  = chữ chính (token này)
+       #94a3b8  = `--text-dim` / `--answer`, chữ phụ
+     ĐO TRƯỚC/SAU trên nền THẬT: thẻ #202020 **13,17 → 10,94:1**; nền trang #171717 **14,55 → 12,07:1**.
+     Vẫn thừa xa ngưỡng 4,5:1, và vẫn cách chữ phụ (#94a3b8 = 6,33:1) một khoảng rõ — nên thứ bậc
+     chữ chính / chữ phụ KHÔNG đổi, kiểm bằng số chứ không bằng mắt.
+     NẤC TIẾP THEO nếu còn bị yêu cầu tối hơn: #94a3b8 = đúng bằng chữ phụ → mất luôn phân cấp,
+     đừng đi; muốn khác thì phải nâng `--text-dim` LÊN cùng lúc, và nói rõ đánh đổi cho người dùng. */
+  --text: #cbd5e1;
   --text-dim: #94a3b8;
   --answer: #94a3b8;   /* chữ đáp án ở chế độ tối. Đường đi cả ngày 19/9/2026 — mỗi nấc đo trên
                           NỀN ĐANG DÙNG lúc đó, nên các số bên cạnh KHÔNG so sánh chéo được:
@@ -72,9 +82,14 @@
                           TRẦN: nấc tiếp theo (#a8b3c4 rồi tới trắng) làm đáp án ngang cỡ chữ câu hỏi
                           — mất luôn tương phản CỐ Ý giữa hai dòng. Muốn vượt #94a3b8 thì phải nói rõ
                           đánh đổi đó cho người dùng. */
-  --q-text: #e2e8f0;   /* chữ CÂU HỎI: sáng ở chế độ tối. Ở chế độ sáng là #1f2937 (xám RẤT ĐẬM) —
-                          đã đi qua hai nấc theo yêu cầu: đen mặc định → xanh dương đậm #1e3a8a →
-                          xám đậm #1f2937. Muốn đậm hơn nữa thì dùng #111827 (xám 900). */
+  --q-text: #cbd5e1;   /* chữ CÂU HỎI ở chế độ tối. 20/9/2026 — hạ CÙNG nấc với `--text`
+                          (#e2e8f0 → #cbd5e1). Hai token này là cùng MỘT vai trò "chữ chính", chỉ khác
+                          chỗ dùng, nên lệch nấc là chữ câu hỏi sáng hơn mọi chữ khác trên màn và
+                          đọc như lỗi. Trên tấm đáp án #262626: **12,28 → 10,0:1** — vẫn thừa xa 4,5:1
+                          và vẫn cách `--answer` (#94a3b8) một khoảng rõ nên cặp câu hỏi/đáp án không nhoè.
+                          Ở chế độ sáng là #1f2937 (xám RẤT ĐẬM) — đã đi qua hai nấc theo yêu cầu:
+                          đen mặc định → xanh dương đậm #1e3a8a → xám đậm #1f2937.
+                          Muốn đậm hơn nữa thì dùng #111827 (xám 900). */
   --set-box-bg: #262626;   /* nền hộp từng bộ đề — xám THUẦN ĐẬM ở chế độ tối (đổi từ #262a33
                               cùng lượt với --navy #171717 và tấm đáp án #262626, 19/9/2026),
                               xám nhạt ở chế độ sáng (body.light-mode đè lại) */
@@ -88,14 +103,55 @@
      Dùng BIẾN chứ không viết luật `body.light-mode .mix-lock` riêng: luật đó có độ ưu tiên
      (0,2,1) nên sẽ đè mất cả `.mix-lock:hover` (0,2,0) ở chế độ sáng — mất luôn dấu khi trỏ chuột. */
   --pin-brd: #3b82f6;
-  /* Viền nút QUAY LẠI (⬅️, `.home-btn`) — ĐẬM HƠN viền thường (20/9/2026 — "tôi muốn viền đậm
-     hơn ở nút này"). Viền mặc định `--border` = 0,22 trắng chỉ đạt **2,05:1** trên thẻ #202020,
-     nên nút lối thoát duy nhất của bài thi gần như không có viền. 0,45 trắng → pha ra rgb(132,132,132)
-     = **4,35:1**, vượt ngưỡng 3:1 của WCAG cho viền điều khiển, mà vẫn là XÁM (không phải trắng
-     chói). Dùng BIẾN chứ không viết luật `body.light-mode .home-btn`: luật đó (0,2,1) sẽ đè mất
-     `.quiz-btn:focus` (0,2,0) — mất luôn viền khi bấm/khi trỏ chuột. Chế độ sáng khai trong khối
-     `body.light-mode` ở cuối tệp. */
-  --home-brd: rgba(255,255,255,0.45);
+  /* ── TÊN cho các vai trò màu (20/9/2026 — "gom màu về biến") ───────────────────────
+     Bảng màu dưới đây đã có biến từ trước, nhưng các LUẬT THÀNH PHẦN vẫn viết mã màu trần,
+     vì chưa có TÊN cho những vai trò đó. Nhóm này chỉ ĐẶT TÊN — KHÔNG gộp màu nào lại,
+     từng chữ số giữ nguyên.
+     ĐỪNG GỘP: thang màu trong khối `body.light-mode` là kết quả ĐO TƯƠNG PHẢN chứ không phải
+     chọn tuỳ hứng — `--border-answer` #96a2af = 2,60:1 (khớp ĐÚNG viền của chế độ tối),
+     `--border-field` #b3bfcc = 1,87:1, `--surface-answer` #fafbfc chỉ hơn thẻ trắng 1,04:1,
+     và `--ok-strong` #059669 = 3,77:1 vì `--green` #10b981 chỉ được 2,54:1 trên nền trắng.
+     Gộp hai màu "trông gần giống nhau" ở đây là tự ý sửa lại công đo đó — đọc ghi chú ngay
+     cạnh màu trước khi đổi, và đo lại cả HAI chế độ.
+     Một chỗ KHÔNG token hoá được bằng `var()`: quầng `box-shadow` cần cùng màu nhưng khác
+     alpha — `rgba(74,222,128,0.35)` chính là `--ok` ở 0,35. Đổi hex thì phải đổi cả rgba,
+     đừng chỉ sửa một bên. */
+  --on-accent: #ffffff;       /* chữ TRẮNG trên nền màu đặc: nút chính, huy hiệu, ô/hàng đang chọn */
+  --header-from: #1d4ed8;     /* gradient header — đầu (chế độ sáng đè lại bằng #1e40af) */
+  --header-deep: #1e3a8a;     /* gradient header — cuối (hai chế độ giống nhau) */
+  --accent-deep: #1e40af;     /* xanh đậm làm MÀU CHỮ ở chế độ sáng (7,45:1 trên nền đã pha) */
+  --ok: #4ade80;              /* viền nút bộ đề ở chế độ TỐI (9,36:1) */
+  --ok-hover: #86efac;        /* viền nút bộ đề khi trỏ/bấm, chế độ tối */
+  --ok-strong: var(--green);  /* viền đáp án ĐÚNG ở chế độ tối (chế độ sáng cần #059669) */
+  --mix-cyan: #7dd3fc;        /* ô nhập tỷ lệ %: chữ + viền focus + đồng hồ khoá (3 chỗ, chế độ tốI) */
+  /* ── HỆ CỠ CHỮ (20/9/2026 — "thêm hệ cỡ chữ") ──────────────────────────────────────
+     Trước lượt này app chỉ có HAI nấc thấy được: 17px/500 và 15px/400 — mà 17px/500 bị dùng
+     cho CẢ BA thứ cùng lúc: tiêu đề mục trong thẻ, MỌI nút, và từng hàng danh sách. Nên tiêu
+     đề không phân biệt được với nút, và mắt không có chỗ nào để bám.
+     Bậc thang từ đây: micro < tiny < note < sub < lead < base < head.
+     `--fs-head` là nấc DUY NHẤT thực sự đổi kích thước ở lượt này (17px → 18px, kèm 500 → 600),
+     và nó CHỈ áp cho 7 tiêu đề mục. Mọi token còn lại giữ ĐÚNG giá trị cũ đang dùng, nên phần
+     lớn app không xê dịch một pixel.
+     `.header-title` (tên app) CỐ Ý không dùng token nào ở đây: nó có luật responsive riêng
+     (17px → 16px ở ≤380px, xem media query ở khu vực HEADER). Đổi nó là đổi ngưỡng vỡ dòng
+     đã đo, nên để nguyên. */
+  --fs-micro: 10px;           /* nút tăng/giảm ▲▼ của bảng trộn */
+  --fs-tiny: 11px;            /* mũi tên ▾ của ô chọn bộ đề */
+  --fs-note: 13px;            /* phụ chú nhỏ nhất */
+  --fs-sub: 15px;             /* chữ phụ: dòng đếm, nhãn hàng, mô tả dưới tiêu đề */
+  --fs-lead: 16px;            /* chữ nhấn 600 (đề bài / tiêu đề phụ) */
+  --fs-base: 17px;            /* CHUẨN của app: nút, ô nhập, hàng danh sách, tên bộ đề */
+  --fs-head: 18px;            /* tiêu đề MỤC trong thẻ — một nấc TRÊN --fs-base */
+  --fw-body: 400;             /* chữ thường */
+  --fw-ui: 500;               /* nút, hàng danh sách, tên bộ đề */
+  --fw-head: 600;             /* chữ CẦN NHẤN trong câu hỏi (danh sách / màn xem lại).
+                                 Tiêu đề mục KHÔNG dùng nấc này nữa: từ 20/9/2026 ("nét mỏng lại")
+                                 tiêu đề mục dùng `--fw-ui` = 500, tức mỏng hơn một nấc. ĐỪNG đổi
+                                 giá trị ở đây thành 500 — làm thế thì chữ câu hỏi mỏng theo, mà
+                                 đó là thay đổi KHÔNG ai yêu cầu. */
+  /* (Biến `--home-brd` của nút QUAY LẠI `.home-btn` đã bị XOÁ 20/9/2026 — "bỏ viền và cho icon to
+     hơn": nút giờ KHÔNG có viền ở cả hai chế độ. Đừng dựng lại biến này; lịch sử dài của nó
+     (viền xám 0,22 → 0,45 vì ngưỡng 3:1 của WCAG) nằm trong khối `.home-btn` bên dưới.) */
   --card: rgba(255,255,255,0.04);
   --radius: 12px;
   --header-h: 56px;
@@ -105,7 +161,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  font-size: 17px;   /* nền chung cho chữ không tự đặt cỡ, khớp mức +1px của cả app */
+  font-size: var(--fs-base);   /* nền chung cho chữ không tự đặt cỡ, khớp mức +1px của cả app */
   background: var(--navy);
   color: var(--text);
   min-height: 100vh;
@@ -119,7 +175,7 @@ body {
 .header {
   background:
     linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0) 40%),
-    linear-gradient(135deg, #1d4ed8, #1e3a8a);
+    linear-gradient(135deg, var(--header-from), var(--header-deep));
   border-bottom: 1px solid var(--border);
   box-shadow: 0 3px 10px rgba(0,0,0,0.35);
   height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
@@ -139,9 +195,9 @@ body {
    (`#clockBtn` là `flex-shrink: 0` bên phải, không nhường chỗ). Giữ nowrap + ellipsis: chữ CHỈ bị
    rút gọn khi thật sự hết chỗ, còn ở bề rộng thường vẫn hiện đủ. `max-width:100%` để nó co theo
    `.title-wrap` (đã có `min-width: 0`). */
-.header-title { font-size: 17px; font-weight: 500; letter-spacing: 0.3px; color: #ffffff; white-space: nowrap;
+.header-title { font-size: var(--fs-base); font-weight: 500; letter-spacing: 0.3px; color: var(--on-accent); white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.header-sub { font-size: 15px; font-weight: 400; color: #cbd5e1; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.header-sub { font-size: var(--fs-sub); font-weight: 400; color: #cbd5e1; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
 .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 /* Màn HẸP: tiêu đề "Ôn Tập Trắc Nghiệm" (17px = 173px) cộng đồng hồ có dòng NGÀY (108px)
    cần ~361px bề ngang mới hiện ĐỦ (đo được: 18 lề + 44 nút sáng/tối + 6 + 173 chữ + 12 khe +
@@ -153,10 +209,24 @@ body {
    Còn lại cần ~320px, nên từ ~320px trở lên chữ vẫn hiện ĐỦ; hẹp hơn nữa thì ellipsis của
    `.header-title` tự rút gọn — không bao giờ chồng lên đồng hồ. */
 @media (max-width: 380px) {
-  .header-title { font-size: 16px; }
+  .header-title { font-size: var(--fs-lead); }
   #clockDateLive { display: none; }
 }
 
+/* Nút sáng/tối của header — 20/9/2026 "cho nút này nổi khối và đẹp hơn". Ba lớp cộng lại mới ra
+   cảm giác NỔI, và cả ba đều chỉ dùng CSS — ảnh (data URI) KHÔNG bị đụng tới:
+     1. BÓNG ĐỔ hai tầng: một lớp TIẾP XÚC sát viền + một lớp TOẢ rộng xuống dưới.
+     2. Lớp GLOSS phủ trên ảnh: sáng ở trên-trái, tối dần xuống đáy => mặt cầu LỒI.
+     3. Ánh viền (rim): cạnh trên sáng, cạnh dưới tối — đây là thứ khiến nó đọc ra "khối" chứ
+        không phải "hình tròn dán phẳng".
+   Bóng đặt bằng `filter: drop-shadow` trên `.theme-toggle img`, KHÔNG phải `box-shadow` trên nút:
+   drop-shadow bám theo ALPHA của chính ảnh tròn, nên bóng cũng tròn và không lộ góc vuông — đúng
+   lý do đã dùng cho `.home-btn svg` (xem ghi chú ở khu vực .home-btn).
+   Hai tầng bóng chứ không một: một bóng đơn hoặc quá mờ (trông phẳng) hoặc quá đậm (trông như dán
+   nổi trên nền, rời khỏi nút). Lớp tiếp xúc giữ nó "nằm trên" mặt header, lớp toả cho nó "nhấc lên".
+   Header LUÔN nền xanh đậm ở cả hai theme (`#1d4ed8→#1e3a8a` tối, `#1e40af→#1e3a8a` sáng — xem
+   `body.light-mode .header`), nên MỘT giá trị bóng dùng chung cho cả hai theme là đủ; khác với
+   `.home-btn svg` phải tách alpha vì nút đó nằm trên nền sáng/tối thật. */
 .theme-toggle {
   width: 44px; height: 44px;
   border-radius: 50%;
@@ -171,11 +241,37 @@ body {
 .theme-toggle img {
   width: 100%; height: 100%;
   border-radius: 50%; object-fit: contain; display: block;
+  filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.55)) drop-shadow(0 5px 7px rgba(0,0,0,0.38));
+  transition: filter 70ms ease-out;
 }
+/* Gloss + rim. `::after` là CON GIẢ CUỐI của `.theme-toggle` nên vẽ ĐÈ lên `.theme-toggle img`
+   (cả hai cùng ở tầng vẽ "positioned/stacking", `::after` đứng sau theo thứ tự cây DOM — `img`
+   tuy thành stacking context vì có `filter`, nhưng vẫn trước `::after`). `pointer-events:none` để
+   nó không ăn mất cú bấm; độ mờ để THẤP vì đây là lớp phủ trên một tia sét vàng — đậm hơn thì tia
+   sét bạc màu và nút trông bóng nhẫy. */
+.theme-toggle::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 34% 22%, rgba(255,255,255,0.50), rgba(255,255,255,0.13) 42%, rgba(255,255,255,0) 64%),
+    linear-gradient(180deg, rgba(255,255,255,0) 56%, rgba(0,0,0,0.20) 100%);
+  box-shadow:
+    inset 0 1.5px 2px rgba(255,255,255,0.45),
+    inset 0 -2.5px 4px rgba(0,0,0,0.26);
+}
+/* Nhấn XUỐNG như một phím thật — cùng ngôn ngữ đã dùng cho `.home-btn` ("> giữ cho tấm xanh nhún
+   xuống khi bấm giữ"): `scale` nhỏ lại VÀ bóng NGẮN lại trong cùng một nhịp. Bóng ngắn đi mới là
+   thứ bán được cảm giác "đi xuống" — chỉ thu nhỏ mà bóng vẫn dài thì trông như trượt ra xa.
+   `.theme-toggle:active img` phải ghi rõ `img` vì bóng nằm trên chính thẻ ảnh, không phải trên nút. */
 .theme-toggle:active { transform: scale(0.9); }
+.theme-toggle:active img {
+  filter: drop-shadow(0 0 1px rgba(0,0,0,0.60)) drop-shadow(0 2px 2px rgba(0,0,0,0.30));
+}
 
 .upload-btn-header {
-  background: transparent; color: #ffffff; border: none;
+  background: transparent; color: var(--on-accent); border: none;
   padding: 6px 10px; border-radius: 8px;
   cursor: pointer; display: flex; flex-direction: column;
   align-items: center; line-height: 1.1; gap: 0;
@@ -206,14 +302,14 @@ body {
   background: rgba(59,130,246,0.18);
   color: var(--accent-glow);
   font-family: 'Inter', sans-serif;
-  font-size: 17px;
+  font-size: var(--fs-base);
   font-weight: 500;
   cursor: pointer;
 }
 body.light-mode .big-upload-btn {
   background: rgba(59,130,246,0.14);
   border-color: var(--accent);
-  color: #1d4ed8;
+  color: var(--accent);
 }
 .big-upload-btn:active { opacity: 0.9; }
 .big-upload-btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -233,7 +329,7 @@ body.light-mode .big-upload-btn {
   background: rgba(59, 130, 246, 0.18); border-color: var(--accent-glow); color: var(--accent-glow);
 }
 body.light-mode .quiz-btn.mix-act:active {
-  background: rgba(59, 130, 246, 0.14); border-color: var(--accent); color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.14); border-color: var(--accent); color: var(--accent);
 }
 /* Vòng focus CHỈ cho bàn phím (`:focus-visible`): nó không kích hoạt khi CHẠM trên điện thoại,
    nên không phá yêu cầu "chỉ hiện màu khi bấm giữ" — mà bàn phím vẫn thấy mình đang ở nút nào. */
@@ -243,10 +339,10 @@ body.light-mode .quiz-btn.mix-act:focus-visible { box-shadow: 0 0 0 2px rgba(29,
 .quiz-btn {
   padding: 9px 12px; border-radius: 9px; cursor: pointer;
   border: 1px solid var(--border); background: var(--navy-mid); color: var(--text);
-  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-base); font-weight: 500;
 }
-.quiz-btn.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
-.quiz-btn.danger { background: var(--red); color: #ffffff; border-color: var(--red); }
+.quiz-btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.quiz-btn.danger { background: var(--red); color: var(--on-accent); border-color: var(--red); }
 .quiz-btn:active { opacity: 0.85; }
 /* Nút điều hướng "Câu trước" bị TẮT ở câu đầu tiên (19/9/2026). Trước lượt này app chưa hề có
    nút .quiz-btn nào bị tắt, nên không có luật :disabled nào — thiếu nó thì nút trông y như bấm
@@ -270,7 +366,7 @@ body.light-mode .quiz-btn.mix-act:focus-visible { box-shadow: 0 0 0 2px rgba(29,
 .quiz-toggle {
   padding: 7px 10px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border); background: transparent; color: var(--text-dim);
-  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-base); font-weight: 500;
 }
 /* Chip ĐANG BẬT — ĐẬM HƠN (19/9/2026 — "tôi muốn khi chọn có màu đậm hơn").
    Lịch sử nền: 0,14 → **0,32**; viền `--accent` (#1d4ed8, chỉ 2,43:1 trên thẻ #202020 — gần như
@@ -355,7 +451,7 @@ body.light-mode .quiz-btn.mix-act:focus-visible { box-shadow: 0 0 0 2px rgba(29,
 .quiz-input {
   width: 100%; padding: 10px; border-radius: 10px;
   border: 1.5px solid var(--border); background: var(--navy-mid);
-  color: var(--text); font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: var(--fs-base); font-weight: 500;
 }
 .quiz-input:focus { outline: none; border-color: var(--accent); }
 /* ── DROPDOWN CHỌN BỘ ĐỀ: TỰ VẼ (19/9/2026) ───────────────────────────────────────
@@ -377,23 +473,23 @@ body.light-mode .quiz-btn.mix-act:focus-visible { box-shadow: 0 0 0 2px rgba(29,
    **5px/0,20**; lằn ngoài 0,55 → 0,35 (tối) và 0,5 → 0,30 (sáng). Trạng thái trỏ chuột cũng hạ
    theo (15px/0,65 → 9px/0,40 và 13px/0,55 → 8px/0,35) để nó vẫn "sáng hơn lúc nghỉ" nhưng không
    thành vệt sáng. Màu viền KHÔNG đổi — chỉ độ toả đổi.
-   Khác biệt về mặt quy ước: app đã có "xanh lá = đã ghim" (.mix-lock.on #34d399 / #166534) và
-   "xanh lá = đáp án đúng". #4ade80 là tông lá tươi, khác #34d399 (ngọc bích) nên vẫn phân biệt
-   được, nhưng đây là lý do ĐỪNG dùng đúng #34d399 ở đây. */
+   Lịch sử quy ước: app TỪNG có "xanh lá = đã ghim" (.mix-lock.on #34d399 / #166534) nhưng nút
+   ghim đã chuyển sang cặp cyan `--mix-cyan` cho đồng bộ với Ô SỐ (20/9/2026), nên xanh lá giờ
+   chỉ còn mang nghĩa "đáp án đúng". Đó cũng là lý do ĐỪNG dùng lại #34d399 ở đây. */
 .set-dd { position: relative; }
 .set-dd-btn {
   width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
   text-align: left; cursor: pointer;
-  padding: 10px; border-radius: 10px; border: 1.5px solid #4ade80;
+  padding: 10px; border-radius: 10px; border: 1.5px solid var(--ok);
   background: var(--navy-mid); color: var(--text);
   /* Cỡ 17px (19/9/2026 — "tôi muốn tất cả chữ này cỡ 17px", ảnh người dùng khoanh cả nút
      dropdown). Trước đó 15px (bản gốc) → 16px (một lượt trước trong ngày) → 17px. */
-  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-base); font-weight: 500;
   box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.35), 0 0 6px rgba(74, 222, 128, 0.25);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .set-dd-btn:hover, .set-dd-btn:focus {
-  outline: none; border-color: #86efac;
+  outline: none; border-color: var(--ok-hover);
   box-shadow: 0 0 0 1px rgba(134, 239, 172, 0.6), 0 0 9px rgba(74, 222, 128, 0.4);
 }
 /* Nhóm NHÃN + ICON của nút mở (19/9/2026 — "tôi muốn có icon ở bảng này"). Bọc trong một
@@ -403,10 +499,10 @@ body.light-mode .quiz-btn.mix-act:focus-visible { box-shadow: 0 0 0 2px rgba(29,
    nội tại của chữ nên tên bộ dài sẽ tràn khỏi nút ở màn hẹp thay vì xuống dòng.
    `flex: none` trên icon để tên bộ xuống 2 dòng mà icon không bị bóp méo. */
 .set-dd-lbl { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.set-dd-ico { flex: none; font-size: 17px; line-height: 1; }
+.set-dd-ico { flex: none; font-size: var(--fs-base); line-height: 1; }
 /* Mũi tên TỰ VẼ: <select> gốc tự có mũi tên của trình duyệt, <button> thì không. Quay 180° khi mở
    để trạng thái đóng/mở đọc được ngay cả khi danh sách bị che một phần. */
-.set-dd-caret { flex: none; font-size: 11px; line-height: 1; transition: transform 0.15s; }
+.set-dd-caret { flex: none; font-size: var(--fs-tiny); line-height: 1; transition: transform 0.15s; }
 .set-dd.open .set-dd-caret { transform: rotate(180deg); }
 /* Danh sách xổ ra NẰM ĐÈ lên nội dung bên dưới (position:absolute) chứ không đẩy trang xuống —
    đẩy sẽ làm cả thẻ nhảy mỗi lần mở. Thẻ `.quiz-card` không đặt `overflow` và không tạo stacking
@@ -427,33 +523,33 @@ body.light-mode .quiz-btn.mix-act:focus-visible { box-shadow: 0 0 0 2px rgba(29,
   background: none; color: var(--text);
   /* 17px, ĐI CÙNG nút mở: nhãn nút và nhãn hàng là cùng một chuỗi "Tên (N câu)" nên lệch
      nhau 1px là thấy ngay khi mở bảng (19/9/2026 — "tất cả chữ này cỡ 17px"). */
-  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 500;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-base); font-weight: 500;
 }
 .set-dd-item:first-child { border-top: 0; }
 .set-dd-item:hover { background: rgba(127, 127, 127, 0.18); }
 /* Hàng ĐANG CHỌN: nền xanh đặc + chữ trắng, đúng quy ước "ô đang chọn" của `.quiz-btn.primary`. */
-.set-dd-item.on { background: var(--accent); color: #ffffff; }
+.set-dd-item.on { background: var(--accent); color: var(--on-accent); }
 /* Chữ của cả nút và danh sách là ĐEN ở chế độ sáng (19/9/2026 — "đổi chữ màu đen ở dropdow light
    mode"). Trước đó cả hai chỗ lấy `var(--text)` = #e2e8f0 — màu chỉ tồn tại trong `:root` (chế độ
    tối), còn `body.light-mode` KHÔNG ghi đè `--text`, nên ở chế độ sáng chữ trắng-xám nằm trên nền
    sáng: nút gần như trống chữ. Đây là lỗi thật đã thấy trong ảnh người dùng gửi, không phải cảm
    nhận. Đen là màu chữ nền của `body.light-mode` nên khớp cả app. */
 body.light-mode .set-dd-btn {
-  background: #e9ecef; border-color: #16a34a; color: #000000;
+  background: var(--surface-sunken); border-color: var(--ok); color: var(--text-base);
   box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.3), 0 0 5px rgba(22, 163, 74, 0.2);
 }
 body.light-mode .set-dd-btn:hover, body.light-mode .set-dd-btn:focus {
-  border-color: #15803d;
+  border-color: var(--ok-hover);
   box-shadow: 0 0 0 1px rgba(21, 128, 61, 0.55), 0 0 8px rgba(22, 163, 74, 0.35);
 }
 /* Bảng xổ ở CHẾ ĐỘ SÁNG dùng #e9ecef = nền trang, đúng màu bảng xổ của `<select>` cũ. */
-body.light-mode .set-dd-list { background: #e9ecef; border-color: #c9d1da; }
-body.light-mode .set-dd-item { color: #000000; }
+body.light-mode .set-dd-list { background: var(--surface-sunken); border-color: var(--border-light); }
+body.light-mode .set-dd-item { color: var(--text-base); }
 body.light-mode .set-dd-item:hover { background: rgba(0, 0, 0, 0.06); }
 /* Phải khai báo LẠI ở đây: `body.light-mode .set-dd-item` là (0,2,1) còn `.set-dd-item.on` chỉ
    (0,2,0) nên luật chế độ sáng sẽ ĐÈ MẤT nền xanh của hàng đang chọn. Cùng họ bẫy specificity
    đã ghi ở mục `.quiz-opt` — luật `body.light-mode .<x>` luôn thắng luật trạng thái. */
-body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
+body.light-mode .set-dd-item.on { background: var(--accent); color: var(--on-accent); }
 .quiz-opt {
   display: flex; align-items: flex-start; gap: 8px; width: 100%;
   text-align: left; padding: 9px; margin-bottom: 6px;
@@ -489,7 +585,7 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
        Tấm/thẻ = 1.08:1; chữ đáp án #8394a9 trên tấm mới = **4.88:1** — vẫn trên ngưỡng 4.5:1.
      Chế độ sáng đè lại bằng luật body.light-mode .quiz-opt ngay bên dưới. */
   background: #262626; color: var(--answer);
-  font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.5;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-lead); line-height: 1.5;
   font-weight: 500;   /* câu trả lời: 16px, nét 500 */
   cursor: pointer;
 }
@@ -513,11 +609,11 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
 /* Tint 0,15 → 0,12: chữ 4,51:1 → **4,67:1** — 4,51 là sát ngưỡng nên lấy khoảng an toàn hơn. */
 .quiz-badge {
   min-width: 22px; height: 22px; border-radius: 50%;
-  background: var(--accent); color: #ffffff;
-  font-size: 13px; font-weight: 700;
+  background: var(--accent); color: var(--on-accent);
+  font-size: var(--fs-note); font-weight: 700;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.quiz-opt .mark { font-size: 16px; line-height: 1.2; flex-shrink: 0; }
+.quiz-opt .mark { font-size: var(--fs-lead); line-height: 1.2; flex-shrink: 0; }
 /* Số câu đặt trước nội dung câu hỏi. Thay icon ❓ emoji ở lượt trước: emoji rộng
    19px mà không mang thông tin gì, còn vòng tròn mang luôn SỐ CÂU nên bỏ được dòng
    nhãn “Câu 1/30” trên mỗi thẻ — trang ngắn hơn hẳn.
@@ -534,13 +630,13 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
   min-width: 20px; height: 20px; border-radius: 10px; padding: 0 5px;
   box-sizing: border-box; background: transparent;
   border: 1px solid var(--red); color: var(--red);
-  font-size: 13px; font-weight: 700;
+  font-size: var(--fs-note); font-weight: 700;
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0; margin-top: 2px;
 }
 .quiz-fb {
   display: none; margin-top: 5px; padding: 8px 10px;
-  border-radius: 10px; font-size: 16px; line-height: 1.5;
+  border-radius: 10px; font-size: var(--fs-lead); line-height: 1.5;
 }
 .quiz-fb.show { display: block; }
 .quiz-fb.ok { background: rgba(16,185,129,0.14); border: 1px solid var(--green); }
@@ -582,7 +678,11 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
      249px → tóm tắt bị ngắt thành hai dòng, xấu hơn ngắt tiêu đề.
    - Hàng riêng cho nút: đầu bài cao thêm ~30px ở mọi bề ngang.
    Nút chỉ dùng emoji 🏠 (23px chữ): nhãn “Trang chủ” cần 103px + padding, đủ để
-   ngốn thêm 80px bề ngang của tiêu đề. */
+   ngốn thêm 80px bề ngang của tiêu đề.
+   ⚠️ KẾT LUẬN TRÊN ĐÃ BỊ NGƯỜI DÙNG ĐẢO NGƯỢC (20/9/2026 — “bỏ icon ở hai nút quay về còn lại …
+   cho đồng bộ với nút Về trang chủ”): nút giờ là CHỮ và đúng là ngốn thêm ~77px của tiêu đề
+   (đo: tiêu đề còn 221,9px thay vì 299,4px). Chiều cao thì KHÔNG đổi vì font đã hạ 20px → 17px.
+   Đừng “tối ưu” ngược lại thành icon — đó là yêu cầu, không phải sót. */
 .head-row { display: flex; align-items: center; gap: 8px; }
 /* Nút về trang chủ đã được làm TO hơn (yêu cầu 18/9/2026: “cho nút quay lại màn
    hình chính to hơn”). Trước đó nó bị thu nhỏ xuống 4px 8px chính vì lý do ngược lại
@@ -599,7 +699,55 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
    Chọn dòng in đậm ban đầu, rồi GIẢM xuống ("cho icon quay lại nhỏ hơn 1 tí", 19/9/2026):
    font 24px → 20px, padding 10/14 → 7/11 → nút **48×34**. Vẫn lớn hơn bản gốc 41×26,
    vẫn trên ngưỡng chạm WCAG 24×24, và thanh dính hạ xuống **74px** (từ 82).*/
-.home-btn { padding: 7px 11px; line-height: 1; font-size: 20px; flex-shrink: 0; border-color: var(--home-brd); }
+.home-btn {
+  /* ICON SVG, không chữ (20/9/2026 — xem `homeIcoSvg`).
+     KHÔNG VIỀN + icon 32px (20/9/2026 — "bỏ viền và cho icon to hơn", rồi "cho nút to hơn 1 tí"):
+     bỏ hẳn viền (trước là `--home-brd` = trắng 0,45 — biến đó đã xoá) và icon 22 → 28 → **32px**.
+     Padding hạ 5px 12px → 3px 6px → **1px 4px** nên kích thước NÚT vẫn ĐÚNG **40 × 34px** như bản
+     48×34 trước đó — tức thanh dính KHÔNG cao thêm px nào, bề ngang tiêu đề cũng không hụt thêm:
+     icon lớn lên 4px thì padding nhỏ đi 4px, phần hộp giữ nguyên. Điểm chạm 40×34 vẫn trên ngưỡng
+     24×24 của WCAG.
+     `inline-flex` để icon luôn nằm giữa và không bị `line-height` của nút đẩy lệch — SVG là phần
+     tử inline nên nếu để mặc định sẽ thừa một khoảng trắng dưới đáy. */
+  padding: 1px 4px; flex-shrink: 0; border: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+/* Hiệu ứng NỔI KHỐI (20/9/2026 — "thêm hiệu ứng nổi khối"): bóng đổ đặt trên chính `<svg>`, KHÔNG
+   phải trên nút — hai lý do:
+   1. `box-shadow` của nút đã dùng cho VÒNG FOCUS (`.home-btn:focus-visible` ở dưới); đặt bóng đổ
+      lên nút thì lúc focus sẽ bị luật sau GHI ĐÈ MẤT bóng.
+   2. `filter: drop-shadow()` bám theo HÌNH DẠNG THẬT của tấm (đã bo góc 5,5) — còn `box-shadow`
+      trên `<svg>` vẽ ra một bóng HÌNH CHỮ NHẬT, bốn góc vuông lòi ra ngoài tấm bo góc.
+   Bóng nhẹ (2px, alpha 0,45) để đọc ra "nổi" mà không thành vệt loang — đúng bài học từ quầng sáng
+   của nút ghim đã phải hạ hai lần. Chế độ sáng dùng alpha thấp hơn vì nền sáng ăn bóng mạnh hơn. */
+.home-btn svg {
+  display: block; width: 32px; height: 32px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+  /* 70ms là mức "tức thì nhưng không giật": dài hơn thì cảm giác bị trễ tay, ngắn hơn thì tấm
+     nhảy cứng. Áp cho cả lúc NHẢ (tấm nổi lại) nên cú bấm có vào có ra, không phải bật/tắt. */
+  transition: transform 70ms ease-out, filter 70ms ease-out;
+}
+body.light-mode .home-btn svg { filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22)); }
+/* NHÚN XUỐNG KHI BẤM GIỮ (20/9/2026 — "thêm phản hồi xúc giác"): tấm xanh tụt xuống 2px và bóng
+   thu lại còn 1px — đúng cách một phím thật ăn xuống mặt bàn (vật đi xuống thì bóng ngắn lại).
+   CHỈ `transform` trên `<svg>`, KHÔNG đụng kích thước nút: transform không tham gia vào layout nên
+   hàng và các nút xung quanh không nhích một px nào (đây là điều kiện của yêu cầu "giữ nguyên
+   kích cỡ"). Tấm tụt xuống dưới đáy nút 2px nhưng không bị cắt: tổ tiên của nút không đặt
+   `overflow:hidden` (đã kiểm trên trang thật — xem run doc).
+   `opacity: 1` là BẮT BUỘC: `.quiz-btn:active { opacity: 0.85 }` (0,2,0) sẽ làm tấm MỜ ĐI, mà tấm mờ
+   trông như bị khoá/nút tắt chứ không phải bị ấn. Phím thật không mờ, nó TỤT XUỐNG. */
+.home-btn:active { opacity: 1; }
+.home-btn:active svg { transform: translateY(2px); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)); }
+/* Chế độ sáng phải khai LẠI ở đây: `body.light-mode .home-btn svg` là (0,2,2) nên nó ĐÈ `:active`
+   (0,2,1) — thiếu luật này thì ở chế độ sáng tấm vẫn tụt xuống nhưng bóng KHÔNG thu lại, mất một
+   nửa cảm giác "ăn xuống". (0,3,1) của luật dưới mới thắng được. */
+body.light-mode .home-btn:active svg { transform: translateY(2px); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25)); }
+/* Vòng focus của nút này phải vẽ bằng `box-shadow`, KHÔNG phải viền: nút đã bỏ viền nên
+   `.quiz-btn:focus { border-color: var(--accent-glow) }` (0,2,0) chỉ đổi MÀU của một đường dày
+   0px — không thấy gì. Thiếu khối này thì đây là nút duy nhất trong app không có dấu hiệu nào
+   khi được chọn bằng bàn phím. Dùng `:focus-visible` (không phải `:focus`) đúng như các nút
+   `.mix-act`, để chạm trên điện thoại không dính vòng xanh sau khi nhả tay. */
+.home-btn:focus-visible { box-shadow: 0 0 0 2px var(--accent-glow); }
 /* (Icon ❓ emoji ở lượt trước đã bị thay bằng .q-num — xem khai báo .q-num ở trên.) */
 /* Ghi chú cũ của icon ❓, giữ lại để biết vì sao không quay lại emoji ở cỡ chữ lớn:
    emoji ở 16px rộng 22px, cộng khe 8px là lấy mất 30px bề ngang câu hỏi — đo trên
@@ -612,12 +760,87 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
    Padding ngang co từ 12px xuống 6px để nhãn dài nhất “▶️ Từng câu” (≈93px) vẫn
    nằm một dòng: ở khung nhìn 311px mỗi cột chỉ còn ≈120px, trừ 12px padding là
    ≈108px chỗ cho chữ. Bốn nút trên MỘT hàng là không thể ở cỡ 17px (mỗi nút chỉ
-   còn ≈78px, không đủ cho nhãn), nên 2×2 là cách duy nhất để cả bốn đều nhau. */
+   còn ≈78px, không đủ cho nhãn), nên 2×2 là cách duy nhất để cả bốn đều nhau.
+   LỚP NÀY GIỜ CÓ BA CHỖ DÙNG (20/9/2026): màn KẾT QUẢ (🔄 Làm lại / Về trang chủ — hai NÚT HÀNH ĐỘNG,
+   không phải ô chọn) và hai chỗ dưới đây; thẻ "Chọn từng bộ đề" (Từng câu / Cả bộ / Học / Câu hỏi)
+   và thẻ mở bằng nút 👁 "Câu hỏi" (Thi từng câu / Thi cả bộ / Học (chọn sai làm lại) / Về trang chủ).
+   Chỗ thứ hai trước đây là hai hàng flex riêng nên bốn nút lệch nhau (155,1 / 128,2 / 227,4 / 151px)
+   — đó chính là lý do nó chuyển sang dùng lớp này. Nhãn dài nhất ở đó ("Học (chọn sai làm lại)")
+   PHẢI xuống hai dòng ở khung hẹp, và `grid-auto-rows: 1fr` chính là thứ giữ cho bốn nút vẫn cao bằng nhau.
+   Sửa lớp này thì SỬA CHO CẢ HAI THẺ. */
 .set-acts {
   display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;
   grid-auto-rows: 1fr;   /* cửa sổ rất hẹp: có nhãn phải xuống 2 dòng thì cả bốn nút vẫn cao bằng nhau */
 }
 .set-acts .quiz-btn { width: 100%; padding: 9px 6px; text-align: center; }
+/* Nút ICON nằm trong lưới này (màn KẾT QUẢ — 20/9/2026) phải TRẢ LẠI padding của `.home-btn`:
+   `.set-acts .quiz-btn` (0,2,0) MẠNH HƠN `.home-btn` (0,1,0), nên không có luật này thì icon mang
+   padding 9px 6px → nút cao 28+18 = 46px và KÉO CẢ HÀNG cao thêm 4px (nút chữ bên cạnh chỉ 41,8px).
+   Với 3px 6px nút icon còn 34px — thấp hơn nút chữ nên hàng giữ nguyên 41,8px, và hai nút vẫn cao
+   bằng nhau nhờ `grid-auto-rows: 1fr`. Phải khai SAU `.set-acts .quiz-btn`: cùng độ ưu tiên (0,2,0)
+   nên CHỈ THỨ TỰ phân định. */
+.set-acts .home-btn { padding: 3px 6px; }
+/* Hàng BA nút ở màn 👁 "Câu hỏi" (20/9/2026 — "cho 3 tab còn lại nằm cùng hàng").
+   Cùng công thức với `.set-acts`, chỉ đổi số cột. Phải khai SAU `.set-acts`: hai luật cùng độ ưu
+   tiên (0,1,0) nên CHỈ THỨ TỰ phân định — dời lên trên là ba nút quay về 2×2 ngay.
+   Ba cột ở khung 393px còn ~101px chỗ chữ cho mỗi nút, nên "📖 Học (chọn sai làm lại)" xuống
+   3 dòng; `grid-auto-rows: 1fr` của `.set-acts` giữ cả ba nút cao bằng nhau. */
+.set-acts-3 { grid-template-columns: 1fr 1fr 1fr; }
+/* BỎ padding NGANG của hàng ba nút. Bề ngang mỗi ô đã do LƯỚI `1fr` quyết định, nên 12px padding
+   chỉ ăn mất chỗ của chữ: ở khung 327px ô rộng 87,1px → còn 73px chỗ chữ, mà nhãn dài nhất
+   (`Từng câu`, 77px ở 17px) lại phải xuống 2 dòng. Bỏ padding ngang → 85,1px, một dòng, và
+   vẫn đủ chỗ tới khoảng 310px. Canh giữa KHÔNG đổi: `text-align:center` canh theo lòng hộp, mà
+   padding đối xứng thì lòng hộp vẫn cùng tâm. */
+.set-acts-3 .quiz-btn { padding-left: 0; padding-right: 0; }
+/* Hàng đầu thẻ 👁 "Câu hỏi": tên bộ đề bên trái, nút quay về dồn ra mép phải.
+   LƯỚI `1fr auto` — KHÔNG còn `1fr 1fr` (20/9/2026, cùng lượt "bỏ viền bỏ nền, thêm icon"):
+   hai cột bằng nhau chỉ có nghĩa khi hai bên là hai HỘP cùng cỡ (yêu cầu "cho 2 tab này kích cỡ
+   bằng nhau" ngày 19/9). Từ khi nhãn tên bộ mất nền/viền và thành tiêu đề chữ + icon 📚, việc
+   chia đôi chỉ làm hại: icon ăn 23,3px + 8px khe nên ở khung hẹp "Chăm sóc KH" phải XUỐNG 2 DÒNG
+   dù bên phải còn trống (đo ở khung 309px: chỗ chữ 101,3px < bề rộng chữ, hàng cao 45,9px).
+   `1fr auto` cho tên chiếm hết phần còn lại → một dòng (đo lại: hàng 40px).
+   Ô `auto` chỉ rộng bằng nút, nên `min-width: 44px` dưới đây giữ vùng chạm đủ lớn (WCAG 24px).
+   Stretch mặc định của lưới vẫn kéo hai bên cao BẰNG NHAU, nên tên dài 2 dòng thì nút cao theo và
+   cặp này không bao giờ lệch — cũng là lý do không được cắt tên bằng ellipsis cho gọn. */
+.browse-head { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+/* Hàng tên bộ ở màn 👁 "Câu hỏi": BỎ NỀN + BỎ VIỀN của nhãn `.set-name` và THÊM ICON 📚 trước
+   tên (20/9/2026 — "bỏ viền bỏ nền, thêm icon"). Đây là NGOẠI LỆ DUY NHẤT của `.set-name`: ở hộp
+   "📝 Chọn từng bộ đề" trên trang chủ nhãn đó VẪN phải có nền xanh nhẹ + viền, nên ĐỪNG sửa
+   `.set-name` ở khu vực chính — phải phủ bằng luật con `.browse-name .set-name` (0,2,0), mạnh hơn
+   `body.light-mode .set-name` (0,1,1) nên chế độ sáng cũng mất nền/viền theo. Chữ giữ nguyên màu
+   của `.set-name` (trắng ở tối, xanh đậm ở sáng) — chỉ mất cái hộp.
+   Icon cách tên 8px, đúng khuôn `.set-dd-lbl` của nút chọn bộ đề ("icon 📚 đứng TRƯỚC tên bộ").
+   Chữ canh TRÁI như một tiêu đề (trước là canh giữa trong hộp) — nút quay về ở ô bên phải đã dồn
+   sát mép nên hai đầu hàng giờ nằm ở hai mép thẻ.
+   `min-width:0` là BẮT BUỘC: thiếu nó thì tên dài ("Các tình huống vi phạm sử dụng điện") làm tràn
+   lưới thay vì tự xuống dòng — cùng cái bẫy đã gặp ở `.set-dd-lbl` và hàng nút bảng trộn. */
+.browse-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* BA lớp chứ không hai là BẮT BUỘC — đây đúng BẪY SPECIFICITY đã gặp nhiều lần trong app:
+   `body.light-mode .set-name` = (0,2,1) vì `body` là TYPE selector, mạnh hơn `.browse-name
+   .set-name` (0,2,0); và viết `body .browse-name .set-name` cũng vẫn (0,2,1) — HÒA, mà luật chế độ
+   sáng lại nằm SAU trong tệp nên nó thắng theo thứ tự. Đo được sau lượt sửa đầu: ở chế độ sáng
+   nền VẪN là rgba(29,78,216,0.1) — không hết. Thêm `.browse-head` thành (0,3,0) là thắng chắc,
+   không phụ thuộc thứ tự khai báo. Chỉ chặn nền/viền/padding, KHÔNG đụng `color`, nên chữ vẫn
+   trắng ở tối và xanh đậm ở sáng theo `.set-name`. */
+.browse-head .browse-name .set-name { background: none; border: 0; padding: 0; }
+/* Nút quay về ở màn này giờ là ICON (20/9/2026 — "đổi icon về trang chủ"): nó mang thêm lớp
+   `.home-btn` nên dùng CHUNG hình SVG (cỡ icon 32px), bóng nổi khối, không viền và vòng focus bàn
+   phím với nút ở đầu màn làm bài — hai chỗ đọc ra như cùng một nút. Khai ở ĐÂY (sau `.home-btn`)
+   để đè `padding` của lớp đó: `width:100%` cho nút giãn kín cả ô, còn padding dọc 4px giữ chiều
+   cao đúng 32 + 4×2 = 40px = đúng chiều cao ô tên bên cạnh, nên hàng KHÔNG cao thêm.
+   `border:0` (shorthand, đè `1px` của `.quiz-btn`) — luật chế độ sáng `body.light-mode .quiz-btn`
+   (0,2,1) chỉ còn đổi MÀU của đường dày 0px nên không vẽ ra gì. */
+/* Icon DỒN RA SÁT MÉP PHẢI (20/9/2026 — "cho icon ra sát phía ngoài") bằng `justify-content:
+   flex-end` + `padding` NGANG bằng 0: nút vẫn giãn kín ô lưới (nên vùng chạm vẫn bằng CẢ Ô —
+   đo 173,68px ở khung 468px, và
+   hai ô vẫn BẰNG NHAU), nhưng icon nằm ở mép phải của lòng thẻ. Padding ngang 0 là BẮT BUỘC: với
+   6px cũ icon còn cách mép 6px và KHÔNG thẳng hàng với mép phải của hàng ba nút bên dưới (những
+   nút đó không có padding ngang — xem `.set-acts-3 .quiz-btn`).
+   Padding dọc 6px → 4px (khi icon lên 32px) → **2px** (20/9/2026 — "cho chữ 25 câu hỏi nằm xích lên
+   gần tên bộ đề"): phần padding này là thứ QUYẾT ĐỊNH chiều cao hàng, mà hàng cao hơn chữ tên bao
+   nhiêu thì chữ "25 câu hỏi" bị đẩy xuống bấy nhiêu (chữ tên được canh giữa trong hàng). Hàng 40 →
+   **36px** nên khe hở dưới chữ tên hụt 2px ở mỗi phía. Điểm chạm vẫn 44 × 36px, trên ngưỡng 24. */
+.browse-back { width: 100%; min-width: 44px; padding: 2px 0; border: 0; justify-content: flex-end; }
 
 /* ── MODAL ───────────────────────── */
 .modal-overlay {
@@ -661,7 +884,41 @@ body.light-mode .set-dd-item.on { background: var(--accent); color: #ffffff; }
 /* --text-dim đậm hơn #64748b một chút: hộp từng bộ đề giờ có nền xám #f1f3f5, mà
    #64748b trên xám đó chỉ đạt 4.31:1 (dưới ngưỡng 4.5:1). #5b6675 cho 5.27:1 trên
    nền xám và 5.83:1 trên thẻ trắng. */
-body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --border: rgba(0,0,0,0.22); --answer: #5f6b7c; --q-text: #1f2937; --set-box-bg: #f1f3f5; --pin-brd: #1d4ed8; --home-brd: rgba(0,0,0,0.38); --red-text: #dc2626; }
+body.light-mode {
+  background: var(--surface-sunken); color: var(--text-base);
+  --text-dim: #5b6675; --border: rgba(0,0,0,0.22); --answer: #5f6b7c; --q-text: #1f2937;
+  --set-box-bg: #f1f3f5; --pin-brd: #1d4ed8; --red-text: #dc2626;
+  /* ── Biến CHỈ dùng ở chế độ SÁNG ───────────────────────────────────────────────────
+     Mọi luật dùng nhóm này đều là luật `body.light-mode .<x>`, nên khai ở đây là đủ và chế
+     độ tối không thấy chúng. KHÔNG khai chúng trong `:root`: đó là cách để một biến chỉ có
+     nghĩa ở một chế độ không lặng lẽ rò sang chế độ kia.
+     `--on-accent`, `--header-deep` và `--accent-deep` KHÔNG khai lại ở đây — hai chế độ dùng
+     chung đúng một giá trị, nên để nguyên ở `:root`. */
+  --header-from: #1e40af;     /* đầu gradient header ở chế độ sáng */
+  --mix-cyan: #075985;        /* cùng vai trò với --mix-cyan ở :root, nhưng phải ĐẬM hơn */
+  --ok: #16a34a;              /* viền nút bộ đề ở chế độ sáng (3,28:1 trên nền sáng) */
+  --ok-hover: #15803d;        /* viền khi trỏ/bấm, chế độ sáng */
+  --ok-strong: #059669;       /* viền đáp án ĐÚNG (3,77:1) — KHÔNG dùng --green, chỉ 2,54:1 */
+  --danger: #dc2626;          /* nút nguy hiểm + ô số câu (4,53:1 trên thẻ trắng) */
+  --surface-card: #ffffff;    /* thẻ, ô nhập, nút — nền trắng đục */
+  --surface-answer: #fafbfc;  /* tấm đáp án: chỉ 1,04:1 trên thẻ — CỐ Ý, xem ghi chú quiz-opt */
+  --surface-sunken: #e9ecef;  /* nền trang + bảng xổ bộ đề */
+  --surface-modal: #f0f1f4;   /* nền hộp thoại */
+  --border-light: #c9d1da;    /* viền thẻ / khung */
+  --border-field: #b3bfcc;    /* viền ô nhập và nút (1,87:1) */
+  --border-answer: #96a2af;   /* viền tấm đáp án (2,60:1 — khớp đúng viền của chế độ tối) */
+  --text-strong: #1e293b;     /* chữ trên nền trắng */
+  /* Chữ trên NỀN TRANG (xám #e9ecef), chế độ sáng. 20/9/2026 — "chữ nào đen quá thì giảm xuống
+     một tí light mode": #000000 → **#1e293b**. Đen tuyệt đối trên nền sáng là cặp gắt nhất có thể
+     (21:1) và làm nét chữ dày lên trong mắt; #1e293b là nấc "đen mềm" app ĐÃ dùng sẵn cho chữ trên
+     thẻ trắng (`--text-strong`), nên không thêm màu mới nào vào bảng.
+     ĐO: trên nền trang #e9ecef **17,71 → 12,34:1**; trên thẻ trắng **21,0 → 14,63:1** — thừa xa 4,5:1.
+     HỆ QUẢ CẦN BIẾT: từ đây `--text-base` bằng `--text-strong`. Giữ hai token vì chúng thuộc hai
+     mặt nền khác nhau và còn có thể tách lại; nếu gộp làm một thì phải rà cả 4 chỗ dùng
+     `var(--text-base)` — cả 4 đều là luật chế độ sáng (`.set-dd-btn`, `.set-dd-item`, `body`, và
+     `.search-clear:hover`), nên `:root` KHÔNG được khai token này. */
+  --text-base: #1e293b;
+}
 
 /* Hộp từng bộ đề trên trang chủ (📝 Chọn từng bộ đề) có nền riêng để tách khỏi thẻ
    chứa nó: xám ĐẬM #262626 ở chế độ tối (thẻ tối chỉ ≈#202020 nên hộp nhỉnh lên,
@@ -684,7 +941,7 @@ body.light-mode { background: #e9ecef; color: #000000; --text-dim: #5b6675; --bo
      182×30px như trước, không làm thẻ bộ đề cao thêm. */
   background: rgba(29,78,216,0.16);
   border: 1px solid rgba(96,165,250,0.55);
-  color: #ffffff;
+  color: var(--on-accent);
   padding: 2px 8px; border-radius: 8px;
 }
 /* Chế độ sáng: viền phải ĐẬM hơn chế độ tối mới thấy rõ, vì nền nhạt và mắt nhạy với
@@ -696,16 +953,12 @@ body.light-mode .set-name {
      phải --accent #1d4ed8: đây đúng là màu chữ xanh đậm app đã dùng cho chip đang bật ở
      chế độ sáng, đo trên nền đã pha được 7,45:1. Chế độ tối vẫn giữ chữ TRẮNG — xanh đậm
      trên nền tối là không đọc được, và luật cũ của người dùng vẫn là “trắng ở dark mode”. */
-  color: #1e40af;
+  color: var(--accent-deep);
 }
-/* Tên bộ đề trong bảng 🎲 Trộn đề: nền XANH LÁ NHẸ + chữ cùng tông (yêu cầu 18/9/2026).
-   Cùng dáng với nhãn .set-name ở danh sách bộ đề nhưng KHÁC TÔNG màu (đỏ vs xanh lá)
-   nên nhìn là biết đang ở bảng nào — đừng dùng chung một lớp cho cả hai chỗ.
-   Chữ xanh lá ở chế độ tối phải SÁNG (#34d399), không dùng --green #10b981: mắt nhạy
-   với xanh lá kém hơn xanh dương, #10b981 trên tint này chỉ 5,32:1 còn #34d399 đạt
-   7,09:1. Chế độ sáng ngược lại cần ĐẬM: #15803d chỉ 4,44:1 (dưới ngưỡng 4,5:1) nên
-   dùng #166534 — 6,40:1. Đừng viết style thẳng trong thẻ: style thẳng không ghi đè
-   được luật chế độ sáng. */
+/* Tên bộ đề trong bảng 🎲 Trộn đề (yêu cầu 18/9/2026). Cùng dáng với nhãn .set-name ở
+   danh sách bộ đề nhưng KHÁC TÔNG màu nên nhìn là biết đang ở bảng nào — đừng dùng
+   chung một lớp cho cả hai chỗ.
+   Đừng viết style thẳng trong thẻ: style thẳng không ghi đè được luật chế độ sáng. */
 .mix-name {
   display: inline-block;
   /* KHÔNG NỀN — chỉ còn chữ (yêu cầu 19/9/2026 — "tôi muốn bỏ màu nền").
@@ -713,11 +966,15 @@ body.light-mode .set-name {
      → 0,06 ở chế độ sáng → và giờ là KHÔNG có nền.
      Lề trong `3px 8px` CỐ Ý GIỮ LẠI dù không còn khối màu: nó chính là thứ đang đặt chữ vào
      đúng chỗ hiện tại, nên bỏ luôn lề là chữ NHẢY sang trái 8px so với hôm nay. Muốn bỏ thì
-     bỏ lề trong cùng lúc, đừng bỏ lẻ.
-     Chữ vẫn TRẮNG ở tối và xanh đen #134e4a ở sáng (xem khối chế độ sáng ngay dưới) — bỏ nền
-     KHÔNG kéo theo đổi màu chữ. */
+     bỏ lề trong cùng lúc, đừng bỏ lẻ. */
   background: none;
-  color: #ffffff;
+  /* --text, KHÔNG dùng --on-accent (20/9/2026 — "cho những chữ này màu tối 1 tí").
+     `--on-accent` là #ffffff ở chế độ tối: đó là màu cho chữ TRÊN NỀN MÀU ĐẶC (nút chính,
+     huy hiệu, hàng đang chọn) — nó chỉ lọt vào đây từ hồi nhãn này còn nền xanh lá. Nền đã
+     bỏ từ 19/9 nhưng màu chữ thì sót lại, nên tên bộ đề thành chữ TRẮNG TINH, sáng nhất cả
+     app — còn hơn cả --text #e2e8f0. Vì `--on-accent` vẫn đang dùng thật cho nút chính nên
+     KHÔNG được sửa giá trị token; chỉ đổi ở đây thôi. Chế độ sáng giữ #134e4a (khối dưới). */
+  color: var(--text);
   padding: 3px 8px; border-radius: 8px;
 }
 /* Chế độ sáng: chữ XANH ĐEN (#134e4a), không phải đen tuyền (yêu cầu 19/9/2026).
@@ -740,7 +997,7 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
   color: var(--accent-glow); font-family: 'Inter', sans-serif;
   /* 15px → 17px (19/9/2026 — "tất cả chữ này cỡ 17px", ảnh có nút "↺ Mặc định"). Nút cao thêm
      ~3px; nó nằm cùng hàng flex với dòng "Tổng tỷ lệ" (cũng vừa lên 17px) nên hàng vẫn cân. */
-  font-size: 17px; font-weight: 400; padding: 4px 9px; cursor: pointer;
+  font-size: var(--fs-base); font-weight: 400; padding: 4px 9px; cursor: pointer;
 }
 .mix-reset:hover { border-color: var(--accent-glow); }
 
@@ -753,14 +1010,14 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
 .mix-step { display: flex; flex-direction: column; gap: 2px; flex: none; }
 .mix-step button {
   width: 32px; height: 17px; padding: 0; line-height: 1;
-  font-family: 'Inter', sans-serif; font-size: 10px;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-micro);
   background: none; border: 1px solid var(--border); border-radius: 6px;
   color: var(--text-dim); cursor: pointer;
 }
 /* Ô số của bảng trộn — lớp RIÊNG để thu nhỏ (19/9/2026 "cho ô số nhỏ lại") mà không kéo theo
    .quiz-input (ô đổi tên bộ đề dùng chung lớp đó, phải giữ 17px/10px lề). 46×35 thay vì 62×41:
    đủ chỗ cho 3 chữ số "100", và trả lại ~16px cho cột tên bộ đề. */
-.mix-input { width: 40px; padding: 5px 3px; text-align: center; font-size: 15px; }
+.mix-input { width: 40px; padding: 5px 3px; text-align: center; font-size: var(--fs-sub); }
 /* Ô SỐ (%) của bảng trộn: NỀN XANH NHẸ + CHỮ XANH + VIỀN XANH (19/9/2026 — "tôi muốn hàng số có
    nền xanh nhẹ và chữ xanh, viền xanh"). Cặp màu lấy từ viền neon của `.set-dd-btn` khi nó còn
    xanh dương (trước 19/9/2026 là `#setSelect` — ô select đã được thay bằng dropdown tự vẽ), nên
@@ -780,9 +1037,9 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
 .mix-input {
   background: rgba(56, 189, 248, 0.08);
   border-color: rgba(56, 189, 248, 0.55);
-  color: #7dd3fc;
+  color: var(--mix-cyan);
 }
-.mix-input:focus { border-color: #7dd3fc; }
+.mix-input:focus { border-color: var(--mix-cyan); }
 /* Ô số = 0: NỀN ĐEN (tối) / TRẮNG (sáng) + VIỀN XÁM (19/9/2026 — "tôi muốn những ô số 0 thì có
    viền cùng màu với bảng và có viền xám ở light mode và dark mode").
    Viền dùng ĐÚNG `--border` — cùng màu với kẻ ngang và viền khung của bảng Trộn đề, nên ô số 0
@@ -824,7 +1081,7 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
 .mix-lock {
   width: 23px; height: 36px; margin-right: -4px; padding: 0; flex: none;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-note); line-height: 1;
   /* Viền XANH DƯƠNG (`--pin-brd`) chứ không phải viền xám `--border` như mọi ô khác trong hàng
      (19/9/2026 — "tôi muốn có viền xanh dương đậm ở nút ghim"): nút ghim là chỗ bấm được, không
      phải ô hiển thị, nên viền xanh tách nó ra khỏi nền hàng ở cả hai chế độ. */
@@ -835,11 +1092,19 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
      vẫn trả về `rgb(59,130,246)` nên nhìn mã thì tưởng đúng, chỉ ảnh chụp mới lộ. Làm mờ ở
      span bên trong thì chỉ icon đổi, viền giữ nguyên màu. */
 }
-/* Chưa ghim thì icon MỜ + XÁM. Giữ nguyên lý do cũ: hai emoji 📍/📌 trông gần như nhau ở cỡ
-   13px nên hàng nào cũng ra cây ghim đỏ — độ mờ là thứ DUY NHẤT phân biệt hàng đang ghim. */
-.mix-lock-ico { filter: grayscale(1) opacity(0.5); line-height: 1; }
+/* Chưa ghim thì icon HIỆN ĐỦ MÀU — bỏ `grayscale(1) opacity(0.5)` (20/9/2026 — "bỏ làm mờ nút
+   ghim, phân biệt bằng hình và màu").
+   LÝ DO CŨ ĐÃ HẾT ĐÚNG: bản ghi trước nói "hai emoji 📍/📌 trông gần như nhau ở cỡ 13px nên độ
+   mờ là thứ DUY NHẤT phân biệt hàng đang ghim". Nhưng chính độ mờ đó làm nút ghim thành chỗ
+   TƯƠNG PHẢN THẤP NHẤT toàn app: icon bị xám hoá RỒI hạ opacity 50%, nên cây ghim chưa ghim
+   gần như tan vào nền hàng. Hàng đang ghim giờ nhận ra bằng hai thứ khác, không cần hạ sáng icon:
+     1. HÌNH — 📍 là ghim TRÒN (đầu tròn + lỗ), 📌 là ghim CÓ ĐẦU HÌNH THANG;
+     2. MÀU ở chính cái NÚT — `.mix-lock.on` đổi viền + nền sang `--mix-cyan`.
+   Cộng thêm `aria-pressed` và `title` (đổi theo trạng thái) nên trạng thái không phụ thuộc
+   hoàn toàn vào thị giác. ĐỪNG đặt lại `filter` cho span này.
+   Bỏ luôn `.mix-lock:hover .mix-lock-ico { filter: none }` — không còn `filter` nào để đặt lại. */
+.mix-lock-ico { line-height: 1; }
 .mix-lock:hover { border-color: var(--accent-glow); color: var(--text); }
-.mix-lock:hover .mix-lock-ico { filter: none; }
 /* Hàng ĐANG GHIM: nền + viền ĐỒNG BỘ VỚI Ô SỐ ngay bên cạnh (20/9/2026 — "đổi màu nền và viền
    ghim cho đồng bộ với màu nền viền số"). Trước đây là xanh LÁ (#34d399 / rgba(52,211,153,0.18)
    ở tối, #166534 / rgba(22,101,52,0.12) ở sáng) — hai ô nằm sát nhau mà lệch hệ màu.
@@ -848,16 +1113,15 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
    sau này đổi màu ô số thì phải đổi cả ở đây, nếu không chúng lại lệch nhau.
    Viền xanh đứng sau `.mix-lock` nên thắng `--pin-brd` (cùng (0,2,0) với `.mix-lock:hover`,
    mà luật này khai SAU) — đó là lý do hàng ghim không còn viền `--pin-brd` đậm.
-   Hàng ghim vẫn phân biệt được với hàng thường nhờ ICON: `.mix-lock.on .mix-lock-ico` bỏ
-   `filter` nên 📌 hiện đầy màu, còn hàng thường bị `grayscale(1) opacity(0.5)`.
+   Hàng ghim phân biệt với hàng thường bằng HÌNH icon (📌 so với 📍) và bằng chính cặp viền +
+   nền cyan ở đây — KHÔNG còn bằng cách hạ sáng icon (xem `.mix-lock-ico` phía trên).
    Chỉ MÀU đổi — độ dày viền vẫn 1px (ô số là 1,5px) và bo góc vẫn 8px (ô số 10px). */
 .mix-lock.on {
-  border-color: rgba(56, 189, 248, 0.55); color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.55); color: var(--mix-cyan);
   background: rgba(56, 189, 248, 0.08);
 }
-.mix-lock.on .mix-lock-ico { filter: none; }
 body.light-mode .mix-lock.on {
-  border-color: rgba(14, 165, 233, 0.45); color: #075985; background: rgba(14, 165, 233, 0.06);
+  border-color: rgba(14, 165, 233, 0.45); color: var(--mix-cyan); background: rgba(14, 165, 233, 0.06);
 }
 /* Dấu chỉ hàng đang ghim trên chính tên bộ đề — ĐÃ BỎ (20/9/2026 — "tôi muốn bỏ viền khi ghim ở
    tên bộ đề"). Trước đây là `box-shadow: inset 0 0 0 1px rgba(52,211,153,0.7)` và lý do dùng inset
@@ -865,8 +1129,8 @@ body.light-mode .mix-lock.on {
    Class `pinned` KHÔNG bị bỏ: `toggleMixLock()` (dòng ~1660) vẫn bật/tắt nó và markup lúc dựng
    hàng vẫn gắn nó, nên state vẫn nằm trong DOM — chỉ là giờ không có khai báo CSS nào cho nó.
    Đừng xoá ở JS: `paintMixLock` sẽ lệch trạng thái với markup.
-   Hàng đang ghim vẫn nhận ra được ngay qua NÚT GHIM (`.mix-lock.on`: viền + nền xanh lá, icon 📌
-   giữ nguyên màu) — đó mới là chỉ báo chính, không phải tên bộ đề. */
+   Hàng đang ghim vẫn nhận ra được ngay qua NÚT GHIM (`.mix-lock.on`: viền + nền `--mix-cyan`,
+   icon 📌 đủ màu) — đó mới là chỉ báo chính, không phải tên bộ đề. */
 /* ── BẢNG TRỘN ĐỀ: KHỐI KẺ NGANG, BO GÓC (yêu cầu 19/9/2026 — "cho bảng Trộn đề bo góc theo
    đường kẻ mới") ──
    Lịch sử trong ngày, đúng thứ tự đã đi: (1) thêm KẺ NGANG giữa các hàng; (2) thêm kẻ DƯỚI
@@ -927,8 +1191,8 @@ input[id^="mixPct-"] { -moz-appearance: textfield; appearance: textfield; }
    #1e40af mà .quiz-toggle.on dùng ở chế độ sáng (7,45:1 trên nền chip).
    Lưu ý: `#93c5fd` cũng là màu `.quiz-toggle.on` dùng ở CHẾ ĐỘ TỐI từ 20/9/2026, nhưng đó là
    màu sáng (đọc trên nền tối), còn ở đây là màu ĐẬM trên nền sáng — hai giá trị cho hai chế độ. */
-body.light-mode .mix-reset { color: #1e40af; border-color: rgba(0,0,0,0.35); }
-body.light-mode .mix-reset:hover { border-color: #1e40af; }
+body.light-mode .mix-reset { color: var(--accent-deep); border-color: rgba(0,0,0,0.35); }
+body.light-mode .mix-reset:hover { border-color: var(--accent-deep); }
 
 /* ── SEARCH ───────────────────────── */
 /* Thanh tìm kiếm đứng RIÊNG, ngay dưới thanh xanh trên cùng và TRÊN thẻ “📚 Thư viện
@@ -945,12 +1209,12 @@ body.light-mode .mix-reset:hover { border-color: #1e40af; }
   width: 100%; padding: 9px 38px 9px 34px;
   border-radius: 10px; border: 1.5px solid var(--border);
   background: var(--navy-mid); color: var(--text);
-  font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400;
+  font-family: 'Inter', sans-serif; font-size: var(--fs-lead); font-weight: 400;
 }
 .search-input:focus { outline: none; border-color: var(--accent); }
 .search-icon {
   position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-  font-size: 16px; pointer-events: none; opacity: 0.6;
+  font-size: var(--fs-lead); pointer-events: none; opacity: 0.6;
 }
 /* Nút XOÁ (✕) nằm TRONG ô nhập, sát mép phải (19/9/2026 — "tôi muốn có dấu x để xoá ở thanh tìm
    kiếm"). 34×34 là vùng chạm tối thiểu trên điện thoại; ký tự ✕ không tính vào vùng đó.
@@ -962,7 +1226,7 @@ body.light-mode .mix-reset:hover { border-color: #1e40af; }
   width: 34px; height: 34px; padding: 0;
   display: flex; align-items: center; justify-content: center;
   background: none; border: 0; border-radius: 8px; cursor: pointer;
-  color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: 17px; line-height: 1;
+  color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: var(--fs-base); line-height: 1;
 }
 .search-clear[hidden] { display: none; }
 .search-clear:hover, .search-clear:active { color: var(--text); background: rgba(127, 127, 127, 0.18); }
@@ -970,7 +1234,7 @@ body.light-mode .mix-reset:hover { border-color: #1e40af; }
    `body.light-mode` không ghi đè nó — dùng nguyên `var(--text)` ở đây là chữ trắng trên nền trắng.
    Cùng họ lỗi đã làm nút dropdown mất chữ. */
 body.light-mode .search-clear:hover, body.light-mode .search-clear:active {
-  color: #000000; background: rgba(0, 0, 0, 0.06);
+  color: var(--text-base); background: rgba(0, 0, 0, 0.06);
 }
 .search-results {
   max-height: 360px; overflow-y: auto; margin-top: 6px;
@@ -982,15 +1246,15 @@ body.light-mode .search-clear:hover, body.light-mode .search-clear:active {
   border: 1px solid var(--border); background: var(--navy-mid);
 }
 .search-hit-set {
-  font-size: 13px; font-weight: 500; color: var(--accent-glow);
+  font-size: var(--fs-note); font-weight: 500; color: var(--accent-glow);
   margin-bottom: 4px;
 }
 .search-hit-q {
-  font-size: 16px; font-weight: 500; color: var(--text);
+  font-size: var(--fs-lead); font-weight: 500; color: var(--text);
   line-height: 1.5; margin-bottom: 4px;
 }
 .search-hit-a {
-  font-size: 15px; font-weight: 400; color: var(--green);
+  font-size: var(--fs-sub); font-weight: 400; color: var(--green);
   line-height: 1.4;
 }
 .search-hit-q em, .search-hit-a em {
@@ -998,23 +1262,23 @@ body.light-mode .search-clear:hover, body.light-mode .search-clear:active {
   border-radius: 3px; padding: 0 2px;
 }
 .search-empty {
-  font-size: 15px; color: var(--text-dim); padding: 8px 0;
+  font-size: var(--fs-sub); color: var(--text-dim); padding: 8px 0;
 }
-body.light-mode .search-input { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
-body.light-mode .search-hit { background: #ffffff; border-color: #c9d1da; }
-body.light-mode .search-hit-q { color: #1e293b; }
+body.light-mode .search-input { background: var(--surface-card); border-color: var(--border-field); color: var(--text-strong); }
+body.light-mode .search-hit { background: var(--surface-card); border-color: var(--border-light); }
+body.light-mode .search-hit-q { color: var(--text-strong); }
 body.light-mode .search-hit-a { color: #166534; }
 body.light-mode .header {
   background:
     linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 42%),
-    linear-gradient(135deg, #1e40af, #1e3a8a);
+    linear-gradient(135deg, var(--header-from), var(--header-deep));
   box-shadow: 0 3px 10px rgba(30,64,175,0.35);
 }
 body.light-mode .header-sub { color: #dbeafe; }
-body.light-mode .modal { background: #f0f1f4; }
+body.light-mode .modal { background: var(--surface-modal); }
 body.light-mode .modal-handle { background: rgba(0,0,0,0.15); }
-body.light-mode .quiz-card { background: #ffffff; border-color: #c9d1da; }
-body.light-mode .quiz-input { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
+body.light-mode .quiz-card { background: var(--surface-card); border-color: var(--border-light); }
+body.light-mode .quiz-input { background: var(--surface-card); border-color: var(--border-field); color: var(--text-strong); }
 /* Ô số của bảng trộn ở CHẾ ĐỘ SÁNG. Phải khai báo SAU `body.light-mode .quiz-input` ở trên:
    hai luật cùng độ ưu tiên (0,2,0) nên luật nào đứng sau mới thắng — đặt trước là màu trắng
    của .quiz-input đè mất, và lỗi này chỉ hiện ở chế độ sáng.
@@ -1022,7 +1286,7 @@ body.light-mode .quiz-input { background: #ffffff; border-color: #b3bfcc; color:
 body.light-mode .mix-input {
   background: rgba(14, 165, 233, 0.06);
   border-color: rgba(14, 165, 233, 0.45);
-  color: #075985;
+  color: var(--mix-cyan);
 }
 /* Ô SỐ 0 ở CHẾ ĐỘ SÁNG — phải khai báo LẠI Ở ĐÂY, không dùng được khối `.mix-zero` phía trên.
    Lý do là bẫy specificity đã gặp nhiều lần trong app: `body.light-mode .mix-input` và
@@ -1032,7 +1296,7 @@ body.light-mode .mix-input {
    Bản trước tôi chỉ khai `background` ở đây — thiếu `border-color` và `color` nên ô 0 ở chế độ
    sáng vẫn xanh viền và xanh chữ. Giờ khai đủ ba thuộc tính. */
 body.light-mode .mix-zero {
-  background: #ffffff;
+  background: var(--surface-card);
   border-color: var(--border);
   color: var(--text-dim);
 }
@@ -1044,16 +1308,15 @@ body.light-mode .mix-zero {
    Tên bộ `#134e4a` đi từ 8,95 → 7,57 — cũng không phải chỗ chặn. Nhớ ở chế độ sáng nấc nào cũng
    vượt ngưỡng, nên TRẦN 0,22 ở đây là do chế độ TỐI quyết định, không phải do nền trắng. */
 body.light-mode .mix-row.on { background: rgba(14,165,233,0.10); }
-body.light-mode .quiz-btn { background: #ffffff; border-color: #b3bfcc; color: #1e293b; }
-body.light-mode .quiz-btn.primary { background: #1d4ed8; color: #ffffff; border-color: #1d4ed8; }
-body.light-mode .quiz-btn.danger { background: #dc2626; color: #ffffff; border-color: #dc2626; }
-/* Nút ⬅️ ở CHẾ ĐỘ SÁNG phải khai báo LẠI Ở ĐÂY, không dùng được `.home-btn { border-color:
-   var(--home-brd) }` ở khu vực chính. Đây đúng BẪY SPECIFICITY đã gặp nhiều lần: `body.light-mode
-   .quiz-btn` là (0,2,1) còn `.home-btn` chỉ (0,1,0), nên luật chế độ sáng ĐÈ MẤT và viền vẫn ra
-   xám nhạt #b3bfcc (ĐO ĐƯỢC sau lượt sửa đầu: vẫn `rgb(179,191,204)`). Ở chế độ tối thì không cần
-   luật riêng: hai luật cùng (0,1,0) nên `.home-btn` (khai sau `body.light-mode` trong tệp) thắng.
-   Phải đứng SAU `body.light-mode .quiz-btn` ở trên — cùng độ ưu tiên nên luật nào sau thì thắng. */
-body.light-mode .home-btn { border-color: var(--home-brd); }
+body.light-mode .quiz-btn { background: var(--surface-card); border-color: var(--border-field); color: var(--text-strong); }
+body.light-mode .quiz-btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+body.light-mode .quiz-btn.danger { background: var(--danger); color: var(--on-accent); border-color: var(--danger); }
+/* Nút QUAY LẠI ở CHẾ ĐỘ SÁNG: luật `body.light-mode .home-btn { border-color: var(--home-brd) }`
+   và biến `--home-brd` đã bị XOÁ 20/9/2026 ("bỏ viền và cho icon to hơn") — nút không còn viền ở
+   CẢ HAI chế độ nên không còn gì phải khai riêng cho chế độ sáng, và bẫy specificity cũ
+   (`body.light-mode .quiz-btn` (0,2,1) đè `.home-btn` (0,1,0), đo được `rgb(179,191,204)`) tự
+   hết. Dấu hiệu khi chọn bằng bàn phím giờ là `.home-btn:focus-visible` (box-shadow) ở khu vực
+   chính — đừng khôi phục viền ở đây, cả hai chế độ phải đọc ra GIỐNG NHAU. */
 /* VIỀN KHI ĐANG CHỌN ở CHẾ ĐỘ SÁNG — phải khai báo Ở ĐÂY, không phải cạnh `.quiz-btn:focus`.
    Ba luật `body.light-mode .quiz-btn[.primary|.danger]` ngay trên có độ ưu tiên (0,3,1), còn
    luật gốc `.quiz-btn:focus` chỉ (0,3,0) — nên nếu không có khối này thì ở chế độ sáng viền focus
@@ -1092,7 +1355,7 @@ body.light-mode .quiz-btn.danger:focus { border-color: var(--accent-glow); }
    đạt **2,60:1 trên thẻ trắng — KHỚP CHÍNH XÁC với viền ở chế độ tối** (rgba trắng 0,29 → #606060
    trên thẻ #202020 cũng 2,60:1). Độ dày 2px lấy từ luật `.quiz-opt` gốc ở trên. Đổi một bên thì
    phải đo lại bên kia, nếu không hai chế độ lại lệch nhau như trước lượt này (1,87 so với 2,05). */
-body.light-mode .quiz-opt { background: #fafbfc; border-color: #96a2af; color: var(--answer); }
+body.light-mode .quiz-opt { background: var(--surface-answer); border-color: var(--border-answer); color: var(--answer); }
 /* Đáp án đã chọn ở CHẾ ĐỘ SÁNG phải hiện xanh/đỏ y như chế độ tối.
    Luật `body.light-mode .quiz-opt` ở ngay trên có độ ưu tiên cao hơn
    `.quiz-opt.correct/.wrong` (2 class + 1 thẻ so với 2 class), nên nó XOÁ luôn màu của
@@ -1107,7 +1370,7 @@ body.light-mode .quiz-opt { background: #fafbfc; border-color: #96a2af; color: v
    Tint 0,15 → 0,12 ở CẢ HAI: chữ đáp án #5f6b7c trên nền xanh 4,68:1 (đã đạt, giữ được 4,67:1)
    và trên nền đỏ chỉ 4,45:1 — DƯỚI ngưỡng 4,5:1 — nay **4,64:1**.
    Kết quả: viền 3,77 và 3,76 — hai trạng thái CÂN NHAU về độ mạnh, thay vì lệch như trước. */
-body.light-mode .quiz-opt.correct { border-color: #059669; background: rgba(5,150,105,0.12); }
+body.light-mode .quiz-opt.correct { border-color: var(--ok-strong); background: rgba(5,150,105,0.12); }
 body.light-mode .quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,0.12); }
 /* Chip bật/tắt ở chế độ sáng: chữ xanh nhạt --accent-glow (#60a5fa) trên nền chip
    xanh nhạt chỉ đạt 2.06:1 — không đọc được. Đổi sang xanh đậm, vì giờ trạng thái
@@ -1120,18 +1383,19 @@ body.light-mode .quiz-opt.wrong { border-color: var(--red); background: rgba(239
 /* Chip đang bật ở CHẾ ĐỘ SÁNG — đồng bộ với nút 📦 Thư viện (20/9/2026): nền 0,26 → **0,14**,
    chữ `#1e40af` → **`#1d4ed8`**. Đo trên nền đã pha `rgb(228,238,254)`: **5,71:1** (trước là 7,45:1
    với nền đậm hơn) — vẫn trên ngưỡng 4,5:1. Viền `#1d4ed8` không đổi. */
-body.light-mode .quiz-toggle.on { background: rgba(59,130,246,0.14); border-color: var(--accent); color: #1d4ed8; }
+body.light-mode .quiz-toggle.on { background: rgba(59,130,246,0.14); border-color: var(--accent); color: var(--accent); }
 /* Số câu (viền đỏ) ở chế độ sáng: --red #ef4444 trên thẻ trắng chỉ đạt 3.76:1 —
    hơi mờ cho một con số nhỏ. Dùng #dc2626 (đúng màu đỏ mà chế độ sáng đã dùng ở
    .quiz-btn.danger) → 4.53:1, vượt ngưỡng dễ đọc. */
-body.light-mode .q-num { border-color: #dc2626; color: #dc2626; }
+body.light-mode .q-num { border-color: var(--danger); color: var(--danger); }
 /* Hộp phản hồi ✅/❌: chế độ sáng dùng 0.12 còn chế độ tối 0.14 — chênh 2% độ trong
    suốt, không nhìn ra được, nhưng để y hệt chế độ tối thì lấy 0.14 cho cả hai. */
 body.light-mode .quiz-fb.ok { background: rgba(16,185,129,0.14); }
 body.light-mode .quiz-fb.no { background: rgba(239,68,68,0.14); }
-body.light-mode .arc-item { background: #ffffff !important; border-color: #c9d1da !important; }
+body.light-mode .arc-item { background: var(--surface-card) !important; border-color: var(--border-light) !important; }
 
 #quizFileInput, #quizDirInput, #quizRestoreInput { display: none; }
+
 </style>
 </head>
 <body>
@@ -1146,8 +1410,8 @@ body.light-mode .arc-item { background: #ffffff !important; border-color: #c9d1d
   </div>
   <div class="header-right">
     <button class="upload-btn-header" id="clockBtn" onclick="showClock()" title="Xem đồng hồ">
-      <span id="clockLive" style="color:#ffffff;font-size:21px;font-weight:700"></span>
-      <span id="clockDateLive" style="color:rgba(255,255,255,0.65);font-size:15px;font-weight:400;margin-top:2px"></span>
+      <span id="clockLive" style="color:var(--on-accent);font-size:21px;font-weight:700"></span>
+      <span id="clockDateLive" style="color:rgba(255,255,255,0.65);font-size:var(--fs-sub);font-weight:var(--fw-body);margin-top:2px"></span>
     </button>
   </div>
 </div>
@@ -1224,7 +1488,7 @@ function showClock() {
     const box = document.createElement('div');
     box.style.cssText = 'background:var(--navy-mid);border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.5);min-width:240px';
     box.innerHTML = '<div id="clockDigital" style="font-size:49px;font-weight:200;color:#60a5fa;letter-spacing:2px"></div>' +
-      '<div id="clockDate" style="font-size:15px;font-weight:400;color:#94a3b8;margin-top:8px"></div>';
+      '<div id="clockDate" style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:#94a3b8;margin-top:8px"></div>';
     overlay.appendChild(box);
     document.body.appendChild(overlay);
   }
@@ -1305,7 +1569,15 @@ let _quizOpts = { shuffleQ: true, shuffleA: false };
 // cả 44 ô đều chỉ còn viền.
 const SET_ACT_KEY = 'qlno_set_act';
 const SET_ACTS = { single: 1, all: 1, study: 1, browse: 1 };
-let _setActSel = { setId: null, key: null };
+// Ba chế độ LÀM BÀI. Tách khỏi SET_ACTS vì 'browse' không phải một chế độ làm bài — nó là một
+// MÀN, và chính vì thế nó phải được đối xử khác (xem `useSetAct` bên dưới).
+const SET_EXAM_ACTS = { single: 1, all: 1, study: 1 };
+// `key`  = ô xanh của thẻ "Chọn từng bộ đề" (có cả 👁 browse).
+// `examKey` = chế độ làm bài được chọn GẦN NHẤT cho bộ này, để màn 👁 "Câu hỏi" cũng hiện được
+// một ô xanh. Hai trường KHÔNG thay thế nhau: màn 👁 không có nút browse nên nó cần biết chế độ
+// làm bài, còn thẻ ở trang chủ thì cần biết cả nút 👁. Chỉ một trong hai màn hiện ra tại một
+// thời điểm, nên vẫn đúng luật "mỗi màn chỉ một ô xanh".
+let _setActSel = { setId: null, key: null, examKey: null };
 (function restoreSetAct() {
   // Chỉ nhận dạng { setId, key } do CHÍNH bản này ghi. Hai dạng cũ KHÔNG được đọc lên:
   //  - một chuỗi trần ('single') của bản 18/9 — đọc lên là tự dưng có ô xanh dù chưa bấm;
@@ -1314,7 +1586,12 @@ let _setActSel = { setId: null, key: null };
   try {
     const saved = JSON.parse(localStorage.getItem(SET_ACT_KEY) || 'null');
     if (saved && !Array.isArray(saved) && SET_ACTS[saved.key] && typeof saved.setId === 'string') {
-      _setActSel = { setId: saved.setId, key: saved.key };
+      // `examKey` ra đời sau (20/9/2026) nên bản ghi cũ không có nó: khi đó chính `key` LÀ chế
+      // độ làm bài vừa dùng, nên lấy nó làm giá trị khởi đầu — nhờ vậy dữ liệu đang có trên máy
+      // người dùng vẫn hiện đúng ô xanh, không cần bấm lại.
+      const ek = SET_EXAM_ACTS[saved.examKey] ? saved.examKey
+        : (SET_EXAM_ACTS[saved.key] ? saved.key : null);
+      _setActSel = { setId: saved.setId, key: saved.key, examKey: ek };
     }
   } catch (e) {}
 })();
@@ -1325,6 +1602,11 @@ function saveSetAct() {
 // duy nhất tồn tại trên toàn app.
 function isSetActOn(setId, key) {
   return _setActSel.setId === setId && _setActSel.key === key;
+}
+// Như trên nhưng cho màn 👁 "Câu hỏi": hỏi `examKey` (chế độ làm bài gần nhất) thay vì `key`,
+// vì ở màn đó không có nút browse nào để mà sáng.
+function isExamActOn(setId, key) {
+  return _setActSel.setId === setId && _setActSel.examKey === key && !!SET_EXAM_ACTS[key];
 }
 // Mặc định của đề trộn: bài 100 câu, nên SỐ PHẦN TRĂM TRÙNG VỚI SỐ CÂU.
 const MIX_DEFAULT_TOTAL = 100;
@@ -1467,8 +1749,10 @@ function toggleQuizOpt(k) { _quizOpts[k] = !_quizOpts[k]; renderQuiz(); }
 
 // Một ô trong hàng 2×2: ô ĐANG được chọn dùng kiểu xanh (.primary), các ô còn lại kiểu
 // viền. Hai kiểu cùng cỡ nên đổi màu KHÔNG làm nút nhảy kích thước.
-function setActBtn(setId, key, label, title, off) {
-  const on = isSetActOn(setId, key);
+// `exam` = true khi nút nằm ở màn 👁 "Câu hỏi" — lúc đó ô xanh tra theo `examKey` chứ không
+// phải `key` (xem `isExamActOn`). Mặc định false = thẻ "Chọn từng bộ đề".
+function setActBtn(setId, key, label, title, off, exam) {
+  const on = exam ? isExamActOn(setId, key) : isSetActOn(setId, key);
   return '<button class="quiz-btn' + (on ? ' primary' : '') + '" data-set-act="' + key + '"'
     + (off || '')
     + ' onclick="useSetAct(\'' + setId + '\',\'' + key + '\')"'
@@ -1519,7 +1803,17 @@ document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeSetDd
 
 function useSetAct(setId, key) {
   if (!SET_ACTS[key]) return;
-  _setActSel = { setId: setId, key: key };
+  // 'browse' KHÔNG xoá ký ức về chế độ làm bài (20/9/2026). Đây là chỗ hỏng đã làm cả một lượt
+  // sửa thành vô hình: đường vào màn 👁 DUY NHẤT là bấm nút 👁, nên nếu 'browse' ghi đè thẳng vào
+  // `_setActSel` thì cả ba nút ở màn đó luôn xám — màu xanh chẳng bao giờ hiện ra để người dùng
+  // thấy. Giữ `examKey` của CHÍNH bộ này (đổi sang bộ khác thì không giữ) là đủ để nó hiện.
+  const keepExam = (_setActSel.setId === setId && SET_EXAM_ACTS[_setActSel.examKey])
+    ? _setActSel.examKey : null;
+  _setActSel = {
+    setId: setId,
+    key: key,
+    examKey: SET_EXAM_ACTS[key] ? key : keepExam
+  };
   saveSetAct();
   if (key === 'browse') openBrowse(setId);
   else startSetExam(setId, key);
@@ -1554,8 +1848,8 @@ function quizHomeHtml() {
   // mà nút giờ ở bên cạnh — giữ lại chỉ làm đáy thẻ dày thêm 9px vô ích.
   h += '<div class="lib-head">';
   h += '<div class="lib-head-text">';
-  h += '<div style="font-size:17px;font-weight:500;margin-bottom:4px">📚 Thư viện bộ đề</div>';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim)">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
+  h += '<div style="font-size:var(--fs-head);font-weight:var(--fw-ui);margin-bottom:4px">📚 Thư viện bộ đề</div>';
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim)">${quizLib.length ? quizLib.length + ' bộ đề · ' + nQ + ' câu hỏi' : 'Chưa có bộ đề nào'}</div>`;
   h += '</div>';
   // Trang chủ chỉ còn MỘT nút, mở bảng 📦. Nạp file, nạp cả thư mục, sao lưu và
   // phục hồi đều nằm trong bảng đó, nên hai nút “Chọn file”/“Thư mục” đã bị bỏ.
@@ -1572,7 +1866,7 @@ function quizHomeHtml() {
   h += '</div>';
 
   if (!nQ) {
-    h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">'
+    h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:var(--fs-sub);line-height:1.6">'
       + 'Chưa có bộ đề nào.<br>Bấm “📦 Thư viện” rồi chọn “📥 Nạp hoặc nạp lại file bộ đề” — chọn được nhiều file Excel/CSV, hoặc 1 file .zip chứa cả thư mục.<br>Mỗi file sẽ thành một bộ đề riêng.</div>';
     return h;
   }
@@ -1584,7 +1878,7 @@ function quizHomeHtml() {
   // Dòng phụ "Chọn bộ đề trong dropdown rồi bấm nút thi bên dưới." đã XOÁ (19/9/2026 — "tôi muốn bỏ
   // những chữ này"): chính các nút bên dưới đã nói rõ phải làm gì. Lề dưới của tiêu đề 2px → 10px
   // để giữ nguyên khoảng thở cũ (2px + dòng phụ + 9px) chứ không để tiêu đề dính vào dropdown.
-  h += '<div style="font-size:17px;font-weight:500;margin-bottom:10px">📝 Chọn từng bộ đề</div>';
+  h += '<div style="font-size:var(--fs-head);font-weight:var(--fw-ui);margin-bottom:10px">📝 Chọn từng bộ đề</div>';
   // ── Dropdown chọn bộ đề — TỰ VẼ, không còn <select> (19/9/2026) ──
   // `<select>` gốc không nhận CSS cho bảng xổ xuống nên không thể có kẻ ngang giữa các hàng;
   // xem khối `.set-dd` ở CSS. Cấu trúc: nút mở + danh sách nút nằm đè.
@@ -1638,28 +1932,76 @@ function quizBrowseHtml() {
   if (!s) { _quizMode = 'home'; return quizHomeHtml(); }
   const n = s.questions.length;
   let h = '<div class="quiz-card">';
-  h += `<div style="font-size:17px;font-weight:500;line-height:1.35" title="${esc(s.name)}">`
-    + `<span class="set-name">${esc(s.name)}</span></div>`;
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:4px 0 12px">${n} câu hỏi</div>`;
-  h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  h += `<button class="quiz-btn primary"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','single')">▶️ Thi từng câu</button>`;
-  h += `<button class="quiz-btn"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','all')">📋 Thi cả bộ</button>`;
-  h += `<button class="quiz-btn"${n ? '' : ' disabled'} onclick="startSetExam('${s.id}','study')">📖 Học (chọn sai làm lại)</button>`;
+  // Tên bộ đề và nút "Về trang chủ" là HAI Ô BẰNG NHAU trên cùng một hàng (20/9/2026 — "cho 2
+  // tab này kích cỡ bằng nhau"). Vì thế hàng này là LƯỚI `1fr 1fr` chứ không phải flex: lưới chia
+  // đôi bề ngang bằng nhau BẤT KỂ độ dài chữ, còn `align-items` mặc định (stretch) tự kéo cả hai
+  // ô cao bằng nhau — cùng một cặp bảo đảm như hàng ba nút bên dưới.
+  // Nút đứng SAU tên trong DOM nên thứ tự đọc và thứ tự tab vẫn đúng.
+  // `min-width:0` trên khối tên là BẮT BUỘC: không có nó thì tên dài ("Các tình huống vi phạm
+  // sử dụng điện") làm tràn lưới thay vì tự xuống dòng — cùng cái bẫy đã gặp ở `.set-dd-lbl`
+  // và hàng nút của bảng trộn. KHÔNG cắt chữ bằng ellipsis vì app không rút gọn tên bộ đề ở đâu cả.
+  // Nhãn KHÔNG còn hộp nền/viền, chỉ còn chữ + icon 📚 (20/9/2026 — "bỏ viền bỏ nền, thêm icon") —
+  // xem `.browse-name` ở khu vực chính; lớp cũ `set-name-fill` (giãn kín ô + canh giữa) đã bị xoá
+  // cùng lượt này vì nó tồn tại chỉ để canh giữa chữ TRONG cái hộp không còn nữa.
+  h += '<div class="browse-head">';
+  h += `<div class="browse-name" style="font-size:var(--fs-base);font-weight:var(--fw-ui);line-height:1.35" title="${esc(s.name)}">`
+    + `<span class="set-dd-ico">📚</span><span class="set-name">${esc(s.name)}</span></div>`;
+  // Nhãn là ICON SVG, cùng hình với nút ở đầu màn làm bài (20/9/2026 — "đổi icon về trang chủ").
+  // Đường đi của chỗ này: "← Về trang chủ" (chữ có mũi tên → Windows vẽ "←" thành emoji mũi tên
+  // xanh có nền, nặng thị giác) → CHỮ "Về trang chủ" → ICON như bây giờ. Bề ngang nút do lưới `1fr`
+  // quyết định nên nhãn đổi cỡ nào cũng KHÔNG làm nút nhỏ đi — hai ô vẫn bằng nhau.
+  // `title`/`aria-label` là BẮT BUỘC: nút chỉ có hình, không còn chữ nào để đọc.
+  h += '<button class="quiz-btn home-btn browse-back" onclick="backHome()"'
+    + ' title="Về trang chủ" aria-label="Về trang chủ">' + homeIcoSvg() + '</button>';
   h += '</div>';
-  h += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">';
-  h += '<button class="quiz-btn" onclick="backHome()">← Về trang chủ</button>';
+  // `margin-top` 4px → 0 (20/9/2026 — "cho chữ 25 câu hỏi nằm xích lên gần tên bộ đề"): dòng này
+  // nằm ngay dưới hàng tên bộ, mà hàng đó cao hơn chữ tên một khoảng (nút icon quyết định chiều
+  // cao), nên mỗi px margin ở đây cộng thêm vào khe hở đã có sẵn → bỏ hẳn. `margin-bottom` 12px
+  // GIỮ NGUYÊN vì đó là nhịp xuống hàng ba nút bên dưới.
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin:0 0 12px">${n} câu hỏi</div>`;
+  // BA nút làm bài trên MỘT hàng (20/9/2026 — "cho 3 tab còn lại nằm cùng hàng"), sau khi nút
+  // Nút "Về trang chủ" đã dời lên hàng tên bộ đề (xem `.browse-head` ở đầu hàm này).
+  // Bề ngang mỗi nút theo ĐỘ DÀI CHỮ đã từng gây lệch cỡ (đo 20/9: 155,1 / 128,2 / 227,4px), nên
+  // dùng lưới: `grid-template-columns: 1fr 1fr 1fr` + `grid-auto-rows: 1fr` cho cả ba ô cùng bề
+  // ngang VÀ cùng chiều cao. `grid-auto-rows: 1fr` đặc biệt quan trọng Ở ĐÂY: nhãn dài nhất
+  // ("📖 Học (chọn sai làm lại)") chỉ còn ~101px chỗ chữ nên phải xuống 3 dòng, và chính nó là
+  // thứ giữ cho hai nút kia cao bằng — không có nó thì ba nút so le ngay.
+  // `margin-top:0` là để giữ nguyên nhịp cũ: dòng "N câu hỏi" phía trên đã có `margin-bottom:12px`,
+  // cộng thêm 8px mặc định của `.set-acts` là thành 20px — hụt hẳn so với trước.
+  // Ba nút làm bài dùng CHUNG `setActBtn`/`useSetAct` với thẻ "Chọn từng bộ đề" (20/9/2026 —
+  // "chọn vô tab nào thì tab đó hiển thị màu"): nút vừa bấm nhận `primary` (nền xanh), hai nút
+  // kia tự về kiểu viền, và lựa chọn được LƯU vào máy nên mở lại màn này vẫn thấy đúng nút đó.
+  // Trước đây "▶️ Thi từng câu" bị gán CỨNG `primary` và onclick gọi thẳng `startSetExam`, nên
+  // màu xanh đứng yên một chỗ dù bấm nút nào — và nó còn lệch với ô xanh của thẻ bộ đề.
+  // Vì dùng chung một `_setActSel` cho cả app, ở đây chỉ có ĐÚNG MỘT ô xanh tại một thời điểm,
+  // khớp với "cả 44 ô" ở trang chủ (bấm "Thi cả bộ" ở đây thì ô "📋 Cả bộ" ở trang chủ cũng xanh).
+  // NHÃN NGẮN + CÓ ICON (20/9/2026). Hai bước, theo đúng thứ tự người dùng yêu cầu:
+  //   1. "cho 3 tab này gọn lại" — rút nhãn `▶️ Thi từng câu / 📋 Thi cả bộ / 📖 Học (chọn sai làm lại)`
+  //      (đo: 129,7 / 102,8 / 201,9px) xuống `Từng câu / Cả bộ / Học` VÀ bỏ icon — vì ở khung 409px
+  //      mỗi nút chỉ có 100,5px chỗ chữ, mà ngay cả `▶️ Từng câu` (104,9px, tức chỉ rút nhãn) cũng
+  //      vẫn hụt 4,4px. Hàng cao 83,6px → 40,3px.
+  //   2. "cho icon vô" — trả lại ba icon, GIỮ nhãn ngắn. Giờ VỪA ĐƯỢC, vì luật
+  //      `.set-acts-3 .quiz-btn { padding-left/right: 0 }` (xem khối CSS) đã nới chỗ chữ từ 100,5px
+  //      lên **112,5px** — `▶️ Từng câu` cần 104,9px nên lọt.
+  // ⚠ NGUỠNG BỊ LẠI: cả ba chỉ nằm một dòng khi khung ≥ khoảng 390px. Dưới mức đó `▶️ Từng câu`
+  // lại xuống 2 dòng → hàng cao thêm ~20px (vẫn cao BẰNG NHAU nhờ `grid-auto-rows: 1fr`).
+  // Đừng sửa nhãn nữa nếu chưa đo lại: đây là cặp nhãn đã được chọn qua hai lượt và có số ở trên.
+  h += '<div class="set-acts set-acts-3" style="margin-top:0">';
+  h += setActBtn(s.id, 'single', '▶️ Từng câu', 'Thi từng câu một', n ? '' : ' disabled', true);
+  h += setActBtn(s.id, 'all', '📋 Cả bộ', 'Làm cả bộ trong một trang', n ? '' : ' disabled', true);
+  h += setActBtn(s.id, 'study', '📖 Học', 'Học: chọn sai thì chọn lại', n ? '' : ' disabled', true);
   h += '</div></div>';
 
   if (!n) {
-    h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">Bộ đề này chưa có câu hỏi.<br>Mở 📦 để nạp lại file cho bộ này.</div>';
+    h += '<div class="quiz-card" style="text-align:center;color:var(--text-dim);font-size:var(--fs-sub);line-height:1.6">Bộ đề này chưa có câu hỏi.<br>Mở 📦 để nạp lại file cho bộ này.</div>';
     return h;
   }
 
   h += '<div class="quiz-card">';
-  h += '<div style="font-size:17px;font-weight:500;margin-bottom:10px">Danh sách câu hỏi</div>';
+  h += '<div style="font-size:var(--fs-head);font-weight:var(--fw-ui);margin-bottom:10px">Danh sách câu hỏi</div>';
   s.questions.forEach((q, i) => {
     h += '<div style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">';
-    h += `<div style="color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(q.q)}</div>`;
+    h += `<div style="color:var(--q-text);font-size:var(--fs-lead);font-weight:var(--fw-head);line-height:1.5">${i + 1}. ${esc(q.q)}</div>`;
     // Dòng đáp án đúng trong danh sách câu hỏi. Đã từng bị bỏ (19/9/2026 sáng) rồi được KHÔI PHỤC
     // cùng ngày ("tôi muốn khôi phục câu đáp án trong ô câu hỏi") — đây là danh sách để HỌC,
     // thiếu đáp án thì mở ra không dùng được gì.
@@ -1668,7 +2010,7 @@ function quizBrowseHtml() {
     const ans = Array.isArray(q.correct)
       ? q.correct.map(ix => q.options[ix] || '—').join(', ')
       : (q.options[q.correct] || '—');
-    h += `<div style="font-size:15px;color:var(--green);margin-top:6px;font-weight:400">✓ ${esc(ans)}</div>`;
+    h += `<div style="font-size:var(--fs-sub);color:var(--green);margin-top:6px;font-weight:400">✓ ${esc(ans)}</div>`;
     h += '</div>';
   });
   h += '</div>';
@@ -1959,14 +2301,14 @@ function quizMixHtml() {
   const pctSum = rows.reduce((a, r) => a + r.pct, 0);
   const ok = pctSum === 100 && rows.some(r => r.got > 0);
   let h = '<div class="quiz-card">';
-  h += '<div style="font-size:17px;font-weight:500">🎲 Trộn đề theo tỷ lệ</div>';
-  h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin:2px 0 12px">Đặt phần trăm cho từng bộ; tổng phải đúng 100%.</div>';
+  h += '<div style="font-size:var(--fs-head);font-weight:var(--fw-ui)">🎲 Trộn đề theo tỷ lệ</div>';
+  h += '<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin:2px 0 12px">Đặt phần trăm cho từng bộ; tổng phải đúng 100%.</div>';
   h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
-  h += '<div style="flex:1;font-size:15px;font-weight:400">Tổng số câu của bài</div>';
+  h += '<div style="flex:1;font-size:var(--fs-sub);font-weight:var(--fw-body)">Tổng số câu của bài</div>';
   // Ô nhập trong bảng trộn để cỡ 15px cho BẰNG các chữ xung quanh (yêu cầu 19/9/2026).
   // Cố ý KHÔNG hạ .quiz-input xuống 15px: lớp đó còn dùng cho ô đổi tên bộ đề ở bảng 📦
   // (ô nhập tên là chữ chính, phải giữ 17px/500). Chỉ hai ô của bảng trộn hạ cỡ.
-  h += `<input id="mixTotal" type="number" min="1" max="${Math.max(1, totalQuestions())}" class="quiz-input" style="width:88px;text-align:center;font-size:15px" value="${mixTotalValue()}" oninput="onMixInput()">`;
+  h += `<input id="mixTotal" type="number" min="1" max="${Math.max(1, totalQuestions())}" class="quiz-input" style="width:88px;text-align:center;font-size:var(--fs-sub)" value="${mixTotalValue()}" oninput="onMixInput()">`;
   h += '</div>';
   // 18 hàng nằm trong `.mix-table` — khung giữ VIỀN + BO GÓC của cả khối (xem khối .mix-table ở
   // CSS). Nhờ nó, kẻ TRÊN hàng đầu và kẻ DƯỚI hàng cuối là viền của khung nên BO THEO CUNG, còn
@@ -1979,7 +2321,7 @@ function quizMixHtml() {
     // Gắn NGAY TỪ ĐÂY chứ không chờ `paintMixMarks()`: lần vẽ đầu có thể chưa qua hàm đó, và khi ấy
     // hàng có số vẫn trắng cho tới lần chỉnh ô đầu tiên — đúng lỗi đã gặp với `.mix-zero`.
     h += '<div class="mix-row' + (r.pct > 0 ? ' on' : '') + '">';
-    h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span id="mixName-${r.set.id}" class="mix-name${r.locked ? ' pinned' : ''}">${esc(r.set.name)}</span></div>`;
+    h += `<div style="flex:1;min-width:0;font-size:var(--fs-sub);font-weight:var(--fw-body);line-height:1.35;white-space:normal" title="${esc(r.set.name)}"><span id="mixName-${r.set.id}" class="mix-name${r.locked ? ' pinned' : ''}">${esc(r.set.name)}</span></div>`;
     // Nút ghim ĐỨNG TRƯỚC ô số (19/9/2026 — "muốn ô ghim dời qua trước ô số"). Đặt trước
     // cũng hợp lý hơn về nghĩa: ghim là thuộc tính CỦA HÀNG, không phải của cặp ▲▼.
     h += `<button type="button" id="mixLock-${r.set.id}" class="mix-lock${r.locked ? ' on' : ''}" aria-pressed="${r.locked ? 'true' : 'false'}" title="${r.locked ? 'Đang ghim: các bộ khác chỉnh không làm đổi số của bộ này. Nhấn để bỏ ghim.' : 'Ghim số câu của bộ này — các bộ khác chỉnh sẽ không làm đổi số này.'}" onclick="toggleMixLock('${r.set.id}')"><span class="mix-lock-ico">${r.locked ? '📌' : '📍'}</span></button>`;
@@ -1994,17 +2336,17 @@ function quizMixHtml() {
     h += `</div>`;
     // Dấu `%` đã bỏ (19/9/2026 — "bỏ dấu %"). Nghĩa của cột số đã rõ nhờ dòng phụ "Đặt phần trăm
     // cho từng bộ" và dòng tổng "Tổng tỷ lệ: 100%"; bỏ đi trả lại ~23px cho cột tên bộ đề.
-    h += `<div id="mixCnt-${r.set.id}" style="width:84px;text-align:right;font-size:15px;font-weight:400;color:var(--text-dim)">${mixCountText(r)}</div>`;
+    h += `<div id="mixCnt-${r.set.id}" style="width:84px;text-align:right;font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim)">${mixCountText(r)}</div>`;
     h += '</div>';
   });
   h += '</div>';   // đóng `.mix-table` — khung bo góc của cả khối hàng
   h += '<div style="display:flex;align-items:center;gap:8px;margin-top:10px">';
   // 15px → 17px (19/9/2026 — "tất cả chữ này cỡ 17px"). Giữ nguyên `font-weight:400`: đây là
   // dòng TRẠNG THÁI, không phải nhãn nút — tăng cỡ chứ không tăng nét.
-  h += '<div id="mixSum" style="flex:1;font-size:17px;font-weight:400"></div>';
+  h += '<div id="mixSum" style="flex:1;font-size:var(--fs-base);font-weight:var(--fw-body)"></div>';
   h += '<button class="mix-reset" onclick="resetMixToDefaults()" title="Về tỷ lệ mặc định của app">↺ Mặc định</button>';
   h += '</div>';
-  h += '<div id="mixWarn" style="font-size:15px;font-weight:400;color:var(--gold);margin-top:4px"></div>';
+  h += '<div id="mixWarn" style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--gold);margin-top:4px"></div>';
   h += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">';
   h += `<button id="mixBtnSingle" class="big-upload-btn" style="width:100%" onclick="mixExam('single')">🎲 Trộn &amp; làm từng câu</button>`;
   // Hai nút dưới chia ĐỀU bề ngang (yêu cầu 19/9/2026 — "cho 2 bảng này đều nhau"): trước đây
@@ -2431,13 +2773,44 @@ function qTextHtml(text, extraStyle, num) {
     + '<div style="flex:1;min-width:0">' + text + '</div></div>';
 }
 
+// Icon nút "về trang chủ" — vẽ bằng SVG, KHÔNG dùng emoji (20/9/2026 — "đổi chữ về trang chủ
+// thành icon như ảnh"). Lý do phải là SVG chứ không phải emoji: cùng một ký tự `↩️` nhưng Windows
+// vẽ ra ô VUÔNG XANH DƯƠNG + mũi tên TRẮNG, còn ảnh người dùng gửi là ô VUÔNG XANH LÁ + mũi tên
+// ĐEN. Màu của emoji do FONT HỆ THỐNG quyết định, không sửa được bằng CSS, và nó khác nhau giữa
+// máy tính với điện thoại — nên không có cách nào "giống ảnh" bằng emoji.
+// Hình dưới đây lấy ĐÚNG từ ảnh đó, đọc từng pixel: khung 45×45 bo góc ~5,5px, nền `#3DC697`
+// (đo được rgb(61,198,151)), mũi tên `#0a0a0a` (rgb(10,10,10)): một nét dọc ở bên PHẢI nối xuống
+// thành nét ngang chạy sang TRÁI (khúc móc ở toạ độ 29,5/24,5), đầu mũi tên chữ V ở bên trái.
+// Đổi lại: cùng một hình trên mọi máy, mọi chế độ sáng/tối, và không bị mờ khi phóng to.
+function homeIcoSvg() {
+  const stroke = 'fill="none" stroke="#0a0a0a" stroke-width="2.3"'
+    + ' stroke-linecap="round" stroke-linejoin="round"';
+  // VÁT NỔI (20/9/2026 — "thêm hiệu ứng nổi khối"): hai vệt mảnh chạy sát mép TRÊN và mép DƯỚI
+  // của tấm — sáng ở trên, tối ở dưới — đúng quy ước ánh sáng từ trên xuống, nên tấm đọc ra là một
+  // khối NỔI chứ không phải miếng dán phẳng. Bóng đổ nằm ở CSS (`.home-btn svg`), còn vát nằm trong
+  // hình vì chỉ ở đây mới vẽ được bên trong tấm.
+  // Hai vệt này dừng trước hai góc (x 5,5 → 39,5) để không đè lên đường bo 5,5 của tấm.
+  // Cỡ nét 2,0 trong hệ 45 nên ở cỡ hiển thị 32px nó ra ~1,4px — mảnh, không thành hai vạch kẻ.
+  const bevel = 'fill="none" stroke-linecap="round" stroke-width="2"';
+  return '<svg viewBox="0 0 45 45" aria-hidden="true" focusable="false">'
+    + '<rect x="0" y="0" width="45" height="45" rx="5.5" fill="#3DC697"></rect>'
+    + '<path d="M5.5 2.4 H39.5" ' + bevel + ' stroke="rgba(255,255,255,0.42)"></path>'
+    + '<path d="M5.5 42.6 H39.5" ' + bevel + ' stroke="rgba(0,0,0,0.20)"></path>'
+    + '<path d="M29.5 15.5 V24.5 H16.5" ' + stroke + '></path>'
+    + '<path d="M20.5 20 L16.5 24.5 L20.5 29" ' + stroke + '></path>'
+    + '</svg>';
+}
+
 function homeBtnHtml() {
-  // Icon đổi 🏠 → ⬅️ (19/9/2026 — "thay icon nút quay về khác icon khác"). Nút này giờ là
-  // LỐI THOÁT DUY NHẤT khỏi bài thi (nút "Thoát bài làm" ở đáy đã bị thay bằng cặp điều hướng),
-  // nên nó phải giữ nguyên cỡ to của .home-btn và luôn nằm ở đầu thẻ — ở "Cả bộ" thẻ đó là
-  // thanh DÍNH nên mũi tên luôn trong tầm mắt dù cuộn tới đâu.
+  // Nút này là LỐI THOÁT DUY NHẤT khỏi bài thi (nút "Thoát bài làm" ở đáy đã bị thay bằng cặp
+  // điều hướng) và ở "Cả bộ"/"Học" thẻ này là thanh DÍNH nên nút luôn trong tầm mắt dù cuộn tới đâu.
+  // Lịch sử trong ngày 20/9/2026, để không ai "sửa qua sửa lại" thêm lần nữa:
+  //   icon ⬅️ → CHỮ "Về trang chủ" (theo yêu cầu "bỏ icon cho đồng bộ") → ICON SVG như trên
+  //   (theo yêu cầu "đổi chữ về trang chủ thành icon như ảnh"). Chữ tốn thêm ~77px bề ngang của
+  //   tiêu đề bộ đề trên cùng hàng; icon trả lại đúng 77px đó.
+  // `title`/`aria-label` là BẮT BUỘC ở đây: nút chỉ có hình, không còn chữ nào để đọc.
   return '<button class="quiz-btn home-btn" onclick="quitQuiz()" title="Về trang chủ"'
-    + ' aria-label="Về trang chủ">⬅️</button>';
+    + ' aria-label="Về trang chủ">' + homeIcoSvg() + '</button>';
 }
 
 function quizPlayHtml() {
@@ -2449,19 +2822,19 @@ function quizPlayHtml() {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   let h = '<div class="quiz-card">';
   h += '<div class="head-row" style="margin-bottom:8px">';
-  h += `<div style="flex:1;min-width:0;font-size:15px;font-weight:400;color:var(--text-dim);line-height:1.35">${st.title ? esc(st.title) : ''}</div>`;
+  h += `<div style="flex:1;min-width:0;font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);line-height:1.35">${st.title ? esc(st.title) : ''}</div>`;
   h += homeBtnHtml();
   h += '</div>';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">';
-  h += `<div style="font-size:15px;font-weight:400">Câu ${st.idx + 1}/${total}</div>`;
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body)">Câu ${st.idx + 1}/${total}</div>`;
   // Số câu SAI hiện ngay cạnh số câu đúng (20/9/2026 — "tôi muốn hiển thị thêm câu sai ở bảng
   // từng câu"). `st.wrong` là mảng các câu làm sai, đã có sẵn từ trước (nó dùng cho bảng kết quả
   // và cho danh sách "📌 Cần ôn lại") nên chỉ là hiển thị thêm, KHÔNG phải thêm cơ chế đếm mới.
   // Màu dùng `--red-text` chứ không phải `--red`: xem ghi chú ở `:root`.
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim)">Đúng: <b style="color:var(--green)">${st.score}</b> · Sai: <b style="color:var(--red-text)">${st.wrong.length}</b></div>`;
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim)">Đúng: <b style="color:var(--green)">${st.score}</b> · Sai: <b style="color:var(--red-text)">${st.wrong.length}</b></div>`;
   h += '</div>';
   h += `<div style="height:6px;background:var(--border);border-radius:3px;margin:8px 0 10px;overflow:hidden"><div style="height:100%;width:${Math.round(st.idx / total * 100)}%;background:var(--accent)"></div></div>`;
-  h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5;margin-bottom:10px', st.idx + 1);
+  h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:var(--fs-lead);font-weight:var(--fw-head);line-height:1.5;margin-bottom:10px', st.idx + 1);
   it.opts.forEach((o, i) => {
     let cls = 'quiz-opt';
     if (answered) {
@@ -2483,8 +2856,8 @@ function quizPlayHtml() {
   }
   h += '</div>';
   // ── HAI NÚT ĐIỀU HƯỚNG Ở ĐÁY (19/9/2026 — "bỏ nút thoát bài làm, thay bằng 2 nút câu tiếp và
-  // câu trước"). Chúng ngồi đúng chỗ nút "Thoát bài làm" cũ; lối thoát bây giờ là mũi tên ⬅️
-  // ở đầu thẻ (homeBtnHtml).
+  // câu trước"). Chúng ngồi đúng chỗ nút "Thoát bài làm" cũ; lối thoát bây giờ là nút "Về trang chủ"
+  // ở đầu thẻ (homeBtnHtml) — nhãn CHỮ, không icon (đổi 20/9/2026).
   // "Câu tiếp" LUÔN BẬT — người dùng đã chọn cho phép bỏ qua câu chưa trả lời, nên có thể nhảy
   // qua lại tự do; "Câu trước" tắt ở câu đầu vì phía trước không còn gì (xem .quiz-btn:disabled).
   // Nút "Câu tiếp →" TRONG thẻ và nút "🏁 Xem kết quả" cũ đã BỎ: ở câu CUỐI, chính nút bên
@@ -2520,16 +2893,16 @@ function quizAllHtml() {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   let h = '<div class="quiz-card quiz-all-head">';
   h += '<div class="head-row">';
-  h += `<div style="flex:1;min-width:0;font-size:17px;font-weight:500">${st.title ? esc(st.title) : '📋 Cả bộ đề'} · ${st.items.length} câu</div>`;
+  h += `<div style="flex:1;min-width:0;font-size:var(--fs-base);font-weight:var(--fw-ui)">${st.title ? esc(st.title) : '📋 Cả bộ đề'} · ${st.items.length} câu</div>`;
   h += homeBtnHtml();
   h += '</div>';
-  h += '<div id="allSummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:3px"></div>';
+  h += '<div id="allSummary" style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:3px"></div>';
   h += '</div>';
 
   st.items.forEach((it, qi) => {
     const done = it.chosen !== null;
     h += `<div class="quiz-card" id="qb-${qi}">`;
-    h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
+    h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:var(--fs-lead);font-weight:var(--fw-head);line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
       let cls = 'quiz-opt';
       let mark = '';
@@ -2548,7 +2921,7 @@ function quizAllHtml() {
   h += '<div class="quiz-card" style="text-align:center">';
   // Nút "Thoát bài làm" ở đây cũng bỏ (19/9/2026, cùng lượt): ở "Cả bộ" không có chuyện
   // câu trước/câu tiếp (tất cả câu nằm trên một trang), nên chỗ đó KHÔNG thay bằng cặp điều
-  // hướng được — lối thoát là mũi tên ⬅️ ở đầu thanh DÍNH, luôn trong tầm mắt dù cuộn tới đâu.
+  // hướng được — lối thoát là nút "Về trang chủ" ở đầu thanh DÍNH, luôn trong tầm mắt dù cuộn tới đâu.
   h += '<button class="big-upload-btn" style="width:100%" onclick="finishQuiz()">🏁 Xem kết quả</button>';
   h += '</div>';
   return h;
@@ -2596,26 +2969,36 @@ function quizResultHtml() {
   const col = pct >= 80 ? 'var(--green)' : (pct >= 50 ? 'var(--gold)' : 'var(--red)');
   let h = '<div class="quiz-card" style="text-align:center">';
   h += `<div style="font-size:45px;font-weight:800;line-height:1;color:${col}">${pct}%</div>`;
-  h += `<div style="font-size:15px;color:var(--text-dim);margin-top:8px">Đúng ${st.score}/${total} câu</div>`;
-  if (_exam && _exam.mode === 'study') h += '<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px;line-height:1.5">Chế độ học: con số trên là số câu đúng ngay lần đầu. Các câu còn lại bạn đã làm đúng sau khi chọn lại.</div>';
-  h += '<div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap">';
+  h += `<div style="font-size:var(--fs-sub);color:var(--text-dim);margin-top:8px">Đúng ${st.score}/${total} câu</div>`;
+  if (_exam && _exam.mode === 'study') h += '<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:6px;line-height:1.5">Chế độ học: con số trên là số câu đúng ngay lần đầu. Các câu còn lại bạn đã làm đúng sau khi chọn lại.</div>';
+  // Hai nút này BẰNG NHAU (20/9/2026 — "cho hai nút ở màn kết quả kích cỡ bằng nhau"): trước là
+  // flex `justify-content:center` nên mỗi nút rộng theo nhãn và lệch nhau (đo: 110,4 vs 129,5px).
+  // Dùng lại `.set-acts` (1fr 1fr + `grid-auto-rows: 1fr`) nên cùng bề ngang VÀ cùng chiều cao.
+  // `margin-top:16px` truyền thẳng để giữ đúng nhịp cũ (lớp đó mặc định 8px).
+  h += '<div class="set-acts" style="margin-top:16px">';
   h += '<button class="quiz-btn primary" onclick="replayExam()">🔄 Làm lại</button>';
-  h += '<button class="quiz-btn" onclick="quitQuiz()">🏠 Về trang chủ</button>';
+  // Nhãn là ICON SVG xanh lá (20/9/2026 — "Dùng cùng icon SVG xanh lá đó cho hai nút Về trang chủ
+  // còn lại ở màn Câu hỏi và màn kết quả"): CÙNG hình, cùng cỡ 28px, không viền với nút ở đầu màn
+  // làm bài và nút ở màn 👁 "Câu hỏi". `title` + `aria-label` BẮT BUỘC vì nút không còn chữ nào.
+  // Vẫn nằm trong `.set-acts` nên BẰNG NHAU với "🔄 Làm lại" — cùng bề ngang, và cùng chiều cao
+  // 41,8px vì nút chữ (41,8) quyết định chiều cao hàng, không phải nút icon (34px).
+  h += '<button class="quiz-btn home-btn" onclick="quitQuiz()" title="Về trang chủ"'
+    + ' aria-label="Về trang chủ">' + homeIcoSvg() + '</button>';
   h += '</div></div>';
   if (st.wrong.length) {
     h += '<div class="quiz-card">';
-    h += `<div style="font-size:17px;font-weight:500;margin-bottom:10px">📌 Cần ôn lại (${st.wrong.length})</div>`;
+    h += `<div style="font-size:var(--fs-head);font-weight:var(--fw-ui);margin-bottom:10px">📌 Cần ôn lại (${st.wrong.length})</div>`;
     st.wrong.forEach((w, i) => {
       h += '<div style="border-left:3px solid var(--red);padding:8px 10px;margin-bottom:10px;border-radius:0 8px 8px 0">';
-      h += `<div style="color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5">${i + 1}. ${esc(w.q)}</div>`;
-      h += `<div style="font-size:15px;color:var(--red);margin-top:6px">Bạn chọn: ${esc(w.chosen)}</div>`;
-      h += `<div style="font-size:15px;color:var(--green)">Đáp án đúng: <b>${esc(w.correct)}</b></div>`;
-      if (w.explain) h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:4px">💡 ${esc(w.explain)}</div>`;
+      h += `<div style="color:var(--q-text);font-size:var(--fs-lead);font-weight:var(--fw-head);line-height:1.5">${i + 1}. ${esc(w.q)}</div>`;
+      h += `<div style="font-size:var(--fs-sub);color:var(--red);margin-top:6px">Bạn chọn: ${esc(w.chosen)}</div>`;
+      h += `<div style="font-size:var(--fs-sub);color:var(--green)">Đáp án đúng: <b>${esc(w.correct)}</b></div>`;
+      if (w.explain) h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:4px">💡 ${esc(w.explain)}</div>`;
       h += '</div>';
     });
     h += '</div>';
   } else {
-    h += '<div class="quiz-card" style="text-align:center;color:var(--green);font-size:15px">🎉 Không có câu nào sai. Xuất sắc!</div>';
+    h += '<div class="quiz-card" style="text-align:center;color:var(--green);font-size:var(--fs-sub)">🎉 Không có câu nào sai. Xuất sắc!</div>';
   }
   h += '<div style="height:20px"></div>';
   return h;
@@ -3044,13 +3427,13 @@ function renderRestorePreview(body) {
   const r = _restorePreview;
   let h = '';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
-  h += '<div style="font-size:17px;font-weight:500">📂 Phục hồi từ file</div>';
+  h += '<div style="font-size:var(--fs-head);font-weight:var(--fw-ui)">📂 Phục hồi từ file</div>';
   h += '<button class="quiz-btn" style="padding:6px 10px" onclick="cancelRestore()" aria-label="Đóng">✕</button>';
   h += '</div>';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:4px;line-height:1.5">${esc(r.fileName)}</div>`;
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px">Trong file: <b>${r.sets.length} bộ đề · ${r.total} câu</b>`
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);padding-bottom:4px;line-height:1.5">${esc(r.fileName)}</div>`;
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);padding-bottom:10px">Trong file: <b>${r.sets.length} bộ đề · ${r.total} câu</b>`
     + (r.exportedAt ? ' · sao lưu ' + fmtTime(Date.parse(r.exportedAt)) : '') + '</div>';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px;line-height:1.5">Thư viện hiện tại: ${quizLib.length} bộ · ${totalQuestions()} câu — trong đó <b style="color:var(--green)">${r.add} bộ mới</b> và <b style="color:var(--gold)">${r.update} bộ trùng tên sẽ được cập nhật nội dung</b>.</div>`;
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);padding-bottom:10px;line-height:1.5">Thư viện hiện tại: ${quizLib.length} bộ · ${totalQuestions()} câu — trong đó <b style="color:var(--green)">${r.add} bộ mới</b> và <b style="color:var(--gold)">${r.update} bộ trùng tên sẽ được cập nhật nội dung</b>.</div>`;
 
   r.sets.forEach(function (s) {
     const same = quizLib.some(function (x) {
@@ -3058,8 +3441,8 @@ function renderRestorePreview(body) {
     });
     h += '<div class="arc-item" style="border:1px solid var(--border);border-radius:10px;padding:9px 10px;margin-bottom:6px;background:var(--card);display:flex;align-items:center;gap:8px">';
     h += '<div style="flex:1;min-width:0">';
-    h += `<div style="font-size:17px;font-weight:500;line-height:1.35;white-space:normal" title="${esc(s.name)}">${esc(s.name)}</div>`;
-    h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
+    h += `<div style="font-size:var(--fs-base);font-weight:var(--fw-ui);line-height:1.35;white-space:normal" title="${esc(s.name)}">${esc(s.name)}</div>`;
+    h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:2px">${s.questions.length} câu</div>`;
     h += '</div>';
     h += same
       ? '<span style="font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0">cập nhật</span>'
@@ -3079,7 +3462,7 @@ function renderRestorePreview(body) {
   }
   h += '</div>';
   if (_restoreConfirm) {
-    h += `<div style="font-size:15px;font-weight:400;color:var(--red);padding-top:8px;line-height:1.5">Thao tác này xoá hết ${quizLib.length} bộ đề đang có và thay bằng ${r.sets.length} bộ trong file. Không khôi phục được.</div>`;
+    h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--red);padding-top:8px;line-height:1.5">Thao tác này xoá hết ${quizLib.length} bộ đề đang có và thay bằng ${r.sets.length} bộ trong file. Không khôi phục được.</div>`;
   }
   body.innerHTML = h;
 }
@@ -3105,14 +3488,14 @@ function renderLibPanel() {
   if (_restorePreview) { renderRestorePreview(body); return; }
   let h = '';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0 4px">';
-  h += '<div style="font-size:17px;font-weight:500">📦 Thư viện bộ đề</div>';
+  h += '<div style="font-size:var(--fs-head);font-weight:var(--fw-ui)">📦 Thư viện bộ đề</div>';
   h += '<button class="quiz-btn" style="padding:6px 10px" onclick="closeModalDirect()" aria-label="Đóng">✕</button>';
   h += '</div>';
   // Dấu bản app: chỉ có khi file được phục vụ/chế biến kèm `window.__APP_BUILD` (bản một-file
   // cho điện thoại, hoặc máy chủ Wi-Fi dán nhãn cho máy KHÁC). Nhờ nó mà nhìn là biết ngay
   // thiết bị đang chạy bản nào — xem run.md "Phone build". Không có thì dòng này y như cũ.
   const _buildNhan = window.__APP_BUILD ? ' · bản ' + window.__APP_BUILD : '';
-  h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);padding-bottom:10px">${quizLib.length} bộ đề · ${totalQuestions()} câu hỏi${_buildNhan}</div>`;
+  h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);padding-bottom:10px">${quizLib.length} bộ đề · ${totalQuestions()} câu hỏi${_buildNhan}</div>`;
 
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:12px">';
   h += '<button class="quiz-btn primary" onclick="closeModalDirect(); pickSetFiles()">📥 Nạp hoặc nạp lại file bộ đề</button>';
@@ -3126,7 +3509,7 @@ function renderLibPanel() {
   h += '</div>';
 
   if (!quizLib.length) {
-    h += '<div style="padding:20px 0;text-align:center;color:var(--text-dim);font-size:15px;line-height:1.6">Thư viện đang trống.<br>Bấm “📥 Nạp hoặc nạp lại file bộ đề” (hoặc “📁 Nạp cả thư mục”).</div>';
+    h += '<div style="padding:20px 0;text-align:center;color:var(--text-dim);font-size:var(--fs-sub);line-height:1.6">Thư viện đang trống.<br>Bấm “📥 Nạp hoặc nạp lại file bộ đề” (hoặc “📁 Nạp cả thư mục”).</div>';
     body.innerHTML = h;
     return;
   }
@@ -3139,12 +3522,12 @@ function renderLibPanel() {
       h += `<button class="quiz-btn primary" onclick="renameSet('${s.id}')">Lưu</button>`;
       h += '<button class="quiz-btn" onclick="cancelRename()">Hủy</button>';
       h += '</div>';
-      h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:6px">${s.questions.length} câu</div>`;
+      h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:6px">${s.questions.length} câu</div>`;
     } else {
       h += '<div style="display:flex;align-items:center;gap:8px">';
       h += '<div style="flex:1;min-width:0">';
-      h += `<div style="font-size:17px;font-weight:500;line-height:1.35;white-space:normal" title="${esc(s.name)}">${esc(s.name)}</div>`;
-      h += `<div style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:2px">${s.questions.length} câu · thêm ${fmtTime(s.addedAt)}</div>`;
+      h += `<div style="font-size:var(--fs-base);font-weight:var(--fw-ui);line-height:1.35;white-space:normal" title="${esc(s.name)}">${esc(s.name)}</div>`;
+      h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:2px">${s.questions.length} câu · thêm ${fmtTime(s.addedAt)}</div>`;
       h += '</div>';
       if (_libPending && _libPending.kind === 'del' && _libPending.setId === s.id) {
         h += `<button class="quiz-btn danger" onclick="deleteSet('${s.id}')">Xóa?</button>`;
@@ -3155,7 +3538,7 @@ function renderLibPanel() {
       }
       h += '</div>';
       if (_libPending && _libPending.kind === 'del' && _libPending.setId === s.id) {
-        h += `<div style="font-size:15px;font-weight:400;color:var(--gold);margin-top:6px">Xoá cả bộ ${s.questions.length} câu. Không khôi phục được.</div>`;
+        h += `<div style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--gold);margin-top:6px">Xoá cả bộ ${s.questions.length} câu. Không khôi phục được.</div>`;
       }
     }
     h += '</div>';
@@ -3214,15 +3597,15 @@ function quizStudyHtml() {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   let h = '<div class="quiz-card quiz-all-head">';
   h += '<div class="head-row">';
-  h += `<div style="flex:1;min-width:0;font-size:17px;font-weight:500">📖 ${st.title ? esc(st.title) : 'Học bài'} · ${st.items.length} câu</div>`;
+  h += `<div style="flex:1;min-width:0;font-size:var(--fs-base);font-weight:var(--fw-ui)">📖 ${st.title ? esc(st.title) : 'Học bài'} · ${st.items.length} câu</div>`;
   h += homeBtnHtml();
   h += '</div>';
-  h += '<div id="studySummary" style="font-size:15px;font-weight:400;color:var(--text-dim);margin-top:3px"></div>';
+  h += '<div id="studySummary" style="font-size:var(--fs-sub);font-weight:var(--fw-body);color:var(--text-dim);margin-top:3px"></div>';
   h += '</div>';
 
   st.items.forEach((it, qi) => {
     h += `<div class="quiz-card" id="qb-${qi}">`;
-    h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px', qi + 1);
+    h += qTextHtml(esc(it.q), 'color:var(--q-text);font-size:var(--fs-lead);font-weight:var(--fw-head);line-height:1.5;margin-bottom:8px', qi + 1);
     it.opts.forEach((o, oi) => {
       const tried = it.tried.indexOf(oi) >= 0;
       let cls = 'quiz-opt';

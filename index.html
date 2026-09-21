@@ -94,15 +94,37 @@
                               cùng lượt với --navy #171717 và tấm đáp án #262626, 19/9/2026),
                               xám nhạt ở chế độ sáng (body.light-mode đè lại) */
   --border: rgba(255,255,255,0.22);   /* viền ô ở chế độ tối: rõ hơn 0.08 cũ */
-  /* Viền nút GHIM (📌) — XANH DƯƠNG, tách hẳn khỏi viền xám `--border` của mọi ô khác
-     (19/9/2026 — "tôi muốn có viền xanh dương đậm ở nút ghim").
-     Chế độ tối #3b82f6: **4,43:1** trên thẻ #202020, và đúng sắc xanh app đã dùng cho nền chip
-     đang bật. KHÔNG dùng #1d4ed8 ở đây dù đó là "xanh dương đậm" theo tên: trên thẻ #202020 nó
-     chỉ đạt **2,43:1**, gần bằng viền xám cũ (2,05:1) nên gần như không thấy.
-     Chế độ sáng dùng #1d4ed8 (6,70:1 trên nền trắng) — xem `body.light-mode` ở cuối tệp.
+  /* Viền nút GHIM (📌) — TÍM, và ĐÂY LÀ LÝ DO NÓ KHÔNG CÒN XANH DƯƠNG (21/9/2026 —
+     "tôi muốn nút ghim có màu khác để khỏi nhầm").
+     Nút ghim từ 19/9/2026 dùng #3b82f6 (blue-500) để tách khỏi viền xám `--border` của mọi ô
+     khác — nhưng Ô SỐ ngay BÊN PHẢI nó là #38bdf8 (sky-400, xem khối `.mix-input`) — tức HAI
+     XANH NẰM CẠNH NHAU: một xanh là "ô nhập được", một xanh là "nút bấm được", mà ở cỡ 1px
+     mắt không tách ra nổi nên bấm nhầm. ĐO của lượt này: ghim `rgb(59,130,246)` · ô số
+     `rgba(56,189,248,0.55)` — chỉ cách nhau một nấc trên CÙNG một thang xanh.
+     Chọn TÍM vì trong tệp này MỌI hệ màu đã mang nghĩa rồi, không được mượn lại:
+       xanh lá (--ok, --green)   = đáp án ĐÚNG, và viền neon của `.set-dd-btn`
+       đỏ (--red, --red-text)    = đáp án SAI
+       vàng (--gold)             = CẢNH BÁO / "cập nhật" / tỷ lệ 50–79% (6 chỗ)
+       xanh dương + cyan         = ô nhập và nút chính (--accent, --accent-glow, --mix-cyan)
+     Tím chưa xuất hiện ở ĐÂU trong tệp (grep `#a78bfa|#8b5cf6|#7c3aed|#6d28d9|#c4b5fd|purple|
+     violet`: 0 kết quả) nên nó không đè lên nghĩa nào — đó chính là điều kiện để dùng.
+     ĐO TƯƠNG PHẢN, không đoán (đúng cách đã chọn #3b82f6 ngày trước):
+       chế độ tối #a78bfa = **5,99:1** trên thẻ #202020 (bản xanh cũ 4,43:1) — lượt này ĐẬM HƠN,
+         không yếu đi;
+       KHÔNG lấy #8b5cf6 chỉ vì nó "cùng nấc blue-500": trên thẻ #202020 nó chỉ **3,85:1**,
+         thấp hơn cả bản xanh cũ. Đây đúng cái bẫy ghi chú cũ về #1d4ed8 đã cảnh báo: chọn theo
+         TÊN nấc thì sai, phải chọn theo SỐ ĐO;
+       chế độ sáng #6d28d9 = **7,10:1** trên nền trắng (bản cũ #1d4ed8 = 6,70:1).
+     Trỏ chuột dùng nấc tím riêng `--pin-brd-hover` (tối #c4b5fd = 8,82:1 · sáng #7c3aed =
+     5,70:1) — hover PHẢI Ở LẠI trong họ TÍM. Đừng trả nó về `--accent-glow` như các nút khác:
+     như vậy là vừa trỏ vào nút ghim nó đã hoá XANH lại, đúng lúc người dùng đang nhắm bấm.
      Dùng BIẾN chứ không viết luật `body.light-mode .mix-lock` riêng: luật đó có độ ưu tiên
-     (0,2,1) nên sẽ đè mất cả `.mix-lock:hover` (0,2,0) ở chế độ sáng — mất luôn dấu khi trỏ chuột. */
-  --pin-brd: #3b82f6;
+     (0,2,1) nên sẽ đè mất cả `.mix-lock:hover` (0,2,0) ở chế độ sáng — mất luôn dấu khi trỏ chuột.
+     HÀNG ĐANG GHIM (`.mix-lock.on`) CỐ Ý KHÔNG đổi ở lượt này: nó vẫn cyan cho đồng bộ với ô số
+     theo yêu cầu 20/9/2026 ("đổi màu nền và viền ghim cho đồng bộ với màu nền viền số"). Nếu
+     người dùng muốn lúc ghim cũng tím thì sửa ĐÚNG hai luật `.mix-lock.on` bên dưới. */
+  --pin-brd: #a78bfa;
+  --pin-brd-hover: #c4b5fd;
   /* ── TÊN cho các vai trò màu (20/9/2026 — "gom màu về biến") ───────────────────────
      Bảng màu dưới đây đã có biến từ trước, nhưng các LUẬT THÀNH PHẦN vẫn viết mã màu trần,
      vì chưa có TÊN cho những vai trò đó. Nhóm này chỉ ĐẶT TÊN — KHÔNG gộp màu nào lại,
@@ -879,6 +901,64 @@ body.light-mode .home-btn:active svg { transform: translateY(2px); filter: drop-
 }
 .modal-body { padding: 4px 12px 20px; }
 
+/* ── MÀN HÌNH ĐĂNG NHẬP ───────────────────────── */
+/* ĐÂY LÀ RÀO CHẮN CHO NGƯỜI DÙNG BÌNH THƯỜNG, KHÔNG PHẢI BẢO MẬT THẬT — và không được lẫn hai
+   chuyện đó. App là MỘT file HTML tĩnh chạy trên máy người xem, không có máy chủ nào kiểm mật
+   khẩu, nên ai mở “Xem mã nguồn” (hoặc lưu file về) đều đọc được cả mã lẫn — với bản điện thoại —
+   cả 643 câu hỏi nằm sẵn trong chính file đó. Việc nó làm được: người cầm máy/link KHÔNG mở lên là
+   dùng được ngay. Việc nó KHÔNG làm được: chặn người biết đọc mã. (Bản ghi 21/9/2026 ở run.md.)
+
+   `z-index: 500` để nằm TRÊN `.modal-overlay` (300) và mọi thứ khác.
+   KHÔNG có `display: none` mặc định và KHÔNG cần class `.open`: HTML để nó HIỆN SẴN, tức là
+   "hỏng thì khoá" (fail-closed) — nếu script dưới cuối tệp lỗi thì người dùng thấy màn đăng nhập
+   chứ không thấy nội dung. Chính vì vậy `hideGate()` mới là thứ PHẢI CHẠY ĐƯỢC, chứ không phải
+   `showGate()`. */
+.login-gate {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: var(--navy);
+  font-family: 'Inter', sans-serif;
+}
+.login-card {
+  width: 100%; max-width: 330px;
+  background: var(--navy-mid);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 26px 20px 20px;
+  text-align: center;
+  /* `color` lấy theo token chứ không theo `body`: thẻ này có nền riêng, và ở chế độ SÁNG nền thẻ
+     là TRẮNG nên phải dùng `--text-strong` (xem `body.light-mode .login-card`). */
+  color: var(--text);
+}
+.login-ico { font-size: 36px; line-height: 1; }
+.login-title { font-size: var(--fs-head); font-weight: var(--fw-head); margin: 12px 0 4px; }
+.login-sub { font-size: var(--fs-note); color: var(--text-dim); margin-bottom: 16px; }
+/* Ô nhập dùng `--set-box-bg` + `--border`: cặp token này đã tự đúng ở CẢ HAI chế độ
+   (#262626 trên thẻ #202020 · #f1f3f5 trên thẻ trắng) nên không cần luật riêng cho chế độ sáng. */
+.login-input {
+  width: 100%; padding: 11px 12px;
+  background: var(--set-box-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: inherit;
+  font: inherit; font-size: var(--fs-base);
+  text-align: center; letter-spacing: 1px;
+  outline: none;
+}
+.login-input::placeholder { color: var(--text-dim); letter-spacing: normal; }
+.login-input:focus { border-color: var(--accent-glow); }
+.login-btn {
+  width: 100%; margin-top: 10px; padding: 12px;
+  border: 0; border-radius: 10px;
+  background: var(--accent); color: var(--on-accent);
+  font: inherit; font-size: var(--fs-base); font-weight: var(--fw-ui);
+  cursor: pointer;
+}
+.login-btn:active { transform: scale(0.98); }
+/* Dòng báo lỗi GIỮ SẴN CHIỀU CAO (`min-height`) để lúc hiện chữ không đẩy nút Lên/xuống. */
+.login-msg { min-height: 20px; margin-top: 10px; font-size: var(--fs-note); color: var(--red-text); }
+
 /* ── LIGHT MODE ───────────────────────── */
 /* Nền chế độ sáng: trắng xám để các thẻ trắng nổi rõ. Thẻ và ô nhập vẫn trắng. */
 /* --text-dim đậm hơn #64748b một chút: hộp từng bộ đề giờ có nền xám #f1f3f5, mà
@@ -887,7 +967,7 @@ body.light-mode .home-btn:active svg { transform: translateY(2px); filter: drop-
 body.light-mode {
   background: var(--surface-sunken); color: var(--text-base);
   --text-dim: #5b6675; --border: rgba(0,0,0,0.22); --answer: #5f6b7c; --q-text: #1f2937;
-  --set-box-bg: #f1f3f5; --pin-brd: #1d4ed8; --red-text: #dc2626;
+  --set-box-bg: #f1f3f5; --pin-brd: #6d28d9; --pin-brd-hover: #7c3aed; --red-text: #dc2626;
   /* ── Biến CHỈ dùng ở chế độ SÁNG ───────────────────────────────────────────────────
      Mọi luật dùng nhóm này đều là luật `body.light-mode .<x>`, nên khai ở đây là đủ và chế
      độ tối không thấy chúng. KHÔNG khai chúng trong `:root`: đó là cách để một biến chỉ có
@@ -1082,9 +1162,10 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
   width: 23px; height: 36px; margin-right: -4px; padding: 0; flex: none;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Inter', sans-serif; font-size: var(--fs-note); line-height: 1;
-  /* Viền XANH DƯƠNG (`--pin-brd`) chứ không phải viền xám `--border` như mọi ô khác trong hàng
-     (19/9/2026 — "tôi muốn có viền xanh dương đậm ở nút ghim"): nút ghim là chỗ bấm được, không
-     phải ô hiển thị, nên viền xanh tách nó ra khỏi nền hàng ở cả hai chế độ. */
+  /* Viền TÍM (`--pin-brd`) chứ không phải viền xám `--border` như mọi ô khác trong hàng: nút ghim
+     là chỗ BẤM ĐƯỢC, không phải ô hiển thị, nên viền màu tách nó khỏi nền hàng ở cả hai chế độ.
+     Đổi xanh dương → tím 21/9/2026 vì xanh dương quá gần màu ô số ngay bên phải — xem ghi chú
+     `--pin-brd` ở `:root` để có đủ số đo và lý do chọn tím. */
   background: none; border: 1px solid var(--pin-brd); border-radius: 8px;
   color: var(--text-dim); cursor: pointer;
   /* KHÔNG đặt `filter` trên chính NÚT nữa (sửa 19/9/2026): `filter` áp cho cả PHẦN TỬ gồm cả
@@ -1092,19 +1173,35 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
      vẫn trả về `rgb(59,130,246)` nên nhìn mã thì tưởng đúng, chỉ ảnh chụp mới lộ. Làm mờ ở
      span bên trong thì chỉ icon đổi, viền giữ nguyên màu. */
 }
-/* Chưa ghim thì icon HIỆN ĐỦ MÀU — bỏ `grayscale(1) opacity(0.5)` (20/9/2026 — "bỏ làm mờ nút
-   ghim, phân biệt bằng hình và màu").
-   LÝ DO CŨ ĐÃ HẾT ĐÚNG: bản ghi trước nói "hai emoji 📍/📌 trông gần như nhau ở cỡ 13px nên độ
-   mờ là thứ DUY NHẤT phân biệt hàng đang ghim". Nhưng chính độ mờ đó làm nút ghim thành chỗ
-   TƯƠNG PHẢN THẤP NHẤT toàn app: icon bị xám hoá RỒI hạ opacity 50%, nên cây ghim chưa ghim
-   gần như tan vào nền hàng. Hàng đang ghim giờ nhận ra bằng hai thứ khác, không cần hạ sáng icon:
-     1. HÌNH — 📍 là ghim TRÒN (đầu tròn + lỗ), 📌 là ghim CÓ ĐẦU HÌNH THANG;
-     2. MÀU ở chính cái NÚT — `.mix-lock.on` đổi viền + nền sang `--mix-cyan`.
-   Cộng thêm `aria-pressed` và `title` (đổi theo trạng thái) nên trạng thái không phụ thuộc
-   hoàn toàn vào thị giác. ĐỪNG đặt lại `filter` cho span này.
-   Bỏ luôn `.mix-lock:hover .mix-lock-ico { filter: none }` — không còn `filter` nào để đặt lại. */
-.mix-lock-ico { line-height: 1; }
-.mix-lock:hover { border-color: var(--accent-glow); color: var(--text); }
+/* CHƯA GHIM thì ICON MÀU XÁM — ĐÂY LÀ CHỖ ĐỔI Ý so với 20/9/2026, theo yêu cầu của người dùng
+   (21/9/2026 — "tôi muốn icon này có màu khác khi chưa ghim").
+   **LỆNH CẤM CŨ ĐÃ ĐƯỢC GỠ, nhưng LÝ DO của nó thì không được quên.** Bản ghi 20/9 viết "ĐỪNG đặt
+   lại `filter` cho span này" vì `grayscale(1) opacity(0.5)` từng làm nút ghim thành chỗ TƯƠNG
+   PHẢN THẤP NHẤT toàn app: icon bị xám hoá RỒI hạ thêm 50% opacity nên cây ghim gần như tan vào
+   nền hàng. Thứ làm hỏng là `opacity(0.5)`, KHÔNG phải `grayscale` — nên lượt này bỏ HẴN opacity
+   và bù lại bằng `brightness()`, rồi ĐO chứ không đoán (số ở dưới).
+   **VÌ SAO PHẢI DÙNG `filter`:** đây là EMOJI, màu của nó do FONT HỆ THỐNG quyết định — `color`
+   KHÔNG có tác dụng gì lên emoji (đúng cái bẫy `▶️` ra ô VUÔNG XANH và `👁` ra mắt XÁM ở mục
+   lịch sử 20/9). `filter` là đường DUY NHẤT đổi được màu một emoji bằng CSS mà vẫn giữ emoji.
+   SỐ ĐO — dựng chính hai emoji lên `<canvas>` với `ctx.filter` rồi đọc pixel alpha > 200 (đúng
+   cách đã dùng cho vụ emoji 20/9), nền là nền THẬT của hàng: tối rgb(30,48,56) · sáng rgb(231,246,253):
+     📍 nguyên bản (hồng 244,56,160)        3,86:1 tối · 3,21:1 sáng   ← mức cũ
+     grayscale(1)             (104,104,104)  **2,44:1 tối** · 5,07:1 sáng  ← TỤT, đúng như đã cảnh báo
+     grayscale(1) brightness(1.5) (139,139,139) **4,00:1 tối** · 3,09:1 sáng
+   Nên HAI CHẾ ĐỘ PHẢI KHAI KHÁC NHAU — một giá trị dùng chung thì kiểu gì cũng thua một bên:
+     TỐI cần ánh SÁNG LÊN: `brightness(1.5)` → 4,00:1, tức lượt này còn RÕ HƠN mức cũ 3,86:1;
+     SÁNG chỉ `grayscale(1)` (5,07:1) — sáng thêm nữa là xám nhạt tan vào nền trắng
+       (`brightness(1.3)` ở SÁNG chỉ 3,62 · `1.5` chỉ 3,09 · `1.6` còn 2,87).
+   ĐÃ GHIM thì icon HIỆN ĐỦ MÀU trở lại (`.mix-lock.on .mix-lock-ico` bên dưới) — đó là toàn bộ ý
+   của thay đổi này: **XÁM = chưa ghim · ĐỎ/HỒNG = đã ghim**. Hai dấu hiệu cũ vẫn còn nguyên
+   (HÌNH: 📍 tròn so với 📌 đầu thang — và MÀU NÚT: `.mix-lock.on` lấy viền + nền `--mix-cyan`),
+   nên trạng thái giờ có tới bốn dấu hiệu. `aria-pressed` + `title` vẫn đổi theo trạng thái nên
+   vẫn không phụ thuộc hoàn toàn vào thị giác.
+   Không cần luật `:hover` cho span này: viền đã sáng lên khi trỏ chuột (`.mix-lock:hover`), thêm
+   nữa là hai thứ nhấp nháy cùng lúc. */
+.mix-lock-ico { line-height: 1; filter: grayscale(1) brightness(1.5); }
+body.light-mode .mix-lock-ico { filter: grayscale(1); }
+.mix-lock:hover { border-color: var(--pin-brd-hover); color: var(--text); }
 /* Hàng ĐANG GHIM: nền + viền ĐỒNG BỘ VỚI Ô SỐ ngay bên cạnh (20/9/2026 — "đổi màu nền và viền
    ghim cho đồng bộ với màu nền viền số"). Trước đây là xanh LÁ (#34d399 / rgba(52,211,153,0.18)
    ở tối, #166534 / rgba(22,101,52,0.12) ở sáng) — hai ô nằm sát nhau mà lệch hệ màu.
@@ -1113,8 +1210,11 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
    sau này đổi màu ô số thì phải đổi cả ở đây, nếu không chúng lại lệch nhau.
    Viền xanh đứng sau `.mix-lock` nên thắng `--pin-brd` (cùng (0,2,0) với `.mix-lock:hover`,
    mà luật này khai SAU) — đó là lý do hàng ghim không còn viền `--pin-brd` đậm.
-   Hàng ghim phân biệt với hàng thường bằng HÌNH icon (📌 so với 📍) và bằng chính cặp viền +
-   nền cyan ở đây — KHÔNG còn bằng cách hạ sáng icon (xem `.mix-lock-ico` phía trên).
+   Hàng ghim phân biệt với hàng thường bằng BỐN dấu hiệu: HÌNH icon (📌 so với 📍), MÀU icon
+   (đỏ/hồng so với XÁM — `.mix-lock.on .mix-lock-ico` ngay dưới), và cặp viền + nền cyan ở đây.
+   (Từ 21/9/2026 icon chưa ghim bị xám hoá — trước đó câu này viết "KHÔNG còn bằng cách hạ sáng"
+   vì lượt 20/9 gỡ `grayscale(1) opacity(0.5)`; xem số đo ở `.mix-lock-ico` phía trên để biết vì
+   sao lượt này đặt lại `filter` MÀ KHÔNG tái phạm lỗi tương phản cũ.)
    Chỉ MÀU đổi — độ dày viền vẫn 1px (ô số là 1,5px) và bo góc vẫn 8px (ô số 10px). */
 .mix-lock.on {
   border-color: rgba(56, 189, 248, 0.55); color: var(--mix-cyan);
@@ -1123,6 +1223,10 @@ body.light-mode .mix-name { background: none; color: #134e4a; }
 body.light-mode .mix-lock.on {
   border-color: rgba(14, 165, 233, 0.45); color: var(--mix-cyan); background: rgba(14, 165, 233, 0.06);
 }
+/* ĐÃ GHIM → icon trở lại đủ màu. Độ ưu tiên (0,3,0) THẮNG cả `body.light-mode .mix-lock-ico`
+   (0,2,1) lẫn `.mix-lock-ico` (0,1,0), nên khai Ở ĐÂU cũng được — để ngay đây cho dễ đọc cùng
+   cặp luật `.mix-lock.on` vừa rồi. ĐỔI Ý Ở ĐÂY NẾU muốn icon lúc ghim cũng bị xám hoá. */
+.mix-lock.on .mix-lock-ico { filter: none; }
 /* Dấu chỉ hàng đang ghim trên chính tên bộ đề — ĐÃ BỎ (20/9/2026 — "tôi muốn bỏ viền khi ghim ở
    tên bộ đề"). Trước đây là `box-shadow: inset 0 0 0 1px rgba(52,211,153,0.7)` và lý do dùng inset
    (thay vì border) vẫn đúng: border làm ô nhích 2px và hàng đổi chiều cao.
@@ -1276,6 +1380,10 @@ body.light-mode .header {
 }
 body.light-mode .header-sub { color: #dbeafe; }
 body.light-mode .modal { background: var(--surface-modal); }
+/* Hai luật dưới chỉ để ĐỔI NỀN cho chế độ sáng (mọi thứ khác đã dùng token tự đổi đúng):
+   nền trang sáng là xám, còn `--navy-mid` thì vẫn là xám ĐẬM của chế độ tối. */
+body.light-mode .login-gate { background: var(--surface-sunken); }
+body.light-mode .login-card { background: var(--surface-card); color: var(--text-strong); }
 body.light-mode .modal-handle { background: rgba(0,0,0,0.15); }
 body.light-mode .quiz-card { background: var(--surface-card); border-color: var(--border-light); }
 body.light-mode .quiz-input { background: var(--surface-card); border-color: var(--border-field); color: var(--text-strong); }
@@ -1399,6 +1507,29 @@ body.light-mode .arc-item { background: var(--surface-card) !important; border-c
 </style>
 </head>
 <body>
+
+<!-- Màn hình đăng nhập. Để HIỆN SẴN trong HTML (không dựa vào JS để hiện) — hỏng thì khoá.
+     Thứ PHẢI CHẠY ĐƯỢC vì thế là `hideGate()` (ẩn đi khi đã đăng nhập), không phải `showGate()`.
+     Nút ĐĂNG XUẤT nằm trong panel 📦 Thư viện, KHÔNG đặt ở header: header ở màn ≤380px chỉ vừa
+     ĐÚNG ~320px (xem ghi chú cạnh `.header`), thêm một nút nữa là tiêu đề bị rút gọn trên
+     điện thoại. -->
+<div class="login-gate" id="loginGate">
+  <div class="login-card">
+    <div class="login-ico">🔒</div>
+    <div class="login-title">Ôn Tập Trắc Nghiệm</div>
+    <div class="login-sub">Nhập mật khẩu để mở ứng dụng</div>
+    <!-- Ô nhập và nút nằm trong một <form> THẬT, không phải chỉ gắn `onclick` cho nút: như vậy
+         phím Enter (và phím “Đi/Go” trên bàn phím điện thoại) đi theo đường SUBMIT CHUẨN của
+         trình duyệt thay vì phải tự bắt `keydown`. `return false` để chặn việc tải lại trang —
+         không có nó thì submit sẽ đẩy trang đi kèm query và mất cả những gì đang gõ. -->
+    <form onsubmit="doLogin(); return false;">
+      <input class="login-input" id="loginPass" type="password" autocomplete="current-password"
+             placeholder="Mật khẩu">
+      <button class="login-btn" id="loginBtn" type="submit">Đăng nhập</button>
+    </form>
+    <div class="login-msg" id="loginMsg"></div>
+  </div>
+</div>
 
 <div class="header">
   <div class="header-left">
@@ -3506,6 +3637,10 @@ function renderLibPanel() {
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:12px">';
   h += `<button class="quiz-btn"${quizLib.length ? '' : ' disabled'} onclick="exportLibrary()">💾 Sao lưu ra file</button>`;
   h += '<button class="quiz-btn" onclick="pickRestoreFile()">📂 Phục hồi từ file</button>';
+  // 🔒 Đăng xuất nằm ở ĐÂY vì hàng này HIỆN TRONG MỌI NHÁNH của hàm này (kể cả thư viện rỗng —
+  // nhánh đó `return` sớm nên không được đặt nút ở cuối), và hàng đã `flex-wrap` sẵn nên thêm
+  // một nút không làm xê dịch gì. KHÔNG đưa nút này lên header: xem ghi chú cạnh `.header`.
+  h += '<button class="quiz-btn" onclick="doLogout()" title="Khoá lại — lần sau mở phải nhập mật khẩu">🔒 Đăng xuất</button>';
   h += '</div>';
 
   if (!quizLib.length) {
@@ -3703,14 +3838,132 @@ function studyPick(qi, oi) {
   updateStudySummary();
 }
 
+// ── ĐĂNG NHẬP ──────────────────────────
+// Mật khẩu KHÔNG nằm trong tệp dạng chữ — chỉ có mã băm SHA-256 dưới đây. Đổi mật khẩu bằng:
+//   python .freebuff/_set_password.py "mật khẩu mới"
+// (script đó tính lại mã băm và cập nhật ĐÚNG dòng dưới, rồi sinh lại các bản build).
+const AUTH_KEY = 'qlno_auth';   // ghi nhớ "đã đăng nhập" — giá trị lưu CHÍNH LÀ mã băm PASS_HASH
+const PASS_HASH = '1d28c120568c10e19b9d8abe8b66d0983fa3d2e11ee7751aca50f83c6f4a43aa';
+
+// SHA-256 viết THUẦN JS, không dùng `crypto.subtle` — LÝ DO QUYẾT ĐỊNH, đừng "tối ưu" lại:
+// `crypto.subtle` CHỈ có trong secure context. App này còn được phục vụ qua
+// `http://192.168.1.4:8080` (điện thoại trong Wi-Fi) và qua `file://` (bản chép vào máy), mà hai
+// nơi đó `crypto.subtle` là `undefined` — dùng nó thì ĐIỆN THOẠI KHÔNG ĐĂNG NHẬP ĐƯỢC, trong khi
+// máy tính (127.0.0.1 = secure context) vẫn vào bình thường: một lỗi chỉ hiện ra ở thiết bị
+// người dùng đang dùng thật. `TextEncoder` và phép cộng bit thì ở đâu cũng có.
+// Lưu ý: mật khẩu qua `_sha256Hex` được mã hoá UTF-8 nên tiếng Việt có dấu vẫn đúng.
+function _rotr(x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; }
+function _sha256Hex(str) {
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+             0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+             0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+             0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+             0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+             0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+             0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+             0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const bytes = new TextEncoder().encode(str);
+  const bitLen = bytes.length * 8;
+  // Đệm: 0x80, rồi các số 0, rồi 8 byte ĐỘ DÀI bit (kiểu big-endian). Công thức `(len + 8) >> 6`
+  // (KHÔNG phải `len + 9`) là thứ cho ra khối NGẮN NHẤT hợp lệ: với len = 55 thì đúng 64 byte;
+  // viết sai chỗ này thì mã băm vẫn ra một số hợp lệ nhưng SAI — lỗi im lặng.
+  const buf = new Uint8Array((((bytes.length + 8) >> 6) + 1) << 6);
+  buf.set(bytes);
+  buf[bytes.length] = 0x80;
+  buf[buf.length - 4] = (bitLen >>> 24) & 0xff;
+  buf[buf.length - 3] = (bitLen >>> 16) & 0xff;
+  buf[buf.length - 2] = (bitLen >>> 8) & 0xff;
+  buf[buf.length - 1] = bitLen & 0xff;
+  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const w = new Uint32Array(64);
+  for (let i = 0; i < buf.length; i += 64) {
+    for (let t = 0; t < 16; t++) {
+      w[t] = (buf[i + t * 4] << 24) | (buf[i + t * 4 + 1] << 16) | (buf[i + t * 4 + 2] << 8) | buf[i + t * 4 + 3];
+    }
+    for (let t = 16; t < 64; t++) {
+      const s0 = _rotr(w[t - 15], 7) ^ _rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+      const s1 = _rotr(w[t - 2], 17) ^ _rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) >>> 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let t = 0; t < 64; t++) {
+      const S1 = _rotr(e, 6) ^ _rotr(e, 11) ^ _rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const t1 = (h + S1 + ch + K[t] + w[t]) >>> 0;
+      const S0 = _rotr(a, 2) ^ _rotr(a, 13) ^ _rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const t2 = (S0 + maj) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0;
+      d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    H = [(H[0] + a) >>> 0, (H[1] + b) >>> 0, (H[2] + c) >>> 0, (H[3] + d) >>> 0,
+         (H[4] + e) >>> 0, (H[5] + f) >>> 0, (H[6] + g) >>> 0, (H[7] + h) >>> 0];
+  }
+  return H.map(x => x.toString(16).padStart(8, '0')).join('');
+}
+
+function isAuthed() {
+  try { return localStorage.getItem(AUTH_KEY) === PASS_HASH; } catch (e) { return false; }
+}
+function showGate(msg) {
+  const gate = document.getElementById('loginGate');
+  if (!gate) return;
+  gate.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  const box = document.getElementById('loginMsg');
+  if (box) box.textContent = msg || '';
+  const inp = document.getElementById('loginPass');
+  if (inp) {
+    inp.value = '';
+    // Chờ một nhịp cho màn hình hiện ra rồi mới focus — gọi ngay trong cùng lượt render thì
+    // trên điện thoại bàn phím ảo đôi khi không mở.
+    setTimeout(() => { try { inp.focus(); } catch (e) {} }, 60);
+  }
+}
+function hideGate() {
+  const gate = document.getElementById('loginGate');
+  if (gate) gate.style.display = 'none';
+  document.body.style.overflow = '';
+  // Xoá cả chữ báo lỗi LẪN mật khẩu vừa gõ: nếu để lại, lần sau mở lại app chữ “Mật khẩu không
+  // đúng.” của lần gõ sai trước đó vẫn nằm đó (DOM không tự xoá), và mật khẩu thì còn nguyên
+  // trong ô — cả hai đều vô tình lộ ra cho người đứng cạnh.
+  const box = document.getElementById('loginMsg');
+  if (box) box.textContent = '';
+  const inp = document.getElementById('loginPass');
+  if (inp) inp.value = '';
+}
+function doLogin() {
+  const inp = document.getElementById('loginPass');
+  if (!inp) return;
+  if (!inp.value) { showGate('Chưa nhập mật khẩu.'); return; }
+  let ok = false;
+  try { ok = _sha256Hex(inp.value) === PASS_HASH; } catch (e) { ok = false; }
+  if (!ok) { showGate('Mật khẩu không đúng.'); return; }
+  try { localStorage.setItem(AUTH_KEY, PASS_HASH); } catch (e) {}
+  hideGate();
+  bootApp();
+}
+// Đăng xuất: xoá dấu đã đăng nhập RỒI tải lại trang — tải lại là cách chắc chắn nhất để mọi
+// trạng thái trong RAM (thư viện đã nạp, bài đang làm, màn đang xem) trở về như lúc mới mở.
+function doLogout() {
+  try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+  location.reload();
+}
+
 // ── KHỞI ĐỘNG ──────────────────────────
-loadLib();
-refreshMix();   // = resetMixDefaults() + ghép lại tỷ lệ trộn đã lưu trong máy
-renderQuiz();
-// Nút ✕ của thanh tìm kiếm: khi tải lại trang, Chrome có thể KHÔI PHỤC nội dung ô tìm kiếm (khôi
-// phục trạng thái form) mà KHÔNG bắn sự kiện `input` — nên nếu chỉ dựa vào `onSearch()` thì chữ có
-// sẵn mà nút ✕ vẫn ẩn, phải gõ thêm một ký tự mới hiện ra. Gọi một lần ở đây là đủ và rẻ.
-paintSearchClear();
+function bootApp() {
+  loadLib();
+  refreshMix();   // = resetMixDefaults() + ghép lại tỷ lệ trộn đã lưu trong máy
+  renderQuiz();
+  // Nút ✕ của thanh tìm kiếm: khi tải lại trang, Chrome có thể KHÔI PHỤC nội dung ô tìm kiếm (khôi
+  // phục trạng thái form) mà KHÔNG bắn sự kiện `input` — nên nếu chỉ dựa vào `onSearch()` thì chữ có
+  // sẵn mà nút ✕ vẫn ẩn, phải gõ thêm một ký tự mới hiện ra. Gọi một lần ở đây là đủ và rẻ.
+  paintSearchClear();
+}
+// Màn đăng nhập đã HIỆN SẴN trong HTML, nên đường đi bình thường là: đã đăng nhập thì ẩn đi và
+// dựng app. CHƯA đăng nhập thì KHÔNG gọi `bootApp()` — nội dung không được dựng vào DOM chút nào,
+// chứ không phải dựng rồi che. Nhờ vậy kể cả đọc DOM cũng không thấy câu hỏi nào khi chưa vào.
+if (isAuthed()) { hideGate(); bootApp(); } else { showGate(''); }
 
 </script>
 </body>
